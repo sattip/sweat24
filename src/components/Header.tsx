@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
@@ -99,6 +98,15 @@ const MobileNavigation = () => {
           Specialized Services
         </Link>
         <Link 
+          to="/referrals" 
+          className={cn(
+            "flex items-center gap-3 p-2 text-sm rounded-md",
+            isActive("/referrals") ? "bg-accent font-medium" : "hover:bg-accent/50"
+          )}
+        >
+          Referral Program
+        </Link>
+        <Link 
           to="/trainers" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
@@ -155,6 +163,7 @@ const Header: React.FC = () => {
     if (path === "/services/confirmation") return "Appointment Confirmation";
     if (path === "/trainers") return "Trainers";
     if (path === "/store") return "Store";
+    if (path === "/referrals") return "Referral Program";
     if (path === "/profile") return "Profile";
     if (path === "/settings") return "Settings";
     return "Sweat24";
