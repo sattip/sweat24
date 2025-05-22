@@ -28,6 +28,12 @@ const Header: React.FC = () => {
             Schedule
           </Link>
           <Link 
+            to="/profile" 
+            className={`text-sm font-medium ${location.pathname === "/profile" ? "text-primary" : "hover:text-primary"}`}
+          >
+            Profile
+          </Link>
+          <Link 
             to="/trainers" 
             className="text-sm font-medium hover:text-primary"
           >
@@ -41,9 +47,11 @@ const Header: React.FC = () => {
           </Link>
         </nav>
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          <Link to="/profile">
+            <Button variant="outline" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </Link>
         </div>
       </div>
     </header>

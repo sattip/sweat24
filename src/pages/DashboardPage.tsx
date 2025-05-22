@@ -92,10 +92,12 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button className="w-full" variant="outline">
-                  View Profile
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <Link to="/profile" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    View Profile
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
           </div>
