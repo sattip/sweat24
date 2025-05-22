@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { trainers } from "@/data/trainers";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Star } from "lucide-react";
 
 const TrainerDetailsPage = () => {
   const { trainerId } = useParams();
@@ -27,6 +27,54 @@ const TrainerDetailsPage = () => {
       </div>
     );
   }
+  
+  // Mock data for trainer rating - this would come from your backend in a real app
+  const trainerRating = {
+    average: 4.7,
+    count: 38
+  };
+  
+  // Function to render rating stars
+  const renderRatingStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    
+    // Add full stars
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star 
+          key={`full-${i}`} 
+          className="w-4 h-4 fill-yellow-400 text-yellow-400" 
+        />
+      );
+    }
+    
+    // Add half star if needed
+    if (hasHalfStar) {
+      stars.push(
+        <div key="half-star" className="relative">
+          <Star className="w-4 h-4 text-yellow-400" />
+          <div className="absolute inset-0 overflow-hidden w-[50%]">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          </div>
+        </div>
+      );
+    }
+    
+    // Add empty stars
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <Star 
+          key={`empty-${i}`} 
+          className="w-4 h-4 text-gray-300" 
+        />
+      );
+    }
+    
+    return stars;
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -53,6 +101,16 @@ const TrainerDetailsPage = () => {
                 <div className="space-y-2">
                   <h2 className="text-xl font-bold">{trainer.name}</h2>
                   <p className="text-muted-foreground">{trainer.title}</p>
+                  
+                  {/* Trainer Rating Display */}
+                  <div className="flex items-center space-x-1 mt-1">
+                    <div className="flex">
+                      {renderRatingStars(trainerRating.average)}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {trainerRating.average.toFixed(1)}/5 ({trainerRating.count} reviews)
+                    </span>
+                  </div>
                   
                   <div className="flex flex-wrap gap-2 py-2">
                     {trainer.specialties.map((specialty, index) => (
