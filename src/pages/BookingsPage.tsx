@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -95,7 +94,7 @@ const BookingsPage = () => {
           <h2 className="text-lg font-medium mb-2">Demo Controls</h2>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={toggleRulesModal}>
-              Toggle Gym Rules Modal
+              Show Gym Rules
             </Button>
             <Button size="sm" onClick={cyclePackageStatus} variant="outline">
               Cycle Package Status: {packageStatus}
