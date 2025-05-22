@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
         
         <Card className="w-full shadow-lg border-t-4 border-t-primary">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Welcome to FitSync Pro</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Welcome to Sweat24</CardTitle>
             <CardDescription className="text-center">Sign in to access your fitness journey</CardDescription>
           </CardHeader>
           
