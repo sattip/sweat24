@@ -1,9 +1,11 @@
 
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PageTitle: React.FC = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const getPageTitle = () => {
     const path = location.pathname;
@@ -26,7 +28,11 @@ const PageTitle: React.FC = () => {
     return "Sweat24";
   };
 
-  return <div className="font-medium ml-2">{getPageTitle()}</div>;
+  return (
+    <div className={`font-medium ml-2 ${isMobile ? 'text-sm' : 'text-base'}`}>
+      {getPageTitle()}
+    </div>
+  );
 };
 
 export default PageTitle;

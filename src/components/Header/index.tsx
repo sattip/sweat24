@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Logo from "../Logo";
 import { Button } from "../ui/button";
-import { Menu, User } from "lucide-react";
+import { Menu, User, Contact } from "lucide-react";
 import { Link } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
 import PageTitle from "./PageTitle";
@@ -40,8 +40,9 @@ const Header: React.FC = () => {
         
         <div className="flex items-center gap-2">
           <Link to="/contact">
-            <Button variant="ghost" size="sm">
-              Contact Us
+            <Button variant="ghost" size="icon">
+              <Contact className="h-5 w-5" />
+              <span className="sr-only">Contact Us</span>
             </Button>
           </Link>
           <Link to="/profile">
