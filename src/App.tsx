@@ -11,6 +11,7 @@ import ClassSchedulePage from "./pages/ClassSchedulePage";
 import ClassDetailsPage from "./pages/ClassDetailsPage";
 import ProfilePage from "./pages/ProfilePage";
 import BookingsPage from "./pages/BookingsPage";
+import WorkoutHistoryPage from "./pages/WorkoutHistoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/class/:classId" element={<ClassDetailsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/bookings" element={<BookingsPage />} />
+          <Route path="/history" element={<WorkoutHistoryPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
