@@ -2,7 +2,7 @@
 import React from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
-import { User, Calendar, Clock, Camera } from "lucide-react";
+import { User, Calendar, Clock, Camera, LineChart } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Header: React.FC = () => {
@@ -46,6 +46,12 @@ const Header: React.FC = () => {
             Progress Photos
           </Link>
           <Link 
+            to="/body-measurements" 
+            className={`text-sm font-medium ${location.pathname === "/body-measurements" ? "text-primary" : "hover:text-primary"}`}
+          >
+            Body Measurements
+          </Link>
+          <Link 
             to="/profile" 
             className={`text-sm font-medium ${location.pathname === "/profile" ? "text-primary" : "hover:text-primary"}`}
           >
@@ -65,6 +71,11 @@ const Header: React.FC = () => {
           </Link>
         </nav>
         <div className="flex items-center space-x-3">
+          <Link to="/body-measurements" className="md:hidden">
+            <Button variant="outline" size="icon">
+              <LineChart className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/progress-photos" className="md:hidden">
             <Button variant="outline" size="icon">
               <Camera className="h-5 w-5" />
