@@ -18,35 +18,47 @@ import NotFound from "./pages/NotFound";
 import SpecializedServicesPage from "./pages/SpecializedServicesPage";
 import AppointmentRequestPage from "./pages/AppointmentRequestPage";
 import AppointmentConfirmationPage from "./pages/AppointmentConfirmationPage";
+import StorePage from "./pages/StorePage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import { CartProvider } from "./hooks/use-cart";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/schedule" element={<ClassSchedulePage />} />
-          <Route path="/class/:classId" element={<ClassDetailsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/bookings" element={<BookingsPage />} />
-          <Route path="/history" element={<WorkoutHistoryPage />} />
-          <Route path="/progress-photos" element={<ProgressPhotosPage />} />
-          <Route path="/body-measurements" element={<BodyMeasurementsPage />} />
-          <Route path="/services" element={<SpecializedServicesPage />} />
-          <Route path="/services/request/:serviceId" element={<AppointmentRequestPage />} />
-          <Route path="/services/confirmation" element={<AppointmentConfirmationPage />} />
-          <Route path="/trainers" element={<NotFound />} /> {/* Placeholder until implemented */}
-          <Route path="/store" element={<NotFound />} /> {/* Placeholder until implemented */}
-          <Route path="/settings" element={<NotFound />} /> {/* Placeholder until implemented */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/schedule" element={<ClassSchedulePage />} />
+            <Route path="/class/:classId" element={<ClassDetailsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/history" element={<WorkoutHistoryPage />} />
+            <Route path="/progress-photos" element={<ProgressPhotosPage />} />
+            <Route path="/body-measurements" element={<BodyMeasurementsPage />} />
+            <Route path="/services" element={<SpecializedServicesPage />} />
+            <Route path="/services/request/:serviceId" element={<AppointmentRequestPage />} />
+            <Route path="/services/confirmation" element={<AppointmentConfirmationPage />} />
+            <Route path="/store" element={<StorePage />} />
+            <Route path="/product/:productId" element={<ProductDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+            <Route path="/trainers" element={<NotFound />} /> {/* Placeholder until implemented */}
+            <Route path="/settings" element={<NotFound />} /> {/* Placeholder until implemented */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Dumbbell } from "lucide-react";
+import { ArrowRight, User, Dumbbell, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 
@@ -56,7 +56,7 @@ const DashboardPage = () => {
           </Card>
           
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">Book a Class</CardTitle>
@@ -96,6 +96,29 @@ const DashboardPage = () => {
                 <Link to="/services" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
                     View Services
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+            
+            <Card className="hover:border-primary transition-colors">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Store</CardTitle>
+                <CardDescription>Browse supplements, apparel, and more</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-4">
+                    <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Shop for supplements, workout apparel, and accessories</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link to="/store" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
+                    Visit Store
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
