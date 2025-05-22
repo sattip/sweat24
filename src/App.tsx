@@ -24,6 +24,8 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import ReferralProgramPage from "./pages/ReferralProgramPage";
+import TrainersListPage from "./pages/TrainersListPage";
+import TrainerDetailsPage from "./pages/TrainerDetailsPage";
 import { CartProvider } from "./hooks/use-cart";
 
 const queryClient = new QueryClient();
@@ -55,7 +57,8 @@ const App = () => (
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             <Route path="/referrals" element={<ReferralProgramPage />} />
-            <Route path="/trainers" element={<NotFound />} /> {/* Placeholder until implemented */}
+            <Route path="/trainers" element={<TrainersListPage />} />
+            <Route path="/trainers/:trainerId" element={<TrainerDetailsPage />} />
             <Route path="/settings" element={<NotFound />} /> {/* Placeholder until implemented */}
             <Route path="*" element={<NotFound />} />
           </Routes>

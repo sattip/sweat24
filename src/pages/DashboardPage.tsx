@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -122,21 +123,21 @@ const DashboardPage = () => {
             
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Specialized Services</CardTitle>
-                <CardDescription>Request personal training and premium services</CardDescription>
+                <CardTitle className="text-xl">Meet Our Trainers</CardTitle>
+                <CardDescription>Learn about our expert coaching staff</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
-                    <Dumbbell className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Book personal training, EMS sessions and more</p>
+                    <User className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Discover our team of certified trainers and specialists</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/services" className="w-full">
+                <Link to="/trainers" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    View Services
+                    View Trainers
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
