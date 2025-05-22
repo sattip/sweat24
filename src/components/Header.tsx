@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
@@ -125,7 +124,10 @@ const MobileNavigation = () => {
               : "hover:bg-accent/50 text-black"
           )}
         >
-          <span className="border-2 border-purple-500 px-2 py-0.5 rounded">Store</span>
+          <span className={cn(
+            "px-2 py-0.5 rounded border-2", 
+            isActive("/store") ? "border-white" : "border-purple-500"
+          )}>Store</span>
         </Link>
       </nav>
 
