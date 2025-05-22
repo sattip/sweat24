@@ -12,6 +12,7 @@ import ClassDetailsPage from "./pages/ClassDetailsPage";
 import ProfilePage from "./pages/ProfilePage";
 import BookingsPage from "./pages/BookingsPage";
 import WorkoutHistoryPage from "./pages/WorkoutHistoryPage";
+import WorkoutDetailsPage from "./pages/WorkoutDetailsPage";
 import ProgressPhotosPage from "./pages/ProgressPhotosPage";
 import BodyMeasurementsPage from "./pages/BodyMeasurementsPage";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/bookings" element={<BookingsPage />} />
             <Route path="/history" element={<WorkoutHistoryPage />} />
+            <Route path="/workout/:workoutId" element={<WorkoutDetailsPage />} />
             <Route path="/progress-photos" element={<ProgressPhotosPage />} />
             <Route path="/body-measurements" element={<BodyMeasurementsPage />} />
             <Route path="/services" element={<SpecializedServicesPage />} />
