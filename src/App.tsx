@@ -35,6 +35,9 @@ const App = () => (
           <Route path="/history" element={<WorkoutHistoryPage />} />
           <Route path="/progress-photos" element={<ProgressPhotosPage />} />
           <Route path="/body-measurements" element={<BodyMeasurementsPage />} />
+          <Route path="/trainers" element={<NotFound />} /> {/* Placeholder until implemented */}
+          <Route path="/store" element={<NotFound />} /> {/* Placeholder until implemented */}
+          <Route path="/settings" element={<NotFound />} /> {/* Placeholder until implemented */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
