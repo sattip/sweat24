@@ -1,0 +1,39 @@
+
+import React from "react";
+import Logo from "./Logo";
+import { Button } from "./ui/button";
+import { User } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const Header: React.FC = () => {
+  return (
+    <header className="bg-white border-b sticky top-0 z-10">
+      <div className="container flex h-16 items-center justify-between px-4 max-w-7xl mx-auto">
+        <Link to="/dashboard">
+          <Logo />
+        </Link>
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link to="/dashboard" className="text-sm font-medium hover:text-primary">
+            Dashboard
+          </Link>
+          <Link to="/schedule" className="text-sm font-medium hover:text-primary">
+            Schedule
+          </Link>
+          <Link to="/trainers" className="text-sm font-medium hover:text-primary">
+            Trainers
+          </Link>
+          <Link to="/store" className="text-sm font-medium hover:text-primary">
+            Store
+          </Link>
+        </nav>
+        <div className="flex items-center space-x-3">
+          <Button variant="outline" size="icon">
+            <User className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
