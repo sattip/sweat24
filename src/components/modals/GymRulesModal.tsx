@@ -24,16 +24,16 @@ const GymRulesModal: React.FC<GymRulesModalProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md w-full">
         <DialogHeader>
-          <DialogTitle>Gym Rules / Κανονισμοί Χώρου</DialogTitle>
+          <DialogTitle>Gym Rules</DialogTitle>
           <DialogDescription>
             Please read and agree to the following rules before proceeding.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[50vh]">
           <div className="space-y-4 py-2">
-            <h3 className="text-sm font-medium">General Rules / Γενικοί Κανονισμοί</h3>
+            <h3 className="text-sm font-medium">General Rules</h3>
             <ul className="list-disc pl-5 space-y-2 text-sm">
               <li>All members must scan their membership card upon entry.</li>
               <li>Appropriate athletic attire and clean sports shoes are required.</li>
@@ -43,7 +43,7 @@ const GymRulesModal: React.FC<GymRulesModalProps> = ({
               <li>Be respectful of other members' space and workout time.</li>
             </ul>
             
-            <h3 className="text-sm font-medium">Class Attendance / Παρακολούθηση Μαθημάτων</h3>
+            <h3 className="text-sm font-medium">Class Attendance</h3>
             <ul className="list-disc pl-5 space-y-2 text-sm">
               <li>Arrive at least 5 minutes before class starts.</li>
               <li>Late arrivals may not be permitted to join classes in progress.</li>
@@ -51,13 +51,13 @@ const GymRulesModal: React.FC<GymRulesModalProps> = ({
               <li>No-shows will result in the class being deducted from your package.</li>
             </ul>
             
-            <h3 className="text-sm font-medium">Personal Training / Personal Training</h3>
+            <h3 className="text-sm font-medium">Personal Training</h3>
             <ul className="list-disc pl-5 space-y-2 text-sm">
               <li>24-hour cancellation notice is required for all personal training sessions.</li>
               <li>Late cancellations or no-shows will be charged the full session fee.</li>
             </ul>
             
-            <h3 className="text-sm font-medium">Facility Usage / Χρήση Εγκαταστάσεων</h3>
+            <h3 className="text-sm font-medium">Facility Usage</h3>
             <ul className="list-disc pl-5 space-y-2 text-sm">
               <li>Locker use is limited to your time in the facility.</li>
               <li>Sweat24 is not responsible for lost or stolen items.</li>
@@ -67,10 +67,10 @@ const GymRulesModal: React.FC<GymRulesModalProps> = ({
         </ScrollArea>
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={onClose}>
-            Cancel / Άκυρο
+            Cancel
           </Button>
           <Button onClick={onAgree} className="sm:ml-auto">
-            I Understand and Agree / Έχω Διαβάσει και Συμφωνώ
+            I Understand and Agree
           </Button>
         </DialogFooter>
       </DialogContent>
