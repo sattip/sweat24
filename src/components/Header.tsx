@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
@@ -38,7 +39,7 @@ const MobileNavigation = () => {
           to="/dashboard" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/dashboard") ? "bg-primary text-white font-medium" : "hover:bg-accent/50"
+            isActive("/dashboard") ? "bg-primary text-white font-medium" : "hover:bg-accent/50 text-black"
           )}
         >
           Dashboard
@@ -47,7 +48,7 @@ const MobileNavigation = () => {
           to="/schedule" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/schedule") || isActive("/class") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/schedule") || isActive("/class") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Schedule
@@ -56,7 +57,7 @@ const MobileNavigation = () => {
           to="/bookings" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/bookings") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/bookings") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           My Bookings
@@ -65,7 +66,7 @@ const MobileNavigation = () => {
           to="/history" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/history") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/history") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Workout History
@@ -74,7 +75,7 @@ const MobileNavigation = () => {
           to="/progress-photos" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/progress-photos") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/progress-photos") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Progress Photos
@@ -83,7 +84,7 @@ const MobileNavigation = () => {
           to="/body-measurements" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/body-measurements") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/body-measurements") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Body Measurements
@@ -92,7 +93,7 @@ const MobileNavigation = () => {
           to="/services" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/services") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/services") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Specialized Services
@@ -101,7 +102,7 @@ const MobileNavigation = () => {
           to="/referrals" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/referrals") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/referrals") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Referral Program
@@ -110,7 +111,7 @@ const MobileNavigation = () => {
           to="/trainers" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/trainers") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/trainers") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
           Trainers
@@ -120,8 +121,8 @@ const MobileNavigation = () => {
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
             isActive("/store") 
-              ? "bg-accent font-medium" 
-              : "hover:bg-accent/50"
+              ? "bg-accent font-medium text-white" 
+              : "hover:bg-accent/50 text-black"
           )}
         >
           <span className="border-2 border-purple-500 px-2 py-0.5 rounded">Store</span>
@@ -131,7 +132,7 @@ const MobileNavigation = () => {
       <div className="border-t mt-4 pt-4 mt-auto">
         <Link 
           to="/settings" 
-          className="flex items-center gap-3 p-2 text-sm rounded-md hover:bg-accent/50"
+          className="flex items-center gap-3 p-2 text-sm rounded-md hover:bg-accent/50 text-black"
         >
           Settings
         </Link>
