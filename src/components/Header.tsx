@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
@@ -134,7 +135,10 @@ const MobileNavigation = () => {
       <div className="border-t mt-4 pt-4 mt-auto">
         <Link 
           to="/settings" 
-          className="flex items-center gap-3 p-2 text-sm rounded-md hover:bg-accent/50 text-black"
+          className={cn(
+            "flex items-center gap-3 p-2 text-sm rounded-md",
+            isActive("/settings") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
+          )}
         >
           Settings
         </Link>
@@ -165,6 +169,7 @@ const Header: React.FC = () => {
     if (path.includes("/services/request")) return "Request Appointment";
     if (path === "/services/confirmation") return "Appointment Confirmation";
     if (path === "/trainers") return "Trainers";
+    if (path.includes("/trainers/")) return "Trainer Profile";
     if (path === "/store") return "Store";
     if (path === "/referrals") return "Referral Program";
     if (path === "/profile") return "Profile";
