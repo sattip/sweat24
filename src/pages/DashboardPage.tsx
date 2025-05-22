@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, User, Dumbbell } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 
@@ -81,20 +81,21 @@ const DashboardPage = () => {
             
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">My Profile</CardTitle>
-                <CardDescription>View and update your personal information</CardDescription>
+                <CardTitle className="text-xl">Specialized Services</CardTitle>
+                <CardDescription>Request personal training and premium services</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
-                    <p className="text-sm">Update your details, track progress, and manage preferences</p>
+                    <Dumbbell className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Book personal training, EMS sessions and more</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/profile" className="w-full">
+                <Link to="/services" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    View Profile
+                    View Services
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

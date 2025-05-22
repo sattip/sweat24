@@ -15,6 +15,9 @@ import WorkoutHistoryPage from "./pages/WorkoutHistoryPage";
 import ProgressPhotosPage from "./pages/ProgressPhotosPage";
 import BodyMeasurementsPage from "./pages/BodyMeasurementsPage";
 import NotFound from "./pages/NotFound";
+import SpecializedServicesPage from "./pages/SpecializedServicesPage";
+import AppointmentRequestPage from "./pages/AppointmentRequestPage";
+import AppointmentConfirmationPage from "./pages/AppointmentConfirmationPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,9 @@ const App = () => (
           <Route path="/history" element={<WorkoutHistoryPage />} />
           <Route path="/progress-photos" element={<ProgressPhotosPage />} />
           <Route path="/body-measurements" element={<BodyMeasurementsPage />} />
+          <Route path="/services" element={<SpecializedServicesPage />} />
+          <Route path="/services/request/:serviceId" element={<AppointmentRequestPage />} />
+          <Route path="/services/confirmation" element={<AppointmentConfirmationPage />} />
           <Route path="/trainers" element={<NotFound />} /> {/* Placeholder until implemented */}
           <Route path="/store" element={<NotFound />} /> {/* Placeholder until implemented */}
           <Route path="/settings" element={<NotFound />} /> {/* Placeholder until implemented */}
