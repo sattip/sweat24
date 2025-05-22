@@ -1,10 +1,16 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Dumbbell, ShoppingCart } from "lucide-react";
+import { ArrowRight, User, Dumbbell, ShoppingCart, Gift } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+
+// Mock function to check if it's the user's birthday week
+const isBirthdayWeek = (dateOfBirth: string): boolean => {
+  // For demo purposes, we'll just return true to show the birthday card
+  // In a real app, this would compare the current date with the user's birthday
+  return true;
+};
 
 const DashboardPage = () => {
   // Mock data for the dashboard
@@ -15,7 +21,11 @@ const DashboardPage = () => {
       expiresAt: "2023-12-31",
       remainingDays: 45,
     },
+    dateOfBirth: "1990-05-15", // Example date of birth
   };
+  
+  // Check if it's the user's birthday week
+  const birthdayWeek = isBirthdayWeek(userData.dateOfBirth);
   
   return (
     <div className="min-h-screen bg-background">
@@ -29,6 +39,37 @@ const DashboardPage = () => {
         </div>
         
         <div className="grid gap-6">
+          {/* Birthday Reward Card - Only shown during birthday week */}
+          {birthdayWeek && (
+            <Card className="border-l-4 border-l-secondary bg-gradient-to-r from-secondary/10 to-background shadow-md animate-fade-in">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">🎉 Happy Birthday Week!</CardTitle>
+                  <Gift className="h-8 w-8 text-secondary" />
+                </div>
+                <CardDescription>We have a special gift just for you</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="font-medium text-lg">Enjoy a <span className="text-secondary font-bold">FREE</span> personal training session</p>
+                  <p className="text-sm text-muted-foreground">
+                    Valid until: {new Date(new Date().setDate(new Date().getDate() + 14)).toLocaleDateString()}
+                  </p>
+                  <div className="bg-secondary/10 text-secondary font-medium rounded-full px-4 py-2 inline-block mt-2">
+                    Booking Code: <span className="font-bold">BDAYPT2023</span>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t pt-4 flex justify-end">
+                <Link to="/services/request/personal-training">
+                  <Button>
+                    Redeem Now
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          )}
+          
           {/* Active Package Status */}
           <Card className="border-l-4 border-l-primary shadow-md">
             <CardHeader className="pb-2">

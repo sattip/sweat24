@@ -1,11 +1,10 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity } from "lucide-react";
+import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift } from "lucide-react";
 
 const ProfilePage = () => {
   // Mock user data for the profile
@@ -26,6 +25,24 @@ const ProfilePage = () => {
       totalMinutes: 2500,
       caloriesBurned: 32500,
     },
+    rewards: [
+      {
+        id: 1,
+        type: "birthday",
+        name: "Free Personal Training Session",
+        code: "BDAYPT2023",
+        status: "Available",
+        expiresAt: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
+      },
+      {
+        id: 2,
+        type: "referral",
+        name: "Free Workout",
+        code: "REF123456",
+        status: "Available",
+        expiresAt: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
+      }
+    ]
   };
 
   return (
@@ -79,6 +96,72 @@ const ProfilePage = () => {
               <Button variant="outline" size="sm">
                 View Membership History
               </Button>
+            </CardFooter>
+          </Card>
+          
+          {/* My Rewards Section */}
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Gift className="h-5 w-5 text-primary" />
+                    My Rewards
+                  </CardTitle>
+                  <CardDescription>Your available and redeemed rewards</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {userData.rewards.length > 0 ? (
+                <div className="divide-y">
+                  {userData.rewards.map((reward) => (
+                    <div key={reward.id} className="py-3 first:pt-0 last:pb-0">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{reward.name}</h3>
+                            {reward.type === "birthday" && (
+                              <div className="bg-secondary/10 text-secondary text-xs px-2 py-0.5 rounded-full">
+                                Birthday
+                              </div>
+                            )}
+                            {reward.type === "referral" && (
+                              <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+                                Referral
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">Code: {reward.code}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Expires: {new Date(reward.expiresAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center">
+                          <div className={`px-3 py-1 rounded-full text-sm ${
+                            reward.status === "Available" 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-muted text-muted-foreground"
+                          }`}>
+                            {reward.status}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No rewards available at the moment.</p>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="border-t pt-4">
+              <Link to="/referrals" className="w-full">
+                <Button variant="outline" className="w-full">
+                  Refer Friends & Get More Rewards
+                </Button>
+              </Link>
             </CardFooter>
           </Card>
           
