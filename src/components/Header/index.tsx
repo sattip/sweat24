@@ -38,7 +38,12 @@ const Header: React.FC = () => {
           <PageTitle />
         </div>
         
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          <Link to="/contact">
+            <Button variant="ghost" size="sm">
+              Contact Us
+            </Button>
+          </Link>
           <Link to="/profile">
             <Button variant="outline" size="icon">
               <User className="h-5 w-5" />

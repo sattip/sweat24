@@ -3,7 +3,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { cn } from "@/lib/utils";
-import { SheetClose } from "../ui/sheet";
 
 const MobileNavigation = () => {
   const location = useLocation();
@@ -91,15 +90,6 @@ const MobileNavigation = () => {
           Specialized Services
         </Link>
         <Link 
-          to="/referrals" 
-          className={cn(
-            "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/referrals") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
-          )}
-        >
-          Referral Program
-        </Link>
-        <Link 
           to="/trainers" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
@@ -107,6 +97,15 @@ const MobileNavigation = () => {
           )}
         >
           Trainers
+        </Link>
+        <Link 
+          to="/referrals" 
+          className={cn(
+            "flex items-center gap-3 p-2 text-sm rounded-md",
+            isActive("/referrals") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
+          )}
+        >
+          Referral Program
         </Link>
         <Link 
           to="/store" 
