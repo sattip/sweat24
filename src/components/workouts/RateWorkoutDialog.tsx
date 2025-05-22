@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Star, ThumbsUp } from "lucide-react";
+import { Star, ThumbsUp, User } from "lucide-react";
 
 interface RateWorkoutDialogProps {
   open: boolean;
@@ -97,6 +97,15 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-6 py-4">
+          {/* Instructor Information - Making it more prominent */}
+          <div className="bg-muted p-3 rounded-md flex items-center space-x-2">
+            <User className="h-5 w-5 text-primary" />
+            <div>
+              <p className="text-sm font-medium">Instructor</p>
+              <p className="text-base">{workout.instructor}</p>
+            </div>
+          </div>
+          
           {/* Overall Experience Rating */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Overall Experience</label>
@@ -122,7 +131,7 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
           
           {/* Coach Rating */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Coach Performance</label>
+            <label className="text-sm font-medium">Coach Performance ({workout.instructor})</label>
             <StarRating rating={coachRating} setRating={setCoachRating} />
           </div>
           
