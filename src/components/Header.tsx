@@ -110,11 +110,13 @@ const MobileNavigation = () => {
         <Link 
           to="/store" 
           className={cn(
-            "flex items-center gap-3 p-2 text-sm rounded-md border-2",
-            isActive("/store") ? "bg-accent font-medium border-purple-500" : "hover:bg-accent/50 border-purple-500"
+            "flex items-center gap-3 p-2 text-sm rounded-md",
+            isActive("/store") 
+              ? "bg-accent font-medium" 
+              : "hover:bg-accent/50"
           )}
         >
-          Store
+          <span className="border-2 border-purple-500 px-2 py-0.5 rounded">Store</span>
         </Link>
       </nav>
 
