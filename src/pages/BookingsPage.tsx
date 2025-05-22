@@ -1,12 +1,26 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { Calendar, Clock, MapPin, User, CalendarX } from "lucide-react";
+import GymRulesModal from "@/components/modals/GymRulesModal";
+import PackageAlert from "@/components/notifications/PackageAlert";
+import PushNotificationSample from "@/components/notifications/PushNotificationSample";
 
 const BookingsPage = () => {
+  // State for gym rules modal
+  const [showRules, setShowRules] = useState(false);
+  // State to track if this is first booking (for demo purposes)
+  const [isFirstBooking, setIsFirstBooking] = useState(false);
+  // State for package status (for demo purposes)
+  const [packageStatus, setPackageStatus] = useState<"normal" | "last-session" | "expiring-soon" | "expired">("normal");
+  // State for notification type (for demo purposes)
+  const [notificationType, setNotificationType] = useState<"booking" | "reminder" | "offer">("booking");
+  // State to show notification demo
+  const [showNotification, setShowNotification] = useState(false);
+
   // Mock data for booked classes
   const bookedClasses = [
     {
@@ -40,6 +54,32 @@ const BookingsPage = () => {
   
   // Example of empty state for demonstration purposes
   const hasBookings = bookedClasses.length > 0;
+
+  // Function to handle agreeing to gym rules
+  const handleAgreeToRules = () => {
+    setShowRules(false);
+    // Logic to save that user has agreed to rules would go here
+    alert("Thank you for agreeing to our gym rules!");
+  };
+  
+  // Demo functions
+  const toggleRulesModal = () => {
+    setShowRules(prev => !prev);
+  };
+
+  const cyclePackageStatus = () => {
+    const statuses = ["normal", "last-session", "expiring-soon", "expired"];
+    const currentIndex = statuses.indexOf(packageStatus);
+    const nextIndex = (currentIndex + 1) % statuses.length;
+    setPackageStatus(statuses[nextIndex] as any);
+  };
+
+  const cycleNotificationType = () => {
+    const types = ["booking", "reminder", "offer"];
+    const currentIndex = types.indexOf(notificationType);
+    const nextIndex = (currentIndex + 1) % types.length;
+    setNotificationType(types[nextIndex] as any);
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -49,6 +89,47 @@ const BookingsPage = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">My Bookings</h1>
         </div>
+        
+        {/* Demo controls (for testing only - would be removed in production) */}
+        <div className="mb-6 p-4 bg-muted/20 border rounded-md">
+          <h2 className="text-lg font-medium mb-2">Demo Controls</h2>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={toggleRulesModal}>
+              Toggle Gym Rules Modal
+            </Button>
+            <Button size="sm" onClick={cyclePackageStatus} variant="outline">
+              Cycle Package Status: {packageStatus}
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => setShowNotification(!showNotification)} 
+              variant="outline"
+            >
+              {showNotification ? "Hide" : "Show"} Notification Sample
+            </Button>
+            {showNotification && (
+              <Button size="sm" onClick={cycleNotificationType} variant="outline">
+                Change Notification Type: {notificationType}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Package alerts based on status */}
+        {packageStatus === "last-session" && (
+          <PackageAlert type="last-session" />
+        )}
+        {packageStatus === "expiring-soon" && (
+          <PackageAlert type="expiring-soon" daysRemaining={3} />
+        )}
+        {packageStatus === "expired" && (
+          <PackageAlert type="expired" />
+        )}
+
+        {/* Push notification sample */}
+        {showNotification && (
+          <PushNotificationSample type={notificationType} />
+        )}
         
         {hasBookings ? (
           <div className="space-y-4">
@@ -128,6 +209,13 @@ const BookingsPage = () => {
           </div>
         )}
       </main>
+
+      {/* Gym Rules Modal */}
+      <GymRulesModal 
+        open={showRules} 
+        onClose={() => setShowRules(false)}
+        onAgree={handleAgreeToRules}
+      />
     </div>
   );
 };

@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, User, Dumbbell, ShoppingCart, Gift } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+import PackageAlert from "@/components/notifications/PackageAlert";
 
 // Mock function to check if it's the user's birthday week
 const isBirthdayWeek = (dateOfBirth: string): boolean => {
@@ -28,6 +29,9 @@ const DashboardPage = () => {
   // Check if it's the user's birthday week
   const birthdayWeek = isBirthdayWeek(userData.dateOfBirth);
   
+  // State for package status (for demo purposes)
+  const [packageStatus, setPackageStatus] = useState<"normal" | "last-session" | "expiring-soon" | "expired">("normal");
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -38,6 +42,36 @@ const DashboardPage = () => {
             Welcome back, {userData.name}!
           </h1>
         </div>
+        
+        {/* Demo controls (for testing only - would be removed in production) */}
+        <div className="mb-6 p-4 bg-muted/20 border rounded-md">
+          <h2 className="text-lg font-medium mb-2">Demo Controls</h2>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              size="sm" 
+              onClick={() => {
+                const statuses = ["normal", "last-session", "expiring-soon", "expired"];
+                const currentIndex = statuses.indexOf(packageStatus);
+                const nextIndex = (currentIndex + 1) % statuses.length;
+                setPackageStatus(statuses[nextIndex] as any);
+              }} 
+              variant="outline"
+            >
+              Cycle Package Status: {packageStatus}
+            </Button>
+          </div>
+        </div>
+        
+        {/* Package alerts based on status */}
+        {packageStatus === "last-session" && (
+          <PackageAlert type="last-session" />
+        )}
+        {packageStatus === "expiring-soon" && (
+          <PackageAlert type="expiring-soon" daysRemaining={3} />
+        )}
+        {packageStatus === "expired" && (
+          <PackageAlert type="expired" />
+        )}
         
         <div className="grid gap-6">
           {/* Birthday Reward Card - Only shown during birthday week */}
