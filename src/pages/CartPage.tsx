@@ -12,11 +12,11 @@ const CartPage = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, subtotal } = useCart();
   
-  const handleIncrementQuantity = (itemId, currentQuantity, options) => {
+  const handleIncrementQuantity = (itemId: string, currentQuantity: number, options?: Record<string, string>) => {
     updateQuantity(itemId, currentQuantity + 1, options);
   };
   
-  const handleDecrementQuantity = (itemId, currentQuantity, options) => {
+  const handleDecrementQuantity = (itemId: string, currentQuantity: number, options?: Record<string, string>) => {
     if (currentQuantity > 1) {
       updateQuantity(itemId, currentQuantity - 1, options);
     } else {
@@ -24,11 +24,11 @@ const CartPage = () => {
     }
   };
   
-  const handleRemoveItem = (itemId, options) => {
+  const handleRemoveItem = (itemId: string, options?: Record<string, string>) => {
     removeItem(itemId, options);
   };
   
-  const formatOptions = (options) => {
+  const formatOptions = (options?: Record<string, string>) => {
     if (!options) return null;
     
     return Object.entries(options).map(([key, value]) => (
