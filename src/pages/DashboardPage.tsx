@@ -22,7 +22,7 @@ const DashboardPage = () => {
       <Header />
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold">
             Welcome back, {userData.name}!
           </h1>
@@ -71,9 +71,9 @@ const DashboardPage = () => {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Link to="/schedule" className="w-full">
-                  <Button className="w-full" variant="default">
+                  <Button className="w-full flex items-center justify-center gap-2">
                     View Schedule
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </CardFooter>
@@ -93,9 +93,9 @@ const DashboardPage = () => {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Link to="/profile" className="w-full">
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
                     View Profile
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </CardFooter>

@@ -2,11 +2,16 @@
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
-import { User, Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose
+} from "@/components/ui/drawer";
 
 const MobileNavigation = () => {
   const location = useLocation();
@@ -16,7 +21,7 @@ const MobileNavigation = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-2">
+    <div className="flex flex-col gap-2 p-4">
       <div className="border-b pb-4 mb-2">
         <Link to="/profile" className="flex items-center gap-4 p-2 rounded-md hover:bg-accent">
           <Avatar>
@@ -145,79 +150,25 @@ const Header: React.FC = () => {
     <header className="bg-white border-b sticky top-0 z-10">
       <div className="container flex h-16 items-center justify-between px-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+          <Drawer open={open} onOpenChange={setOpen}>
+            <DrawerTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:flex">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[240px] p-0">
-              <MobileNavigation />
-            </SheetContent>
-          </Sheet>
+            </DrawerTrigger>
+            <DrawerContent className="h-[90%] rounded-t-xl">
+              <div className="mt-4 mx-4">
+                <MobileNavigation />
+              </div>
+              <DrawerClose className="absolute right-4 top-4" />
+            </DrawerContent>
+          </Drawer>
           <Link to="/dashboard" className="flex items-center">
             <Logo />
           </Link>
-          <div className="md:hidden font-medium ml-2">{getPageTitle()}</div>
+          <div className="font-medium ml-2">{getPageTitle()}</div>
         </div>
-        
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link 
-            to="/dashboard" 
-            className={`text-sm font-medium ${location.pathname === "/dashboard" ? "text-primary" : "hover:text-primary"}`}
-          >
-            Dashboard
-          </Link>
-          <Link 
-            to="/schedule" 
-            className={`text-sm font-medium ${location.pathname.includes("/schedule") || location.pathname.includes("/class") ? "text-primary" : "hover:text-primary"}`}
-          >
-            Schedule
-          </Link>
-          <Link 
-            to="/bookings" 
-            className={`text-sm font-medium ${location.pathname === "/bookings" ? "text-primary" : "hover:text-primary"}`}
-          >
-            My Bookings
-          </Link>
-          <Link 
-            to="/history" 
-            className={`text-sm font-medium ${location.pathname === "/history" ? "text-primary" : "hover:text-primary"}`}
-          >
-            Workout History
-          </Link>
-          <Link 
-            to="/progress-photos" 
-            className={`text-sm font-medium ${location.pathname === "/progress-photos" ? "text-primary" : "hover:text-primary"}`}
-          >
-            Progress Photos
-          </Link>
-          <Link 
-            to="/body-measurements" 
-            className={`text-sm font-medium ${location.pathname === "/body-measurements" ? "text-primary" : "hover:text-primary"}`}
-          >
-            Body Measurements
-          </Link>
-          <Link 
-            to="/profile" 
-            className={`text-sm font-medium ${location.pathname === "/profile" ? "text-primary" : "hover:text-primary"}`}
-          >
-            Profile
-          </Link>
-          <Link 
-            to="/trainers" 
-            className="text-sm font-medium hover:text-primary"
-          >
-            Trainers
-          </Link>
-          <Link 
-            to="/store" 
-            className="text-sm font-medium hover:text-primary"
-          >
-            Store
-          </Link>
-        </nav>
         
         <div className="flex items-center">
           <Link to="/profile">
