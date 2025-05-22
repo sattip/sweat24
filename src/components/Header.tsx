@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
@@ -7,11 +6,11 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-  DrawerClose
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose
+} from "@/components/ui/sheet";
 
 const MobileNavigation = () => {
   const location = useLocation();
@@ -21,7 +20,7 @@ const MobileNavigation = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="flex flex-col gap-2 p-4 h-full">
       <div className="border-b pb-4 mb-2">
         <Link to="/profile" className="flex items-center gap-4 p-2 rounded-md hover:bg-accent">
           <Avatar>
@@ -39,7 +38,7 @@ const MobileNavigation = () => {
           to="/dashboard" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
-            isActive("/dashboard") ? "bg-accent font-medium" : "hover:bg-accent/50"
+            isActive("/dashboard") ? "bg-primary text-white font-medium" : "hover:bg-accent/50"
           )}
         >
           Dashboard
@@ -109,7 +108,7 @@ const MobileNavigation = () => {
         </Link>
       </nav>
 
-      <div className="border-t mt-4 pt-4">
+      <div className="border-t mt-4 pt-4 mt-auto">
         <Link 
           to="/settings" 
           className="flex items-center gap-3 p-2 text-sm rounded-md hover:bg-accent/50"
@@ -150,20 +149,18 @@ const Header: React.FC = () => {
     <header className="bg-white border-b sticky top-0 z-10">
       <div className="container flex h-16 items-center justify-between px-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
-          <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:flex">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
-            </DrawerTrigger>
-            <DrawerContent className="h-[90%] rounded-t-xl">
-              <div className="mt-4 mx-4">
-                <MobileNavigation />
-              </div>
-              <DrawerClose className="absolute right-4 top-4" />
-            </DrawerContent>
-          </Drawer>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[250px] p-0">
+              <MobileNavigation />
+              <SheetClose className="absolute right-4 top-4" />
+            </SheetContent>
+          </Sheet>
           <Link to="/dashboard" className="flex items-center">
             <Logo />
           </Link>
