@@ -10,6 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ClassSchedulePage from "./pages/ClassSchedulePage";
 import ClassDetailsPage from "./pages/ClassDetailsPage";
 import ProfilePage from "./pages/ProfilePage";
+import BookingsPage from "./pages/BookingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/schedule" element={<ClassSchedulePage />} />
           <Route path="/class/:classId" element={<ClassDetailsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

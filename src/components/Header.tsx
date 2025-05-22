@@ -2,7 +2,7 @@
 import React from "react";
 import Logo from "./Logo";
 import { Button } from "./ui/button";
-import { User } from "lucide-react";
+import { User, Calendar } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Header: React.FC = () => {
@@ -28,6 +28,12 @@ const Header: React.FC = () => {
             Schedule
           </Link>
           <Link 
+            to="/bookings" 
+            className={`text-sm font-medium ${location.pathname === "/bookings" ? "text-primary" : "hover:text-primary"}`}
+          >
+            My Bookings
+          </Link>
+          <Link 
             to="/profile" 
             className={`text-sm font-medium ${location.pathname === "/profile" ? "text-primary" : "hover:text-primary"}`}
           >
@@ -47,6 +53,11 @@ const Header: React.FC = () => {
           </Link>
         </nav>
         <div className="flex items-center space-x-3">
+          <Link to="/bookings" className="md:hidden">
+            <Button variant="outline" size="icon">
+              <Calendar className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/profile">
             <Button variant="outline" size="icon">
               <User className="h-5 w-5" />
