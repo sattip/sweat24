@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import RateWorkoutDialog from "@/components/workouts/RateWorkoutDialog";
 
 // Define types for workout data
 interface Workout {
@@ -122,6 +123,8 @@ const groupWorkoutsByMonth = (workouts: Workout[]): GroupedWorkouts => {
 
 const WorkoutHistoryPage = () => {
   const [filter, setFilter] = useState("all");
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   
   // For demo purposes, we'll show the empty state if filter is set to "empty"
   const hasWorkouts = filter !== "empty" && mockWorkoutHistory.length > 0;
@@ -140,6 +143,11 @@ const WorkoutHistoryPage = () => {
     const minutes = parseInt(curr.duration.split(" ")[0]);
     return acc + minutes;
   }, 0);
+  
+  const handleOpenRatingDialog = (workout: Workout) => {
+    setSelectedWorkout(workout);
+    setRatingDialogOpen(true);
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -218,7 +226,14 @@ const WorkoutHistoryPage = () => {
                                 </div>
                               </div>
                               
-                              <Button size="sm" variant="ghost">
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={(e) => {
+                                  e.preventDefault(); // Prevent Link navigation
+                                  handleOpenRatingDialog(workout);
+                                }}
+                              >
                                 Rate
                               </Button>
                             </div>
@@ -247,6 +262,13 @@ const WorkoutHistoryPage = () => {
           </div>
         )}
       </main>
+      
+      {/* Rating Dialog */}
+      <RateWorkoutDialog 
+        open={ratingDialogOpen} 
+        onOpenChange={setRatingDialogOpen}
+        workout={selectedWorkout}
+      />
     </div>
   );
 };
