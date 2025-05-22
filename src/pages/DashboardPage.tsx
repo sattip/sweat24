@@ -70,7 +70,7 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button className="w-full" variant="default">
+                <Button className="w-full" variant="default" as={Link} to="/schedule">
                   View Schedule
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
