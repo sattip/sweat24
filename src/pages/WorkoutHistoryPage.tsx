@@ -19,8 +19,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Define types for workout data
+interface Workout {
+  id: number;
+  name: string;
+  date: string;
+  time: string;
+  instructor: string;
+  type: string;
+  duration: string;
+}
+
 // Mock data for workout history
-const mockWorkoutHistory = [
+const mockWorkoutHistory: Workout[] = [
   {
     id: 101,
     name: "Power Yoga",
@@ -86,9 +97,14 @@ const mockWorkoutHistory = [
   },
 ];
 
+// Define the type for grouped workouts
+interface GroupedWorkouts {
+  [monthYear: string]: Workout[];
+}
+
 // Group workouts by month
-const groupWorkoutsByMonth = (workouts) => {
-  const grouped = {};
+const groupWorkoutsByMonth = (workouts: Workout[]): GroupedWorkouts => {
+  const grouped: GroupedWorkouts = {};
   
   workouts.forEach(workout => {
     const date = new Date(workout.date);
