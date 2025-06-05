@@ -38,36 +38,36 @@ const mockProgressPhotos: ProgressPhoto[] = [
   {
     id: 1,
     imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2670&auto=format&fit=crop",
-    date: "May 20, 2025",
-    caption: "First month of training"
+    date: "20 Μαΐου 2025",
+    caption: "Πρώτος μήνας προπόνησης"
   },
   {
     id: 2,
     imageUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=2670&auto=format&fit=crop",
-    date: "May 10, 2025",
-    caption: "Starting to see definition"
+    date: "10 Μαΐου 2025",
+    caption: "Αρχίζω να βλέπω διαμόρφωση"
   },
   {
     id: 3,
     imageUrl: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=2669&auto=format&fit=crop",
-    date: "April 25, 2025"
+    date: "25 Απριλίου 2025"
   },
   {
     id: 4,
     imageUrl: "https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?q=80&w=2574&auto=format&fit=crop",
-    date: "April 10, 2025",
-    caption: "Two months in"
+    date: "10 Απριλίου 2025",
+    caption: "Δύο μήνες μετά"
   },
   {
     id: 5,
     imageUrl: "https://images.unsplash.com/photo-1616803689943-5601631c7fec?q=80&w=2670&auto=format&fit=crop",
-    date: "March 28, 2025"
+    date: "28 Μαρτίου 2025"
   },
   {
     id: 6,
     imageUrl: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2940&auto=format&fit=crop",
-    date: "March 15, 2025",
-    caption: "Starting my fitness journey"
+    date: "15 Μαρτίου 2025",
+    caption: "Ξεκινώντας το ταξίδι μου στη φυσική κατάσταση"
   },
 ];
 
@@ -76,8 +76,17 @@ const groupPhotosByMonth = (photos: ProgressPhoto[]): GroupedPhotos => {
   const grouped: GroupedPhotos = {};
   
   photos.forEach(photo => {
-    const date = new Date(photo.date);
-    const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    // Extract month from Greek date format
+    const monthMap: { [key: string]: string } = {
+      'Μαΐου': 'Μάιος',
+      'Απριλίου': 'Απρίλιος', 
+      'Μαρτίου': 'Μάρτιος'
+    };
+    
+    const parts = photo.date.split(' ');
+    const month = parts[1];
+    const year = parts[2];
+    const monthYear = `${monthMap[month] || month} ${year}`;
     
     if (!grouped[monthYear]) {
       grouped[monthYear] = [];
@@ -100,9 +109,8 @@ const ProgressPhotosPage = () => {
   const hasPhotos = !showEmptyState && mockProgressPhotos.length > 0;
   
   const sortedPhotos = [...mockProgressPhotos].sort((a, b) => {
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
-    return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    // For Greek dates, we need a different sorting approach
+    return sortOrder === "newest" ? b.id - a.id : a.id - b.id;
   });
   
   const groupedPhotos = groupPhotosByMonth(sortedPhotos);
@@ -129,13 +137,13 @@ const ProgressPhotosPage = () => {
   
   const handleDeletePhoto = (id: number) => {
     // In a real app, this would make an API call to delete the photo
-    toast.success("Photo deleted successfully");
+    toast.success("Η φωτογραφία διαγράφηκε επιτυχώς");
     setSelectedPhoto(null);
   };
   
   const handleUploadPhoto = () => {
     // In a real app, this would open the file picker or camera
-    toast.success("Photo uploaded successfully");
+    toast.success("Η φωτογραφία μεταφορτώθηκε επιτυχώς");
   };
   
   return (
@@ -144,32 +152,39 @@ const ProgressPhotosPage = () => {
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Progress Photos</h1>
+          <h1 className="text-3xl font-bold">Φωτογραφίες Προόδου</h1>
           
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
               onClick={() => setShowTips(!showTips)}
-              title="Photo Tips"
+              title="Συμβουλές Φωτογραφίας"
             >
               <Info className="h-4 w-4" />
             </Button>
             
-            <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as "newest" | "oldest")}>
+            <Select value={sortOrder} onValueChange={(value) => {
+              if (value === "empty") {
+                setShowEmptyState(true);
+              } else {
+                setShowEmptyState(false);
+                setSortOrder(value as "newest" | "oldest");
+              }
+            }}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort order" />
+                <SelectValue placeholder="Σειρά ταξινόμησης" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                <SelectItem value="empty">Show Empty State</SelectItem>
+                <SelectItem value="newest">Νεότερες Πρώτα</SelectItem>
+                <SelectItem value="oldest">Παλαιότερες Πρώτα</SelectItem>
+                <SelectItem value="empty">Εμφάνιση Άδειας Κατάστασης</SelectItem>
               </SelectContent>
             </Select>
             
             <Button onClick={handleUploadPhoto} className="whitespace-nowrap">
               <Camera className="h-4 w-4 mr-2" />
-              Add Photo
+              Προσθήκη Φωτογραφίας
             </Button>
           </div>
         </div>
@@ -178,37 +193,37 @@ const ProgressPhotosPage = () => {
         <Dialog open={showTips} onOpenChange={setShowTips}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Tips for Progress Photos</DialogTitle>
+              <DialogTitle>Συμβουλές για Φωτογραφίες Προόδου</DialogTitle>
             </DialogHeader>
             <div className="py-4 space-y-4">
               <div>
-                <h3 className="font-medium">Consistency is Key</h3>
+                <h3 className="font-medium">Η Συνέπεια είναι το Κλειδί</h3>
                 <p className="text-sm text-muted-foreground">
-                  Take photos at the same time of day, in the same lighting, 
-                  wearing similar clothing, and in the same poses.
+                  Τράβα φωτογραφίες την ίδια ώρα της ημέρας, στο ίδιο φωτισμό, 
+                  φορώντας παρόμοια ρούχα και στις ίδιες πόζες.
                 </p>
               </div>
               <div>
-                <h3 className="font-medium">Lighting</h3>
+                <h3 className="font-medium">Φωτισμός</h3>
                 <p className="text-sm text-muted-foreground">
-                  Use natural light when possible and avoid harsh shadows.
+                  Χρησιμοποίησε φυσικό φως όταν είναι δυνατόν και αποφεύγετε σκληρές σκιές.
                 </p>
               </div>
               <div>
-                <h3 className="font-medium">Multiple Angles</h3>
+                <h3 className="font-medium">Πολλαπλές Γωνίες</h3>
                 <p className="text-sm text-muted-foreground">
-                  Take photos from the front, side, and back for a complete view of your progress.
+                  Τράβα φωτογραφίες από μπροστά, από τα πλάγια και από πίσω για πλήρη εικόνα της προόδου σου.
                 </p>
               </div>
               <div>
-                <h3 className="font-medium">Frequency</h3>
+                <h3 className="font-medium">Συχνότητα</h3>
                 <p className="text-sm text-muted-foreground">
-                  Take photos every 2-4 weeks to track noticeable changes.
+                  Τράβα φωτογραφίες κάθε 2-4 εβδομάδες για να παρακολουθείς αξιοσημείωτες αλλαγές.
                 </p>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="secondary" onClick={() => setShowTips(false)}>Close</Button>
+              <Button variant="secondary" onClick={() => setShowTips(false)}>Κλείσιμο</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -228,7 +243,7 @@ const ProgressPhotosPage = () => {
                       <div className="aspect-square relative">
                         <img 
                           src={photo.imageUrl} 
-                          alt={`Progress photo from ${photo.date}`} 
+                          alt={`Φωτογραφία προόδου από ${photo.date}`} 
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -255,13 +270,13 @@ const ProgressPhotosPage = () => {
             <div className="bg-muted/40 rounded-full p-6 mb-4">
               <Camera className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">No progress photos yet</h2>
+            <h2 className="text-xl font-semibold mb-2">Δεν υπάρχουν ακόμη φωτογραφίες προόδου</h2>
             <p className="text-muted-foreground max-w-md mb-6">
-              Upload your first photo to start tracking your transformation!
+              Ανέβασε την πρώτη σου φωτογραφία για να ξεκινήσεις να παρακολουθείς τη μεταμόρφωσή σου!
             </p>
             <Button onClick={handleUploadPhoto}>
               <Camera className="h-4 w-4 mr-2" />
-              Upload Photo
+              Μεταφόρτωση Φωτογραφίας
             </Button>
           </div>
         )}
@@ -273,17 +288,17 @@ const ProgressPhotosPage = () => {
             <div className="p-4 border-b flex items-center justify-between">
               <Button variant="ghost" onClick={() => setSelectedPhoto(null)}>
                 <X className="h-4 w-4 mr-2" />
-                Close
+                Κλείσιμο
               </Button>
               <span className="font-medium">
-                {currentPhotoIndex + 1} of {flatPhotos.length}
+                {currentPhotoIndex + 1} από {flatPhotos.length}
               </span>
               <Button 
                 variant="destructive"
                 size="sm"
                 onClick={() => handleDeletePhoto(selectedPhoto.id)}
               >
-                Delete
+                Διαγραφή
               </Button>
             </div>
             
@@ -291,7 +306,7 @@ const ProgressPhotosPage = () => {
             <div className="flex-1 relative flex items-center justify-center p-4 overflow-hidden">
               <img
                 src={selectedPhoto.imageUrl}
-                alt={`Progress photo from ${selectedPhoto.date}`}
+                alt={`Φωτογραφία προόδου από ${selectedPhoto.date}`}
                 className="max-h-full max-w-full object-contain"
               />
               

@@ -17,9 +17,9 @@ const isBirthdayWeek = (dateOfBirth: string): boolean => {
 const DashboardPage = () => {
   // Mock data for the dashboard
   const userData = {
-    name: "John",
+    name: "Γιάννης",
     activePackage: {
-      name: "Premium Membership",
+      name: "Premium Συνδρομή",
       expiresAt: "2023-12-31",
       remainingDays: 45,
     },
@@ -39,13 +39,13 @@ const DashboardPage = () => {
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">
-            Welcome back, {userData.name}!
+            Καλώς ήρθες πίσω, {userData.name}!
           </h1>
         </div>
         
         {/* Demo controls (for testing only - would be removed in production) */}
         <div className="mb-6 p-4 bg-muted/20 border rounded-md">
-          <h2 className="text-lg font-medium mb-2">Demo Controls</h2>
+          <h2 className="text-lg font-medium mb-2">Δοκιμαστικά Κοντρόλ</h2>
           <div className="flex flex-wrap gap-2">
             <Button 
               size="sm" 
@@ -57,7 +57,7 @@ const DashboardPage = () => {
               }} 
               variant="outline"
             >
-              Cycle Package Status: {packageStatus}
+              Αλλαγή Κατάστασης Πακέτου: {packageStatus}
             </Button>
           </div>
         </div>
@@ -79,26 +79,26 @@ const DashboardPage = () => {
             <Card className="border-l-4 border-l-secondary bg-gradient-to-r from-secondary/10 to-background shadow-md animate-fade-in">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">🎉 Happy Birthday Week!</CardTitle>
+                  <CardTitle className="text-xl">🎉 Χρόνια Πολλά!</CardTitle>
                   <Gift className="h-8 w-8 text-secondary" />
                 </div>
-                <CardDescription>We have a special gift just for you</CardDescription>
+                <CardDescription>Έχουμε ένα ειδικό δώρο για εσένα</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <p className="font-medium text-lg">Enjoy a <span className="text-secondary font-bold">FREE</span> personal training session</p>
+                  <p className="font-medium text-lg">Απόλαυσε μια <span className="text-secondary font-bold">ΔΩΡΕΑΝ</span> προσωπική προπόνηση</p>
                   <p className="text-sm text-muted-foreground">
-                    Valid until: {new Date(new Date().setDate(new Date().getDate() + 14)).toLocaleDateString()}
+                    Ισχύει έως: {new Date(new Date().setDate(new Date().getDate() + 14)).toLocaleDateString()}
                   </p>
                   <div className="bg-secondary/10 text-secondary font-medium rounded-full px-4 py-2 inline-block mt-2">
-                    Booking Code: <span className="font-bold">BDAYPT2023</span>
+                    Κωδικός Κράτησης: <span className="font-bold">BDAYPT2023</span>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="border-t pt-4 flex justify-end">
                 <Link to="/services/request/personal-training">
                   <Button>
-                    Redeem Now
+                    Εξαργύρωση Τώρα
                   </Button>
                 </Link>
               </CardFooter>
@@ -108,25 +108,25 @@ const DashboardPage = () => {
           {/* Active Package Status */}
           <Card className="border-l-4 border-l-primary shadow-md">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Active Membership</CardTitle>
-              <CardDescription>Your current membership status</CardDescription>
+              <CardTitle className="text-xl">Ενεργή Συνδρομή</CardTitle>
+              <CardDescription>Η τρέχουσα κατάσταση της συνδρομής σας</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col md:flex-row justify-between md:items-center space-y-3 md:space-y-0">
                 <div>
                   <h3 className="font-medium text-lg">{userData.activePackage.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Expires on {new Date(userData.activePackage.expiresAt).toLocaleDateString()}
+                    Λήγει στις {new Date(userData.activePackage.expiresAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="bg-primary/10 text-primary font-medium rounded-full px-4 py-1 text-center">
-                  {userData.activePackage.remainingDays} days remaining
+                  {userData.activePackage.remainingDays} ημέρες απομένουν
                 </div>
               </div>
             </CardContent>
             <CardFooter className="border-t pt-4 flex justify-end">
               <Button variant="outline" size="sm">
-                Renew Membership
+                Ανανέωση Συνδρομής
               </Button>
             </CardFooter>
           </Card>
@@ -135,20 +135,20 @@ const DashboardPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Book a Class</CardTitle>
-                <CardDescription>View schedule and book your next workout</CardDescription>
+                <CardTitle className="text-xl">Κλείσε Μάθημα</CardTitle>
+                <CardDescription>Δες το πρόγραμμα και κλείσε την επόμενη προπόνησή σου</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
-                    <p className="text-sm">Check out our class schedule and reserve your spot</p>
+                    <p className="text-sm">Δες το πρόγραμμα μαθημάτων και κρατά τη θέση σου</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Link to="/schedule" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2">
-                    View Schedule
+                    Προβολή Προγράμματος
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -157,21 +157,21 @@ const DashboardPage = () => {
             
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Meet Our Trainers</CardTitle>
-                <CardDescription>Learn about our expert coaching staff</CardDescription>
+                <CardTitle className="text-xl">Γνώρισε τους Προπονητές</CardTitle>
+                <CardDescription>Μάθε για το ειδικευμένο προπονητικό προσωπικό μας</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
                     <User className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Discover our team of certified trainers and specialists</p>
+                    <p className="text-sm">Ανακάλυψε την ομάδα πιστοποιημένων προπονητών και ειδικών μας</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Link to="/trainers" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    View Trainers
+                    Προβολή Προπονητών
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -180,21 +180,21 @@ const DashboardPage = () => {
             
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Store</CardTitle>
-                <CardDescription>Browse supplements, apparel, and more</CardDescription>
+                <CardTitle className="text-xl">Κατάστημα</CardTitle>
+                <CardDescription>Περιήγηση σε συμπληρώματα, ρούχα και άλλα</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
                     <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Shop for supplements, workout apparel, and accessories</p>
+                    <p className="text-sm">Ψώνισε συμπληρώματα, ρούχα γυμναστικής και αξεσουάρ</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Link to="/store" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Visit Store
+                    Επίσκεψη Καταστήματος
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

@@ -20,21 +20,21 @@ const ReferralProgramPage = () => {
     link: "sweat24.com/join?ref=JOHN50",
     referrals: 2,
     nextRewardAt: 3,
-    nextReward: "50% off next month",
+    nextReward: "50% έκπτωση τον επόμενο μήνα",
     rewards: [
-      { name: "Free Personal Training Session", status: "Available", expiry: "2024-07-15" },
-      { name: "50% Off Protein Shake", status: "Redeemed", expiry: "2024-04-01" }
+      { name: "Δωρεάν Προσωπική Προπόνηση", status: "Διαθέσιμο", expiry: "2024-07-15" },
+      { name: "50% Έκπτωση σε Protein Shake", status: "Εξαργυρώθηκε", expiry: "2024-04-01" }
     ],
     friends: [
-      { name: "Sarah Johnson", joinDate: "2024-03-15" },
-      { name: "Mike Peters", joinDate: "2024-04-02" }
+      { name: "Σάρα Ιωάννου", joinDate: "2024-03-15" },
+      { name: "Μιχάλης Πέτρου", joinDate: "2024-04-02" }
     ]
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success("Copied to clipboard!");
+    toast.success("Αντιγράφηκε στο πρόχειρο!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -44,25 +44,25 @@ const ReferralProgramPage = () => {
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Invite Friends & Earn Rewards</h1>
+          <h1 className="text-3xl font-bold">Προσκάλεσε Φίλους & Κέρδισε Δώρα</h1>
           <p className="text-muted-foreground mt-2">
-            Share Sweat24 with friends and earn exclusive rewards!
+            Μοιράσου το Sweat24 με φίλους και κέρδισε αποκλειστικά δώρα!
           </p>
         </div>
         
         {/* Program Explanation Card */}
         <Card className="mb-6 border-l-4 border-l-primary shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xl">How It Works</CardTitle>
+            <CardTitle className="text-xl">Πώς Λειτουργεί</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              <span className="font-semibold">Invite friends to join Sweat24 and earn amazing rewards:</span>
+              <span className="font-semibold">Προσκάλεσε φίλους να γίνουν μέλη του Sweat24 και κέρδισε φανταστικά δώρα:</span>
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-              <li><span className="font-medium">1 referral</span> = Free personal training session</li>
-              <li><span className="font-medium">3 referrals</span> = 50% off your next month</li>
-              <li><span className="font-medium">5 referrals</span> = One month free membership!</li>
+              <li><span className="font-medium">1 παραπομπή</span> = Δωρεάν προσωπική προπόνηση</li>
+              <li><span className="font-medium">3 παραπομπές</span> = 50% έκπτωση τον επόμενο μήνα</li>
+              <li><span className="font-medium">5 παραπομπές</span> = Ένας μήνας δωρεάν συνδρομή!</li>
             </ul>
           </CardContent>
         </Card>
@@ -70,8 +70,8 @@ const ReferralProgramPage = () => {
         {/* Referral Code & Sharing */}
         <Card className="mb-6 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Your Referral Link</CardTitle>
-            <CardDescription>Share this unique code with friends</CardDescription>
+            <CardTitle className="text-xl">Ο Σύνδεσμος Παραπομπής σου</CardTitle>
+            <CardDescription>Μοιράσου αυτόν τον μοναδικό κωδικό με φίλους</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -86,7 +86,7 @@ const ReferralProgramPage = () => {
                   onClick={() => copyToClipboard(referralData.link)}
                 >
                   <Copy className="h-4 w-4" />
-                  <span className="sr-only">Copy link</span>
+                  <span className="sr-only">Αντιγραφή συνδέσμου</span>
                 </Button>
               </div>
               <div>
@@ -95,7 +95,7 @@ const ReferralProgramPage = () => {
                   className="w-full sm:w-auto" 
                   onClick={() => copyToClipboard(referralData.code)}
                 >
-                  Copy Code: {referralData.code}
+                  Αντιγραφή Κωδικού: {referralData.code}
                 </Button>
               </div>
             </div>
@@ -103,7 +103,7 @@ const ReferralProgramPage = () => {
             <Separator className="my-4" />
             
             <div>
-              <p className="text-sm font-medium mb-3">Share via:</p>
+              <p className="text-sm font-medium mb-3">Κοινοποίηση μέσω:</p>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" className="gap-2">
                   <Facebook className="h-4 w-4 text-blue-600" />
@@ -123,7 +123,7 @@ const ReferralProgramPage = () => {
                 </Button>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Share2 className="h-4 w-4" />
-                  <span>More</span>
+                  <span>Περισσότερα</span>
                 </Button>
               </div>
             </div>
@@ -133,11 +133,11 @@ const ReferralProgramPage = () => {
         {/* Progress Tracker */}
         <Card className="mb-6 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Your Referral Progress</CardTitle>
+            <CardTitle className="text-xl">Η Πρόοδος των Παραπομπών σου</CardTitle>
             <CardDescription>
               {referralData.nextRewardAt - referralData.referrals === 1 
-                ? "Just 1 more referral to earn your next reward!" 
-                : `${referralData.nextRewardAt - referralData.referrals} more referrals for your next reward!`}
+                ? "Μόνο 1 ακόμη παραπομπή για να κερδίσεις το επόμενο δώρο!" 
+                : `${referralData.nextRewardAt - referralData.referrals} ακόμη παραπομπές για το επόμενο δώρο!`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -147,7 +147,7 @@ const ReferralProgramPage = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground mb-1">
-                  Progress to {referralData.nextReward}
+                  Πρόοδος για {referralData.nextReward}
                 </p>
                 <div className="space-y-2 w-full">
                   <Progress 
@@ -168,8 +168,8 @@ const ReferralProgramPage = () => {
           {/* Rewards Section */}
           <Card className="shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Your Rewards</CardTitle>
-              <CardDescription>Rewards you've earned through referrals</CardDescription>
+              <CardTitle className="text-xl">Τα Δώρα σου</CardTitle>
+              <CardDescription>Δώρα που έχεις κερδίσει μέσω παραπομπών</CardDescription>
             </CardHeader>
             <CardContent>
               {referralData.rewards.length > 0 ? (
@@ -179,16 +179,16 @@ const ReferralProgramPage = () => {
                       <div>
                         <p className="font-medium text-sm">{reward.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {reward.status === "Available" 
-                            ? `Expires: ${new Date(reward.expiry).toLocaleDateString()}`
-                            : `Redeemed on: ${new Date(reward.expiry).toLocaleDateString()}`}
+                          {reward.status === "Διαθέσιμο" 
+                            ? `Λήγει: ${new Date(reward.expiry).toLocaleDateString()}`
+                            : `Εξαργυρώθηκε στις: ${new Date(reward.expiry).toLocaleDateString()}`}
                         </p>
                       </div>
                       <div>
-                        {reward.status === "Available" ? (
-                          <Button size="sm" variant="default">Redeem</Button>
+                        {reward.status === "Διαθέσιμο" ? (
+                          <Button size="sm" variant="default">Εξαργύρωση</Button>
                         ) : (
-                          <span className="text-xs bg-muted px-2 py-1 rounded-full">Redeemed</span>
+                          <span className="text-xs bg-muted px-2 py-1 rounded-full">Εξαργυρώθηκε</span>
                         )}
                       </div>
                     </div>
@@ -197,7 +197,7 @@ const ReferralProgramPage = () => {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">
-                    You haven't earned any rewards yet. Start inviting friends!
+                    Δεν έχεις κερδίσει ακόμη δώρα. Ξεκίνα να προσκαλείς φίλους!
                   </p>
                 </div>
               )}
@@ -207,8 +207,8 @@ const ReferralProgramPage = () => {
           {/* Referred Friends Section */}
           <Card className="shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Referred Friends</CardTitle>
-              <CardDescription>Friends who joined using your referral</CardDescription>
+              <CardTitle className="text-xl">Φίλοι που Παρέπεμψες</CardTitle>
+              <CardDescription>Φίλοι που έγιναν μέλη χρησιμοποιώντας την παραπομπή σου</CardDescription>
             </CardHeader>
             <CardContent>
               {referralData.friends.length > 0 ? (
@@ -226,7 +226,7 @@ const ReferralProgramPage = () => {
                       <div className="flex-1">
                         <p className="font-medium text-sm">{friend.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          Joined: {new Date(friend.joinDate).toLocaleDateString()}
+                          Έγινε μέλος: {new Date(friend.joinDate).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -235,7 +235,7 @@ const ReferralProgramPage = () => {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">
-                    None of your friends have joined yet.
+                    Κανένας από τους φίλους σου δεν έχει γίνει ακόμη μέλος.
                   </p>
                 </div>
               )}
@@ -246,7 +246,7 @@ const ReferralProgramPage = () => {
         {/* Terms & Conditions */}
         <div className="mt-6 text-center">
           <Link to="/terms-referral" className="text-sm text-primary underline">
-            View Terms & Conditions
+            Προβολή Όρων & Προϋποθέσεων
           </Link>
         </div>
       </main>
