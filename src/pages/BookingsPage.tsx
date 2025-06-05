@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,29 +26,29 @@ const BookingsPage = () => {
     {
       id: 2,
       name: "HIIT Blast",
-      day: "Today",
-      date: "May 24, 2025",
+      day: "Σήμερα",
+      date: "24 Μαΐου 2025",
       time: "12:00 - 12:45",
       instructor: "Mike Johnson",
-      location: "Main Floor",
+      location: "Κυρίως Όροφος",
     },
     {
       id: 3,
       name: "Spin Class",
-      day: "Tomorrow",
-      date: "May 25, 2025",
+      day: "Αύριο",
+      date: "25 Μαΐου 2025",
       time: "18:00 - 19:00",
       instructor: "Sarah Davis",
-      location: "Cycle Studio",
+      location: "Στούντιο Ποδηλασίας",
     },
     {
       id: 4,
-      name: "Strength Training",
-      day: "Tuesday",
-      date: "May 26, 2025",
+      name: "Προπόνηση Δύναμης",
+      day: "Τρίτη",
+      date: "26 Μαΐου 2025",
       time: "08:00 - 09:00",
       instructor: "Chris Taylor",
-      location: "Weight Room",
+      location: "Αίθουσα Βαρών",
     },
   ];
   
@@ -58,7 +59,7 @@ const BookingsPage = () => {
   const handleAgreeToRules = () => {
     setShowRules(false);
     // Logic to save that user has agreed to rules would go here
-    alert("Thank you for agreeing to our gym rules!");
+    alert("Ευχαριστούμε που συμφωνήσατε με τους κανόνες του γυμναστηρίου μας!");
   };
   
   // Demo functions
@@ -86,29 +87,29 @@ const BookingsPage = () => {
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">My Bookings</h1>
+          <h1 className="text-3xl font-bold">Οι Κρατήσεις μου</h1>
         </div>
         
         {/* Demo controls (for testing only - would be removed in production) */}
         <div className="mb-6 p-4 bg-muted/20 border rounded-md">
-          <h2 className="text-lg font-medium mb-2">Demo Controls</h2>
+          <h2 className="text-lg font-medium mb-2">Δοκιμαστικά Κοντρόλ</h2>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={toggleRulesModal}>
-              Show Gym Rules
+              Εμφάνιση Κανόνων Γυμναστηρίου
             </Button>
             <Button size="sm" onClick={cyclePackageStatus} variant="outline">
-              Cycle Package Status: {packageStatus}
+              Αλλαγή Κατάστασης Πακέτου: {packageStatus}
             </Button>
             <Button 
               size="sm" 
               onClick={() => setShowNotification(!showNotification)} 
               variant="outline"
             >
-              {showNotification ? "Hide" : "Show"} Notification Sample
+              {showNotification ? "Απόκρυψη" : "Εμφάνιση"} Δείγματος Ειδοποίησης
             </Button>
             {showNotification && (
               <Button size="sm" onClick={cycleNotificationType} variant="outline">
-                Change Notification Type: {notificationType}
+                Αλλαγή Τύπου Ειδοποίησης: {notificationType}
               </Button>
             )}
           </div>
@@ -139,14 +140,14 @@ const BookingsPage = () => {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                       <div className="space-y-2 mb-4 md:mb-0">
                         <div className="flex items-center">
-                          {booking.day === "Today" && (
+                          {booking.day === "Σήμερα" && (
                             <span className="bg-primary text-primary-foreground text-xs font-bold rounded-full px-2 py-1 mr-2">
-                              TODAY
+                              ΣΗΜΕΡΑ
                             </span>
                           )}
-                          {booking.day === "Tomorrow" && (
+                          {booking.day === "Αύριο" && (
                             <span className="bg-secondary text-secondary-foreground text-xs font-bold rounded-full px-2 py-1 mr-2">
-                              TOMORROW
+                              ΑΥΡΙΟ
                             </span>
                           )}
                           <h3 className="font-bold text-lg">{booking.name}</h3>
@@ -181,10 +182,10 @@ const BookingsPage = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           // Cancel booking logic would go here
-                          alert("This would cancel your booking");
+                          alert("Αυτό θα ακυρώσει την κράτησή σας");
                         }}
                       >
-                        Cancel Booking
+                        Ακύρωση Κράτησης
                       </Button>
                     </div>
                   </CardContent>
@@ -198,12 +199,12 @@ const BookingsPage = () => {
             <div className="bg-muted/40 rounded-full p-6 mb-4">
               <CalendarX className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">No upcoming bookings</h2>
+            <h2 className="text-xl font-semibold mb-2">Δεν υπάρχουν επερχόμενες κρατήσεις</h2>
             <p className="text-muted-foreground max-w-md mb-6">
-              You don't have any classes booked yet. Take a look at our schedule and book your next workout.
+              Δεν έχετε κλείσει ακόμη κανένα μάθημα. Ρίξτε μια ματιά στο πρόγραμμά μας και κλείστε την επόμενη προπόνησή σας.
             </p>
             <Link to="/schedule">
-              <Button>View Class Schedule</Button>
+              <Button>Προβολή Προγράμματος Μαθημάτων</Button>
             </Link>
           </div>
         )}

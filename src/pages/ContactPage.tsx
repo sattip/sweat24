@@ -58,8 +58,8 @@ const ContactPage = () => {
   
   // Mock user data (in a real app, this would come from authentication/user context)
   const userData = {
-    name: "John Doe",
-    email: "john.doe@example.com"
+    name: "Γιάννης Παπαδόπουλος",
+    email: "giannis.papadopoulos@example.com"
   };
 
   const form = useForm<FormValues>({
