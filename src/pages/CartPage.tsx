@@ -46,17 +46,17 @@ const CartPage = () => {
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/store")}>
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Continue Shopping
+            Συνέχεια Αγορών
           </Button>
         </div>
         
-        <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
+        <h1 className="text-3xl font-bold mb-6">Το Καλάθι σας</h1>
         
         {items.length === 0 ? (
           <Card className="text-center p-8">
             <CardContent className="pt-6">
-              <p className="mb-4">Your cart is empty</p>
-              <Button onClick={() => navigate("/store")}>Browse Products</Button>
+              <p className="mb-4">Το καλάθι σας είναι άδειο</p>
+              <Button onClick={() => navigate("/store")}>Περιήγηση Προϊόντων</Button>
             </CardContent>
           </Card>
         ) : (
@@ -112,7 +112,7 @@ const CartPage = () => {
                         </div>
                         <div className="text-right">
                           <div className="font-medium">${(item.price * item.quantity).toFixed(2)}</div>
-                          <div className="text-sm text-muted-foreground">${item.price.toFixed(2)} each</div>
+                          <div className="text-sm text-muted-foreground">${item.price.toFixed(2)} το κάθε ένα</div>
                         </div>
                       </div>
                     </div>
@@ -124,21 +124,21 @@ const CartPage = () => {
             <div className="md:col-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle>Σύνοψη Παραγγελίας</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between">
-                      <span>Subtotal</span>
+                      <span>Υποσύνολο</span>
                       <span>${subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Taxes</span>
-                      <span>Calculated at checkout</span>
+                      <span>Φόροι</span>
+                      <span>Υπολογισμός στο ταμείο</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-medium text-lg">
-                      <span>Total</span>
+                      <span>Σύνολο</span>
                       <span>${subtotal.toFixed(2)}</span>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ const CartPage = () => {
                     className="w-full" 
                     onClick={() => navigate("/checkout")}
                   >
-                    Proceed to Checkout
+                    Συνέχεια στο Ταμείο
                   </Button>
                 </CardFooter>
               </Card>

@@ -26,9 +26,9 @@ const CheckoutPage = () => {
   const { items, subtotal, clearCart } = useCart();
   
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "555-123-4567",
+    name: "Γιάννης Παπαδόπουλος",
+    email: "giannis.papadopoulos@example.com",
+    phone: "69X-XXX-XXXX",
     pickupOption: "gym",
     notes: "",
   });
@@ -60,8 +60,8 @@ const CheckoutPage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container px-4 py-6 max-w-5xl mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-          <Button onClick={() => navigate("/store")}>Return to Store</Button>
+          <h1 className="text-2xl font-bold mb-4">Το καλάθι σας είναι άδειο</h1>
+          <Button onClick={() => navigate("/store")}>Επιστροφή στο Κατάστημα</Button>
         </main>
       </div>
     );
@@ -75,23 +75,23 @@ const CheckoutPage = () => {
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/cart")}>
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Cart
+            Πίσω στο Καλάθι
           </Button>
         </div>
         
-        <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+        <h1 className="text-3xl font-bold mb-6">Ταμείο</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <form onSubmit={handleSubmit}>
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
+                  <CardTitle>Στοιχεία Επικοινωνίας</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="name">Όνομα</Label>
                       <Input 
                         id="name" 
                         name="name" 
@@ -114,7 +114,7 @@ const CheckoutPage = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">Τηλέφωνο</Label>
                       <Input 
                         id="phone" 
                         name="phone" 
@@ -129,7 +129,7 @@ const CheckoutPage = () => {
               
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Pickup Options</CardTitle>
+                  <CardTitle>Επιλογές Παραλαβής</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RadioGroup 
@@ -140,9 +140,9 @@ const CheckoutPage = () => {
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="gym" id="gym" />
                       <Label htmlFor="gym" className="flex-1">
-                        <div className="font-medium">Pickup at Gym</div>
+                        <div className="font-medium">Παραλαβή από το Γυμναστήριο</div>
                         <div className="text-sm text-muted-foreground">
-                          Collect your order at the Sweat24 front desk during opening hours.
+                          Παραλάβετε την παραγγελία σας από την υποδοχή του Sweat24 κατά τις ώρες λειτουργίας.
                         </div>
                       </Label>
                     </div>
@@ -150,9 +150,9 @@ const CheckoutPage = () => {
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="locker" id="locker" />
                       <Label htmlFor="locker" className="flex-1">
-                        <div className="font-medium">Locker Delivery</div>
+                        <div className="font-medium">Παράδοση στο Ντουλάπι</div>
                         <div className="text-sm text-muted-foreground">
-                          We'll place your order in your gym locker (members with lockers only).
+                          Θα τοποθετήσουμε την παραγγελία σας στο ντουλάπι σας (μόνο για μέλη με ντουλάπια).
                         </div>
                       </Label>
                     </div>
@@ -162,14 +162,14 @@ const CheckoutPage = () => {
               
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Additional Notes</CardTitle>
+                  <CardTitle>Επιπλέον Σημειώσεις</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Textarea 
                     name="notes" 
                     value={formData.notes} 
                     onChange={handleInputChange} 
-                    placeholder="Any special requests or instructions for your order"
+                    placeholder="Οποιεσδήποτε ειδικές απαιτήσεις ή οδηγίες για την παραγγελία σας"
                     className="min-h-[100px]"
                   />
                 </CardContent>
@@ -177,7 +177,7 @@ const CheckoutPage = () => {
               
               <div className="flex justify-end">
                 <Button type="submit" size="lg">
-                  Place Order
+                  Υποβολή Παραγγελίας
                 </Button>
               </div>
             </form>
@@ -186,7 +186,7 @@ const CheckoutPage = () => {
           <div className="md:col-span-1">
             <Card className="sticky top-20">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle>Σύνοψη Παραγγελίας</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {items.map((item, index) => (
@@ -208,19 +208,19 @@ const CheckoutPage = () => {
                 <Separator />
                 
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span>Υποσύνολο</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Taxes</span>
-                  <span>Calculated at checkout</span>
+                  <span>Φόροι</span>
+                  <span>Υπολογισμός στο ταμείο</span>
                 </div>
                 
                 <Separator />
                 
                 <div className="flex justify-between font-medium text-lg">
-                  <span>Total</span>
+                  <span>Σύνολο</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
               </CardContent>

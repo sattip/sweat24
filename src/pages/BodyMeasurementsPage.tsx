@@ -77,7 +77,7 @@ const sampleMeasurements: Measurement[] = [
     arm: "35",
     thigh: "55",
     bodyFat: "18",
-    notes: "Starting my fitness journey"
+    notes: "Ξεκινώ το ταξίδι φυσικής κατάστασής μου"
   },
   {
     id: "2",
@@ -90,7 +90,7 @@ const sampleMeasurements: Measurement[] = [
     arm: "35.5",
     thigh: "54.5",
     bodyFat: "17.5",
-    notes: "One week in, feeling good"
+    notes: "Μια εβδομάδα μετά, αισθάνομαι καλά"
   },
   {
     id: "3",
@@ -103,7 +103,7 @@ const sampleMeasurements: Measurement[] = [
     arm: "36",
     thigh: "54",
     bodyFat: "17",
-    notes: "Two weeks in, seeing progress"
+    notes: "Δύο εβδομάδες μετά, βλέπω πρόοδο"
   }
 ];
 
@@ -227,35 +227,35 @@ const BodyMeasurementsPage: React.FC = () => {
       <Header />
       <main className="container max-w-4xl mx-auto p-4 pb-20">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Body Measurements</h1>
+          <h1 className="text-3xl font-bold">Μετρήσεις Σώματος</h1>
           <Button onClick={handleAddNew} className="gap-2">
             <Plus size={18} />
-            Add Measurements
+            Προσθήκη Μετρήσεων
           </Button>
         </div>
 
         {measurements.length === 0 ? (
           <div className="text-center py-12">
             <div className="mb-4 text-muted-foreground">
-              No measurements logged yet. Start tracking your progress!
+              Δεν έχουν καταγραφεί μετρήσεις ακόμη. Ξεκινήστε να παρακολουθείτε την πρόοδό σας!
             </div>
             <Button onClick={handleAddNew} className="gap-2">
               <Plus size={18} />
-              Add Measurements
+              Προσθήκη Μετρήσεων
             </Button>
           </div>
         ) : (
           <>
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">Progress Chart</h2>
+                <h2 className="text-xl font-semibold">Γράφημα Προόδου</h2>
                 <Button 
                   variant={showChart ? "default" : "outline"} 
                   onClick={() => setShowChart(!showChart)} 
                   className="gap-2"
                 >
                   <LineChart size={18} />
-                  {showChart ? "Hide Chart" : "Show Chart"}
+                  {showChart ? "Απόκρυψη Γραφήματος" : "Εμφάνιση Γραφήματος"}
                 </Button>
               </div>
               
@@ -263,19 +263,19 @@ const BodyMeasurementsPage: React.FC = () => {
                 <Card className="mb-4">
                   <CardContent className="pt-6">
                     <div className="mb-4">
-                      <Label>Select metric to display:</Label>
+                      <Label>Επιλέξτε μετρικό για εμφάνιση:</Label>
                       <select 
                         className="w-full p-2 border rounded mt-1"
                         value={chartMetric}
                         onChange={(e) => setChartMetric(e.target.value)}
                       >
-                        <option value="weight">Weight</option>
-                        <option value="waist">Waist</option>
-                        <option value="hips">Hips</option>
-                        <option value="chest">Chest</option>
-                        <option value="arm">Arm</option>
-                        <option value="thigh">Thigh</option>
-                        <option value="bodyFat">Body Fat %</option>
+                        <option value="weight">Βάρος</option>
+                        <option value="waist">Μέση</option>
+                        <option value="hips">Γοφοί</option>
+                        <option value="chest">Στήθος</option>
+                        <option value="arm">Μπράτσο</option>
+                        <option value="thigh">Μηρός</option>
+                        <option value="bodyFat">Ποσοστό Λίπους %</option>
                       </select>
                     </div>
                     
@@ -284,7 +284,7 @@ const BodyMeasurementsPage: React.FC = () => {
                         className="h-full"
                         config={{
                           metric: {
-                            label: "Measurement",
+                            label: "Μέτρηση",
                             color: "#0369a1"
                           }
                         }}
@@ -310,7 +310,7 @@ const BodyMeasurementsPage: React.FC = () => {
               )}
             </div>
 
-            <h2 className="text-xl font-semibold mb-2">Measurement History</h2>
+            <h2 className="text-xl font-semibold mb-2">Ιστορικό Μετρήσεων</h2>
             <div className="space-y-3">
               {measurements
                 .sort((a, b) => b.date.getTime() - a.date.getTime())
@@ -325,7 +325,7 @@ const BodyMeasurementsPage: React.FC = () => {
                           <div>
                             <CardTitle className="text-lg">{format(measurement.date, 'MMMM d, yyyy')}</CardTitle>
                             <p className="text-muted-foreground text-sm mt-1">
-                              Weight: {measurement.weight} kg • Waist: {measurement.waist} cm
+                              Βάρος: {measurement.weight} kg • Μέση: {measurement.waist} cm
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -360,40 +360,40 @@ const BodyMeasurementsPage: React.FC = () => {
                       <CollapsibleContent>
                         <CardContent className="p-4 pt-0 grid grid-cols-2 md:grid-cols-3 gap-4">
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Weight</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Βάρος</h4>
                             <p>{measurement.weight} kg</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Height</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Ύψος</h4>
                             <p>{measurement.height} cm</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Waist</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Μέση</h4>
                             <p>{measurement.waist} cm</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Hips</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Γοφοί</h4>
                             <p>{measurement.hips} cm</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Chest</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Στήθος</h4>
                             <p>{measurement.chest} cm</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Arm (Right)</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Μπράτσο (Δεξί)</h4>
                             <p>{measurement.arm} cm</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Thigh (Right)</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Μηρός (Δεξί)</h4>
                             <p>{measurement.thigh} cm</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Body Fat</h4>
+                            <h4 className="text-sm font-medium text-muted-foreground">Ποσοστό Λίπους</h4>
                             <p>{measurement.bodyFat}%</p>
                           </div>
                           {measurement.notes && (
                             <div className="col-span-2 md:col-span-3">
-                              <h4 className="text-sm font-medium text-muted-foreground">Notes</h4>
+                              <h4 className="text-sm font-medium text-muted-foreground">Σημειώσεις</h4>
                               <p className="text-sm">{measurement.notes}</p>
                             </div>
                           )}
@@ -411,24 +411,24 @@ const BodyMeasurementsPage: React.FC = () => {
           <DialogContent className="sm:max-w-[500px] max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>
-                {selectedMeasurement ? "Edit Measurements" : "Add New Measurements"}
+                {selectedMeasurement ? "Επεξεργασία Μετρήσεων" : "Προσθήκη Νέων Μετρήσεων"}
               </DialogTitle>
               <DialogDescription>
-                Record your body measurements to track your progress over time.
+                Καταγράψτε τις μετρήσεις του σώματός σας για να παρακολουθείτε την πρόοδό σας με την πάροδο του χρόνου.
               </DialogDescription>
             </DialogHeader>
             
             <ScrollArea className="max-h-[60vh] pr-4">
               <div className="space-y-4 py-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">Ημερομηνία</Label>
                   <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <PopoverTrigger asChild>
                       <Button 
                         variant="outline" 
                         className="justify-start text-left font-normal"
                       >
-                        {formData.date ? format(formData.date, 'MMMM d, yyyy') : "Select date"}
+                        {formData.date ? format(formData.date, 'MMMM d, yyyy') : "Επιλέξτε ημερομηνία"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -444,109 +444,109 @@ const BodyMeasurementsPage: React.FC = () => {
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Label htmlFor="weight">Βάρος (kg)</Label>
                   <Input 
                     id="weight" 
                     name="weight" 
                     type="number" 
                     value={formData.weight} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 70" 
+                    placeholder="π.χ., 70" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="height">Height (cm)</Label>
+                  <Label htmlFor="height">Ύψος (cm)</Label>
                   <Input 
                     id="height" 
                     name="height" 
                     type="number" 
                     value={formData.height} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 175" 
+                    placeholder="π.χ., 175" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="waist">Waist (cm)</Label>
+                  <Label htmlFor="waist">Μέση (cm)</Label>
                   <Input 
                     id="waist" 
                     name="waist" 
                     type="number" 
                     value={formData.waist} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 80" 
+                    placeholder="π.χ., 80" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="hips">Hips (cm)</Label>
+                  <Label htmlFor="hips">Γοφοί (cm)</Label>
                   <Input 
                     id="hips" 
                     name="hips" 
                     type="number" 
                     value={formData.hips} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 95" 
+                    placeholder="π.χ., 95" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="chest">Chest (cm)</Label>
+                  <Label htmlFor="chest">Στήθος (cm)</Label>
                   <Input 
                     id="chest" 
                     name="chest" 
                     type="number" 
                     value={formData.chest} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 100" 
+                    placeholder="π.χ., 100" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="arm">Arm - Right Bicep (cm)</Label>
+                  <Label htmlFor="arm">Μπράτσο - Δεξιός Δικέφαλος (cm)</Label>
                   <Input 
                     id="arm" 
                     name="arm" 
                     type="number" 
                     value={formData.arm} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 35" 
+                    placeholder="π.χ., 35" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="thigh">Thigh - Right (cm)</Label>
+                  <Label htmlFor="thigh">Μηρός - Δεξιός (cm)</Label>
                   <Input 
                     id="thigh" 
                     name="thigh" 
                     type="number" 
                     value={formData.thigh} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 55" 
+                    placeholder="π.χ., 55" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="bodyFat">Body Fat Percentage (%)</Label>
+                  <Label htmlFor="bodyFat">Ποσοστό Σωματικού Λίπους (%)</Label>
                   <Input 
                     id="bodyFat" 
                     name="bodyFat" 
                     type="number" 
                     value={formData.bodyFat} 
                     onChange={handleInputChange}
-                    placeholder="e.g., 18" 
+                    placeholder="π.χ., 18" 
                   />
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="notes">Σημειώσεις</Label>
                   <Textarea 
                     id="notes" 
                     name="notes" 
                     value={formData.notes} 
                     onChange={handleInputChange}
-                    placeholder="Any additional notes about your measurements..." 
+                    placeholder="Οποιεσδήποτε επιπλέον σημειώσεις για τις μετρήσεις σας..." 
                     rows={3}
                   />
                 </div>
@@ -554,8 +554,8 @@ const BodyMeasurementsPage: React.FC = () => {
             </ScrollArea>
             
             <DialogFooter>
-              <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
-              <Button onClick={handleSaveMeasurement}>Save</Button>
+              <Button variant="outline" onClick={handleCloseDialog}>Ακύρωση</Button>
+              <Button onClick={handleSaveMeasurement}>Αποθήκευση</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

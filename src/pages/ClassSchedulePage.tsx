@@ -12,8 +12,8 @@ import { Calendar, Clock, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // Mock data for the class schedule
-const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const CLASS_TYPES = ["All", "Cardio", "Strength", "Yoga", "HIIT", "Cycling"];
+const DAYS_OF_WEEK = ["Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
+const CLASS_TYPES = ["Όλα", "Καρδιο", "Δύναμη", "Yoga", "HIIT", "Ποδηλασία"];
 
 const mockClasses = [
   {
@@ -24,7 +24,7 @@ const mockClasses = [
     spotsAvailable: 8,
     totalSpots: 20,
     type: "Yoga",
-    day: "Monday"
+    day: "Δευτέρα"
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ const mockClasses = [
     spotsAvailable: 3,
     totalSpots: 15,
     type: "HIIT",
-    day: "Monday"
+    day: "Δευτέρα"
   },
   {
     id: 3,
@@ -43,18 +43,18 @@ const mockClasses = [
     instructor: "Sarah Davis",
     spotsAvailable: 0,
     totalSpots: 12,
-    type: "Cycling",
-    day: "Monday"
+    type: "Ποδηλασία",
+    day: "Δευτέρα"
   },
   {
     id: 4,
-    name: "Strength Training",
+    name: "Προπόνηση Δύναμης",
     time: "08:00 - 09:00",
     instructor: "Chris Taylor",
     spotsAvailable: 6,
     totalSpots: 15,
-    type: "Strength",
-    day: "Tuesday"
+    type: "Δύναμη",
+    day: "Τρίτη"
   },
   {
     id: 5,
@@ -63,39 +63,39 @@ const mockClasses = [
     instructor: "Sophia Martinez",
     spotsAvailable: 10,
     totalSpots: 25,
-    type: "Cardio",
-    day: "Wednesday"
+    type: "Καρδιο",
+    day: "Τετάρτη"
   },
   {
     id: 6,
-    name: "Core Conditioning",
+    name: "Ενδυνάμωση Κορμού",
     time: "19:00 - 19:45",
     instructor: "James Wilson",
     spotsAvailable: 8,
     totalSpots: 20,
-    type: "Strength",
-    day: "Thursday"
+    type: "Δύναμη",
+    day: "Πέμπτη"
   },
   {
     id: 7,
-    name: "Boxing",
+    name: "Πυγμαχία",
     time: "20:00 - 21:00",
     instructor: "Alex Rodriguez",
     spotsAvailable: 2,
     totalSpots: 15,
-    type: "Cardio",
-    day: "Friday"
+    type: "Καρδιο",
+    day: "Παρασκευή"
   }
 ];
 
 const ClassSchedulePage = () => {
   const navigate = useNavigate();
-  const [activeDay, setActiveDay] = useState("Monday");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeDay, setActiveDay] = useState("Δευτέρα");
+  const [activeFilter, setActiveFilter] = useState("Όλα");
   
   const filteredClasses = mockClasses.filter(cls => 
     cls.day === activeDay && 
-    (activeFilter === "All" || cls.type === activeFilter)
+    (activeFilter === "Όλα" || cls.type === activeFilter)
   );
 
   const handleClassClick = (classId: number) => {
@@ -108,7 +108,7 @@ const ClassSchedulePage = () => {
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Class Schedule</h1>
+          <h1 className="text-2xl font-bold">Πρόγραμμα Μαθημάτων</h1>
         </div>
         
         {/* Day Tabs */}
@@ -174,8 +174,8 @@ const ClassSchedulePage = () => {
                                 : "bg-green-100 text-green-800"
                           }`}>
                             {cls.spotsAvailable === 0 
-                              ? "Full" 
-                              : `${cls.spotsAvailable} spots left`}
+                              ? "Γεμάτο" 
+                              : `${cls.spotsAvailable} θέσεις διαθέσιμες`}
                           </span>
                           <div className="mt-2 text-xs text-muted-foreground">
                             {cls.type}
@@ -187,7 +187,7 @@ const ClassSchedulePage = () => {
                 ))
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  No classes available for this day with the selected filter.
+                  Δεν υπάρχουν διαθέσιμα μαθήματα για αυτή την ημέρα με το επιλεγμένο φίλτρο.
                 </div>
               )}
             </TabsContent>

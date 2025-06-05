@@ -11,15 +11,15 @@ const mockClasses = [
   {
     id: 1,
     name: "Power Yoga",
-    day: "Monday",
-    date: "May 24, 2025",
+    day: "Δευτέρα",
+    date: "24 Μαΐου 2025",
     time: "07:30 - 08:30",
     instructor: "Emma Wilson",
     instructorImage: "/placeholder.svg",
-    duration: "60 minutes",
-    description: "Power Yoga is a dynamic, flowing style that synchronizes movement with breath. This energizing class builds strength, flexibility, and endurance while reducing stress and improving focus. Suitable for beginners and advanced practitioners alike.",
-    location: "Studio 2",
-    difficulty: "Intermediate",
+    duration: "60 λεπτά",
+    description: "Το Power Yoga είναι ένα δυναμικό, ρευστό στυλ που συγχρονίζει την κίνηση με την αναπνοή. Αυτή η ενεργητική τάξη χτίζει δύναμη, ευελιξία και αντοχή ενώ μειώνει το στρες και βελτιώνει τη συγκέντρωση. Κατάλληλο για αρχάριους και προχωρημένους ασκούμενους.",
+    location: "Στούντιο 2",
+    difficulty: "Μεσαίο",
     spotsAvailable: 8,
     totalSpots: 20,
     type: "Yoga"
@@ -27,15 +27,15 @@ const mockClasses = [
   {
     id: 2,
     name: "HIIT Blast",
-    day: "Monday",
-    date: "May 24, 2025",
+    day: "Δευτέρα",
+    date: "24 Μαΐου 2025",
     time: "12:00 - 12:45",
     instructor: "Mike Johnson",
     instructorImage: "/placeholder.svg",
-    duration: "45 minutes",
-    description: "High-Intensity Interval Training that alternates between intense bursts of activity and fixed periods of less-intense activity or rest. This workout will push your limits and help maximize calorie burn while improving cardiovascular fitness.",
-    location: "Main Floor",
-    difficulty: "Advanced",
+    duration: "45 λεπτά",
+    description: "Προπόνηση Υψηλής Έντασης με Διαστήματα που εναλλάσσεται μεταξύ έντονων περιόδων δραστηριότητας και σταθερών περιόδων λιγότερο έντονης δραστηριότητας ή ανάπαυσης. Αυτή η προπόνηση θα σας ωθήσει στα όριά σας και θα σας βοηθήσει να μεγιστοποιήσετε την καύση θερμίδων βελτιώνοντας παράλληλα την καρδιαγγειακή φυσική κατάσταση.",
+    location: "Κυρίως Όροφος",
+    difficulty: "Προχωρημένο",
     spotsAvailable: 3,
     totalSpots: 15,
     type: "HIIT"
@@ -43,34 +43,34 @@ const mockClasses = [
   {
     id: 3,
     name: "Spin Class",
-    day: "Monday",
-    date: "May 24, 2025",
+    day: "Δευτέρα",
+    date: "24 Μαΐου 2025",
     time: "18:00 - 19:00",
     instructor: "Sarah Davis",
     instructorImage: "/placeholder.svg",
-    duration: "60 minutes",
-    description: "An indoor cycling workout that simulates terrain and situations similar to riding a bike outdoors. Adjust resistance and speed to flat roads, hills, and interval training for a challenging cardio workout.",
-    location: "Cycle Studio",
-    difficulty: "All Levels",
+    duration: "60 λεπτά",
+    description: "Προπόνηση εσωτερικής ποδηλασίας που προσομοιώνει έδαφος και καταστάσεις παρόμοιες με την ποδηλασία σε εξωτερικό χώρο. Προσαρμόστε την αντίσταση και την ταχύτητα σε επίπεδους δρόμους, λόφους και προπόνηση διαστημάτων για μια προκλητική καρδιαγγειακή προπόνηση.",
+    location: "Στούντιο Ποδηλασίας",
+    difficulty: "Όλα τα Επίπεδα",
     spotsAvailable: 0,
     totalSpots: 12,
-    type: "Cycling"
+    type: "Ποδηλασία"
   },
   {
     id: 4,
-    name: "Strength Training",
-    day: "Tuesday",
-    date: "May 25, 2025",
+    name: "Προπόνηση Δύναμης",
+    day: "Τρίτη",
+    date: "25 Μαΐου 2025",
     time: "08:00 - 09:00",
     instructor: "Chris Taylor",
     instructorImage: "/placeholder.svg",
-    duration: "60 minutes",
-    description: "Build muscle and improve strength with this comprehensive workout using free weights, resistance bands, and bodyweight exercises. This class focuses on proper form and technique to maximize results and prevent injury.",
-    location: "Weight Room",
-    difficulty: "Intermediate",
+    duration: "60 λεπτά",
+    description: "Χτίστε μυϊκή μάζα και βελτιώστε τη δύναμη με αυτή την ολοκληρωμένη προπόνηση χρησιμοποιώντας ελεύθερα βάρη, ελαστικές ζώνες και ασκήσεις σωματικού βάρους. Αυτή η τάξη εστιάζει στη σωστή φόρμα και τεχνική για να μεγιστοποιήσει τα αποτελέσματα και να αποτρέψει τραυματισμούς.",
+    location: "Αίθουσα Βαρών",
+    difficulty: "Μεσαίο",
     spotsAvailable: 6,
     totalSpots: 15,
-    type: "Strength"
+    type: "Δύναμη"
   }
 ];
 
@@ -84,9 +84,9 @@ const ClassDetailsPage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container px-4 py-6 max-w-5xl mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Class not found</h1>
+          <h1 className="text-2xl font-bold mb-4">Το μάθημα δεν βρέθηκε</h1>
           <Button onClick={() => navigate("/schedule")}>
-            Return to Schedule
+            Επιστροφή στο Πρόγραμμα
           </Button>
         </div>
       </div>
@@ -106,7 +106,7 @@ const ClassDetailsPage = () => {
           onClick={() => navigate("/schedule")}
           className="mb-4"
         >
-          &larr; Back to Schedule
+          &larr; Πίσω στο Πρόγραμμα
         </Button>
         
         {/* Class Header */}
@@ -151,11 +151,11 @@ const ClassDetailsPage = () => {
               <div className="flex items-center">
                 <BarChart className="text-primary h-5 w-5 mr-3" />
                 <div>
-                  <p className="font-medium">Availability</p>
+                  <p className="font-medium">Διαθεσιμότητα</p>
                   <p className="text-sm text-muted-foreground">
                     {isFull 
-                      ? "Class is full" 
-                      : `${classDetails.spotsAvailable} of ${classDetails.totalSpots} spots available`}
+                      ? "Το μάθημα είναι γεμάτο" 
+                      : `${classDetails.spotsAvailable} από ${classDetails.totalSpots} θέσεις διαθέσιμες`}
                   </p>
                 </div>
               </div>
@@ -172,9 +172,9 @@ const ClassDetailsPage = () => {
               </div>
               <div>
                 <p className="font-medium">{classDetails.instructor}</p>
-                <p className="text-sm text-muted-foreground">Class Instructor</p>
+                <p className="text-sm text-muted-foreground">Εκπαιδευτής Μαθήματος</p>
                 <Button variant="link" size="sm" className="p-0 h-auto">
-                  View Profile
+                  Προβολή Προφίλ
                 </Button>
               </div>
             </div>
@@ -183,7 +183,7 @@ const ClassDetailsPage = () => {
         
         {/* Class Description */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-3">About this class</h2>
+          <h2 className="text-xl font-semibold mb-3">Σχετικά με αυτό το μάθημα</h2>
           <p className="text-muted-foreground">{classDetails.description}</p>
         </div>
         
@@ -194,7 +194,7 @@ const ClassDetailsPage = () => {
             size="lg"
             variant={isFull ? "outline" : "default"}
           >
-            {isFull ? "Join Waitlist" : "Book Class"}
+            {isFull ? "Εγγραφή σε Λίστα Αναμονής" : "Κλείσιμο Μαθήματος"}
           </Button>
         </div>
       </main>

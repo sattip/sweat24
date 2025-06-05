@@ -18,29 +18,29 @@ const PackageAlert: React.FC<PackageAlertProps> = ({ type, daysRemaining = 0 }) 
       case "last-session":
         return {
           icon: <Package className="h-4 w-4" />,
-          title: "Last Session Alert / Ειδοποίηση Τελευταίας Συνεδρίας",
-          description: "This is your last session in your current package. Please renew to continue booking classes.",
+          title: "Ειδοποίηση Τελευταίας Συνεδρίας",
+          description: "Αυτή είναι η τελευταία σας συνεδρία στο τρέχον πακέτο σας. Παρακαλούμε ανανεώστε για να συνεχίσετε να κλείνετε μαθήματα.",
           greekDescription: "Προσοχή! Αυτή είναι η τελευταία σας συνεδρία. Παρακαλούμε ανανεώστε το πακέτο σας για να συνεχίσετε."
         };
       case "expiring-soon":
         return {
           icon: <Clock className="h-4 w-4" />,
-          title: "Package Expiring Soon / Το Πακέτο σας Λήγει Σύντομα",
-          description: `Your package will expire in ${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'}. Renew now to maintain access.`,
+          title: "Το Πακέτο σας Λήγει Σύντομα",
+          description: `Το πακέτο σας θα λήξει σε ${daysRemaining} ${daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}. Ανανεώστε τώρα για να διατηρήσετε την πρόσβαση.`,
           greekDescription: `Το πακέτο σας λήγει σε ${daysRemaining} ${daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}! Ανανεώστε το τώρα.`
         };
       case "expired":
         return {
           icon: <CircleAlert className="h-4 w-4" />,
-          title: "Package Expired / Το Πακέτο σας Έληξε",
-          description: "Your package has expired. Renew now to continue booking classes and using gym facilities.",
+          title: "Το Πακέτο σας Έληξε",
+          description: "Το πακέτο σας έχει λήξει. Ανανεώστε τώρα για να συνεχίσετε να κλείνετε μαθήματα και να χρησιμοποιείτε τις εγκαταστάσεις του γυμναστηρίου.",
           greekDescription: "Το πακέτο σας έχει λήξει. Ανανεώστε τώρα για να συνεχίσετε να κάνετε κρατήσεις και να χρησιμοποιείτε τις εγκαταστάσεις του γυμναστηρίου."
         };
       default:
         return {
           icon: <Package className="h-4 w-4" />,
-          title: "Package Alert / Ειδοποίηση Πακέτου",
-          description: "Please check your package status.",
+          title: "Ειδοποίηση Πακέτου",
+          description: "Παρακαλούμε ελέγξτε την κατάσταση του πακέτου σας.",
           greekDescription: "Παρακαλούμε ελέγξτε την κατάσταση του πακέτου σας."
         };
     }
@@ -80,7 +80,7 @@ const PackageAlert: React.FC<PackageAlertProps> = ({ type, daysRemaining = 0 }) 
                 size="sm"
                 variant={type === "expired" ? "destructive" : "default"}
               >
-                Renew Now / Ανανεώστε Τώρα
+                Ανανεώστε Τώρα
               </Button>
             </Link>
           </AlertDescription>
