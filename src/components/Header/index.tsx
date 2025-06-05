@@ -24,7 +24,7 @@ const Header: React.FC = () => {
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:flex">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
+                <span className="sr-only">Εναλλαγή μενού</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[250px] p-0">
@@ -42,13 +42,13 @@ const Header: React.FC = () => {
           <Link to="/contact">
             <Button variant="ghost" size="icon">
               <Contact className="h-5 w-5" />
-              <span className="sr-only">Contact Us</span>
+              <span className="sr-only">Επικοινωνία</span>
             </Button>
           </Link>
           <Link to="/profile">
             <Button variant="outline" size="icon">
               <User className="h-5 w-5" />
-              <span className="sr-only">Profile</span>
+              <span className="sr-only">Προφίλ</span>
             </Button>
           </Link>
         </div>

@@ -9,22 +9,22 @@ const PageTitle: React.FC = () => {
   
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === "/dashboard") return "Dashboard";
-    if (path.includes("/schedule") || path.includes("/class")) return "Schedule";
-    if (path === "/bookings") return "My Bookings";
-    if (path === "/history") return "Workout History";
-    if (path === "/progress-photos") return "Progress Photos";
-    if (path === "/body-measurements") return "Body Measurements";
-    if (path === "/services") return "Specialized Services";
-    if (path.includes("/services/request")) return "Request Appointment";
-    if (path === "/services/confirmation") return "Appointment Confirmation";
-    if (path === "/trainers") return "Trainers";
-    if (path.includes("/trainers/")) return "Trainer Profile";
-    if (path === "/store") return "Store";
-    if (path === "/referrals") return "Referral Program";
-    if (path === "/profile") return "Profile";
-    if (path === "/settings") return "Settings";
-    if (path === "/contact") return "Contact Us";
+    if (path === "/dashboard") return "Αρχική";
+    if (path.includes("/schedule") || path.includes("/class")) return "Πρόγραμμα";
+    if (path === "/bookings") return "Οι Κρατήσεις μου";
+    if (path === "/history") return "Ιστορικό Προπονήσεων";
+    if (path === "/progress-photos") return "Φωτογραφίες Προόδου";
+    if (path === "/body-measurements") return "Σωματικές Μετρήσεις";
+    if (path === "/services") return "Εξειδικευμένες Υπηρεσίες";
+    if (path.includes("/services/request")) return "Αίτηση Ραντεβού";
+    if (path === "/services/confirmation") return "Επιβεβαίωση Ραντεβού";
+    if (path === "/trainers") return "Προπονητές";
+    if (path.includes("/trainers/")) return "Προφίλ Προπονητή";
+    if (path === "/store") return "Κατάστημα";
+    if (path === "/referrals") return "Πρόγραμμα Παραπομπών";
+    if (path === "/profile") return "Προφίλ";
+    if (path === "/settings") return "Ρυθμίσεις";
+    if (path === "/contact") return "Επικοινωνία";
     return "Sweat24";
   };
 

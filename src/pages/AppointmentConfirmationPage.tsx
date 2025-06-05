@@ -19,29 +19,29 @@ const AppointmentConfirmationPage = () => {
                 <CheckCircle className="h-12 w-12 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-2xl">Request Submitted!</CardTitle>
+            <CardTitle className="text-2xl">Η Αίτηση Υποβλήθηκε!</CardTitle>
             <CardDescription className="text-base mt-2">
-              Your appointment request has been successfully submitted.
+              Η αίτησή σας για ραντεβού υποβλήθηκε με επιτυχία.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              We will contact you shortly to confirm your appointment details.
-              You will receive a notification once your appointment is confirmed.
+              Θα επικοινωνήσουμε μαζί σας σύντομα για να επιβεβαιώσουμε τις λεπτομέρειες του ραντεβού σας.
+              Θα λάβετε ειδοποίηση μόλις επιβεβαιωθεί το ραντεβού σας.
             </p>
             <p className="text-muted-foreground text-sm">
-              Please note that your booking will appear in "My Bookings" after confirmation.
+              Παρακαλούμε σημειώστε ότι η κράτησή σας θα εμφανιστεί στις "Κρατήσεις μου" μετά την επιβεβαίωση.
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
             <Link to="/dashboard" className="w-full">
               <Button variant="default" className="w-full">
-                Return to Dashboard
+                Επιστροφή στην Αρχική
               </Button>
             </Link>
             <Link to="/bookings" className="w-full">
               <Button variant="outline" className="w-full">
-                View My Bookings
+                Προβολή Κρατήσεων
               </Button>
             </Link>
           </CardFooter>

@@ -21,30 +21,30 @@ const OrderConfirmationPage = () => {
                 <CheckCircle className="h-12 w-12 text-primary" />
               </div>
             </div>
-            <CardTitle className="text-2xl">Order Confirmed!</CardTitle>
+            <CardTitle className="text-2xl">Παραγγελία Επιβεβαιώθηκε!</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              Thank you for your order. We have received your request and are processing it now.
+              Ευχαριστούμε για την παραγγελία σας. Λάβαμε το αίτημά σας και το επεξεργαζόμαστε τώρα.
             </p>
             <div className="bg-muted p-4 rounded-md mb-4">
-              <p className="text-sm text-muted-foreground mb-1">Order Number</p>
+              <p className="text-sm text-muted-foreground mb-1">Αριθμός Παραγγελίας</p>
               <p className="font-medium">{orderNumber}</p>
             </div>
             <p className="text-muted-foreground text-sm">
-              We will notify you when your order is ready for pickup at the gym.
-              You can view your order status in the "My Orders" section.
+              Θα σας ειδοποιήσουμε όταν η παραγγελία σας είναι έτοιμη για παραλαβή από το γυμναστήριο.
+              Μπορείτε να δείτε την κατάσταση της παραγγελίας σας στην ενότητα "Οι Παραγγελίες μου".
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
             <Link to="/dashboard" className="w-full">
               <Button variant="default" className="w-full">
-                Return to Dashboard
+                Επιστροφή στην Αρχική
               </Button>
             </Link>
             <Link to="/store" className="w-full">
               <Button variant="outline" className="w-full">
-                Continue Shopping
+                Συνέχεια Αγορών
               </Button>
             </Link>
           </CardFooter>

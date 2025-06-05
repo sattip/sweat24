@@ -20,12 +20,12 @@ const LoginPage: React.FC = () => {
     
     // Validate form
     if (!email || !password) {
-      toast.error("Please fill in all fields");
+      toast.error("Παρακαλώ συμπληρώστε όλα τα πεδία");
       return;
     }
     
     // Simulate login success (we'll implement actual authentication later)
-    toast.success("Login successful!");
+    toast.success("Επιτυχής είσοδος!");
     navigate("/dashboard");
   };
 
@@ -38,8 +38,8 @@ const LoginPage: React.FC = () => {
         
         <Card className="w-full shadow-lg border-t-4 border-t-primary">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Welcome to Sweat24</CardTitle>
-            <CardDescription className="text-center">Sign in to access your fitness journey</CardDescription>
+            <CardTitle className="text-2xl font-bold text-center">Καλώς ήρθατε στο Sweat24</CardTitle>
+            <CardDescription className="text-center">Συνδεθείτε για να αποκτήσετε πρόσβαση στο ταξίδι του fitness σας</CardDescription>
           </CardHeader>
           
           <CardContent>
@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="το@email.σας"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -62,9 +62,9 @@ const LoginPage: React.FC = () => {
               
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Κωδικός Πρόσβασης</Label>
                   <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
+                    Ξεχάσατε τον κωδικό;
                   </Link>
                 </div>
                 <div className="relative">
@@ -91,23 +91,23 @@ const LoginPage: React.FC = () => {
                       <Eye className="h-4 w-4" />
                     )}
                     <span className="sr-only">
-                      {showPassword ? "Hide password" : "Show password"}
+                      {showPassword ? "Απόκρυψη κωδικού" : "Εμφάνιση κωδικού"}
                     </span>
                   </Button>
                 </div>
               </div>
               
               <Button type="submit" className="w-full">
-                Sign In
+                Είσοδος
               </Button>
             </form>
           </CardContent>
           
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-center text-sm">
-              Don't have an account?{" "}
+              Δεν έχετε λογαριασμό;{" "}
               <Link to="/signup" className="text-primary font-medium hover:underline">
-                Sign up
+                Εγγραφή
               </Link>
             </div>
           </CardFooter>
