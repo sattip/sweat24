@@ -16,11 +16,11 @@ const MobileNavigation = () => {
       <div className="border-b pb-4 mb-2">
         <Link to="/profile" className="flex items-center gap-4 p-2 rounded-md hover:bg-accent">
           <Avatar>
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>ΧΡ</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">John Doe</p>
-            <p className="text-sm text-muted-foreground">View Profile</p>
+            <p className="font-medium">Χρήστης</p>
+            <p className="text-sm text-muted-foreground">Προβολή Προφίλ</p>
           </div>
         </Link>
       </div>
@@ -33,7 +33,7 @@ const MobileNavigation = () => {
             isActive("/dashboard") ? "bg-primary text-white font-medium" : "hover:bg-accent/50 text-black"
           )}
         >
-          Dashboard
+          Αρχική
         </Link>
         <Link 
           to="/schedule" 
@@ -42,7 +42,7 @@ const MobileNavigation = () => {
             isActive("/schedule") || isActive("/class") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Schedule
+          Πρόγραμμα
         </Link>
         <Link 
           to="/bookings" 
@@ -51,7 +51,7 @@ const MobileNavigation = () => {
             isActive("/bookings") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          My Bookings
+          Οι Κρατήσεις μου
         </Link>
         <Link 
           to="/history" 
@@ -60,7 +60,7 @@ const MobileNavigation = () => {
             isActive("/history") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Workout History
+          Ιστορικό Προπονήσεων
         </Link>
         <Link 
           to="/progress-photos" 
@@ -69,7 +69,7 @@ const MobileNavigation = () => {
             isActive("/progress-photos") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Progress Photos
+          Φωτογραφίες Προόδου
         </Link>
         <Link 
           to="/body-measurements" 
@@ -78,7 +78,7 @@ const MobileNavigation = () => {
             isActive("/body-measurements") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Body Measurements
+          Σωματικές Μετρήσεις
         </Link>
         <Link 
           to="/services" 
@@ -87,7 +87,7 @@ const MobileNavigation = () => {
             isActive("/services") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Specialized Services
+          Εξειδικευμένες Υπηρεσίες
         </Link>
         <Link 
           to="/trainers" 
@@ -96,7 +96,7 @@ const MobileNavigation = () => {
             isActive("/trainers") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Trainers
+          Προπονητές
         </Link>
         <Link 
           to="/referrals" 
@@ -105,7 +105,7 @@ const MobileNavigation = () => {
             isActive("/referrals") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Referral Program
+          Πρόγραμμα Παραπομπών
         </Link>
         <Link 
           to="/store" 
@@ -119,7 +119,7 @@ const MobileNavigation = () => {
           <span className={cn(
             "px-2 py-0.5 rounded border-2", 
             isActive("/store") ? "border-white" : "border-purple-500"
-          )}>Store</span>
+          )}>Κατάστημα</span>
         </Link>
         <Link 
           to="/contact" 
@@ -128,7 +128,7 @@ const MobileNavigation = () => {
             isActive("/contact") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Contact Us
+          Επικοινωνία
         </Link>
       </nav>
 
@@ -140,13 +140,13 @@ const MobileNavigation = () => {
             isActive("/settings") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
           )}
         >
-          Settings
+          Ρυθμίσεις
         </Link>
         <Link 
           to="/" 
           className="flex items-center gap-3 p-2 text-sm rounded-md text-destructive hover:bg-accent/50"
         >
-          Logout
+          Αποσύνδεση
         </Link>
       </div>
     </div>
