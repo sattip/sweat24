@@ -9,7 +9,7 @@ const Logo: React.FC = () => {
       <img 
         src={theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'} 
         alt="Sweat24 Logo" 
-        className="h-10" 
+        className="h-14" 
       />
     </div>
   );

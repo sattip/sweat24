@@ -4,10 +4,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package } from "lucide-react";
+import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package, CreditCard, Euro } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import LoyaltyRewardAlert from "@/components/notifications/LoyaltyRewardAlert";
 import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 const ProfilePage = () => {
   const [isRewardAlertOpen, setIsRewardAlertOpen] = useState(false);
@@ -53,6 +54,43 @@ const ProfilePage = () => {
         type: "Yoga"
       }
     ],
+    financialInfo: {
+      packages: [
+        {
+          id: 1,
+          packageName: "Πακέτο 20 Ομαδικών",
+          totalAmount: 200,
+          paidAmount: 80,
+          remainingAmount: 120,
+          nextInstallment: {
+            amount: 40,
+            dueDate: "2024-08-15"
+          },
+          installments: [
+            { amount: 80, date: "2024-07-01", status: "Πληρώθηκε" },
+            { amount: 40, date: "2024-08-15", status: "Εκκρεμεί" },
+            { amount: 40, date: "2024-09-15", status: "Εκκρεμεί" },
+            { amount: 40, date: "2024-10-15", status: "Εκκρεμεί" }
+          ]
+        },
+        {
+          id: 2,
+          packageName: "Πακέτο 10 EMS",
+          totalAmount: 350,
+          paidAmount: 150,
+          remainingAmount: 200,
+          nextInstallment: {
+            amount: 100,
+            dueDate: "2024-08-20"
+          },
+          installments: [
+            { amount: 150, date: "2024-07-10", status: "Πληρώθηκε" },
+            { amount: 100, date: "2024-08-20", status: "Εκκρεμεί" },
+            { amount: 100, date: "2024-09-20", status: "Εκκρεμεί" }
+          ]
+        }
+      ]
+    },
     activity: {
       totalWorkouts: 52,
       totalMinutes: 2500,
@@ -146,6 +184,127 @@ const ProfilePage = () => {
                   </div>
                 )}
               </CardContent>
+            </Card>
+
+            {/* Financial Information Section */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary" />
+                  Οικονομικά Στοιχεία
+                </CardTitle>
+                <CardDescription>Η κατάσταση των πληρωμών και των δόσεων σας.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {userData.financialInfo.packages.length > 0 ? (
+                  <div className="space-y-6">
+                    {userData.financialInfo.packages.map((pkg) => {
+                      const paymentProgress = (pkg.paidAmount / pkg.totalAmount) * 100;
+                      const isNextDueSoon = new Date(pkg.nextInstallment.dueDate) <= new Date(new Date().setDate(new Date().getDate() + 7));
+                      
+                      return (
+                        <div key={pkg.id} className="p-4 rounded-lg border bg-muted/20">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-medium text-lg">{pkg.packageName}</h3>
+                            <Badge variant={pkg.remainingAmount > 0 ? "destructive" : "default"}>
+                              {pkg.remainingAmount > 0 ? "Εκκρεμεί Πληρωμή" : "Πληρωμένο"}
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div className="text-center p-3 bg-background rounded-md">
+                              <div className="flex items-center justify-center gap-1 text-lg font-bold">
+                                <Euro className="h-4 w-4" />
+                                {pkg.totalAmount}
+                              </div>
+                              <p className="text-sm text-muted-foreground">Συνολικό Ποσό</p>
+                            </div>
+                            <div className="text-center p-3 bg-green-50 rounded-md">
+                              <div className="flex items-center justify-center gap-1 text-lg font-bold text-green-700">
+                                <Euro className="h-4 w-4" />
+                                {pkg.paidAmount}
+                              </div>
+                              <p className="text-sm text-green-600">Πληρωμένο</p>
+                            </div>
+                            <div className="text-center p-3 bg-red-50 rounded-md">
+                              <div className="flex items-center justify-center gap-1 text-lg font-bold text-red-700">
+                                <Euro className="h-4 w-4" />
+                                {pkg.remainingAmount}
+                              </div>
+                              <p className="text-sm text-red-600">Υπόλοιπο</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 mb-4">
+                            <div className="flex justify-between text-sm">
+                              <span>Πρόοδος πληρωμής</span>
+                              <span>{Math.round(paymentProgress)}%</span>
+                            </div>
+                            <Progress value={paymentProgress} className="h-2" />
+                          </div>
+
+                          {pkg.remainingAmount > 0 && (
+                            <div className={`p-3 rounded-md ${isNextDueSoon ? 'bg-orange-50 border border-orange-200' : 'bg-blue-50 border border-blue-200'}`}>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium">Επόμενη Δόση</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Λήξη: {new Date(pkg.nextInstallment.dueDate).toLocaleDateString('el-GR')}
+                                  </p>
+                                  {isNextDueSoon && (
+                                    <p className="text-xs text-orange-600 font-medium mt-1">
+                                      ⚠️ Λήγει σύντομα
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="flex items-center gap-1 text-xl font-bold">
+                                    <Euro className="h-5 w-5" />
+                                    {pkg.nextInstallment.amount}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <details className="mt-4">
+                            <summary className="cursor-pointer text-sm font-medium text-primary hover:underline">
+                              Προβολή αναλυτικών δόσεων
+                            </summary>
+                            <div className="mt-3 space-y-2">
+                              {pkg.installments.map((installment, index) => (
+                                <div key={index} className="flex justify-between items-center py-2 px-3 bg-background rounded text-sm">
+                                  <div>
+                                    <span>Δόση {index + 1}</span>
+                                    <span className="text-muted-foreground ml-2">
+                                      ({new Date(installment.date).toLocaleDateString('el-GR')})
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">€{installment.amount}</span>
+                                    <Badge variant={installment.status === "Πληρώθηκε" ? "default" : "secondary"} className="text-xs">
+                                      {installment.status}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Δεν υπάρχουν οικονομικά στοιχεία προς εμφάνιση.
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="border-t pt-4">
+                <p className="text-xs text-muted-foreground">
+                  💡 Για οποιαδήποτε απορία σχετικά με τις πληρωμές σας, επικοινωνήστε μαζί μας.
+                </p>
+              </CardFooter>
             </Card>
             
             {/* My Rewards Section */}
