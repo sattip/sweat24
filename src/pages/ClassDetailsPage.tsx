@@ -1,10 +1,10 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, MapPin, User, BarChart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data for class details
 const mockClasses = [
@@ -76,8 +76,23 @@ const mockClasses = [
 
 const ClassDetailsPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { classId } = useParams();
   const classDetails = mockClasses.find(c => c.id === Number(classId));
+  
+  const handleBooking = () => {
+    // Show success toast
+    toast({
+      title: "Κράτηση Επιτυχής!",
+      description: `Η θέση σας στο μάθημα "${classDetails?.name}" επιβεβαιώθηκε.`,
+      duration: 3000,
+    });
+    
+    // Navigate to bookings page after a brief delay
+    setTimeout(() => {
+      navigate("/bookings");
+    }, 1500);
+  };
   
   if (!classDetails) {
     return (
@@ -124,7 +139,7 @@ const ClassDetailsPage = () => {
         
         {/* Class Details Card */}
         <Card className="mb-6">
-          <CardContent className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="p-5">
             {/* Left Column */}
             <div className="space-y-4">
               <div className="flex items-center">
@@ -147,36 +162,6 @@ const ClassDetailsPage = () => {
                 <MapPin className="text-primary h-5 w-5 mr-3" />
                 <p className="font-medium">{classDetails.location}</p>
               </div>
-              
-              <div className="flex items-center">
-                <BarChart className="text-primary h-5 w-5 mr-3" />
-                <div>
-                  <p className="font-medium">Διαθεσιμότητα</p>
-                  <p className="text-sm text-muted-foreground">
-                    {isFull 
-                      ? "Το μάθημα είναι γεμάτο" 
-                      : `${classDetails.spotsAvailable} από ${classDetails.totalSpots} θέσεις διαθέσιμες`}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Right Column - Instructor Info */}
-            <div className="bg-muted/50 rounded-lg p-4 flex items-center">
-              <div className="w-16 h-16 rounded-full bg-muted overflow-hidden mr-4">
-                <img 
-                  src={classDetails.instructorImage} 
-                  alt={classDetails.instructor} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <p className="font-medium">{classDetails.instructor}</p>
-                <p className="text-sm text-muted-foreground">Εκπαιδευτής Μαθήματος</p>
-                <Button variant="link" size="sm" className="p-0 h-auto">
-                  Προβολή Προφίλ
-                </Button>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -193,8 +178,9 @@ const ClassDetailsPage = () => {
             className="w-full" 
             size="lg"
             variant={isFull ? "outline" : "default"}
+            onClick={handleBooking}
           >
-            {isFull ? "Εγγραφή σε Λίστα Αναμονής" : "Κλείσιμο Μαθήματος"}
+            {isFull ? "Εγγραφή σε Λίστα Αναμονής" : "Κράτηση Θέσης"}
           </Button>
         </div>
       </main>

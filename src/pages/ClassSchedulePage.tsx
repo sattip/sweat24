@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { 
@@ -160,23 +159,8 @@ const ClassSchedulePage = () => {
                             <Clock className="mr-1 h-4 w-4" />
                             <span>{cls.time}</span>
                           </div>
-                          <div className="flex items-center text-muted-foreground text-sm mt-1">
-                            <User className="mr-1 h-4 w-4" />
-                            <span>{cls.instructor}</span>
-                          </div>
                         </div>
                         <div className="text-right">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            cls.spotsAvailable === 0 
-                              ? "bg-destructive/10 text-destructive" 
-                              : cls.spotsAvailable <= 5 
-                                ? "bg-orange-100 text-orange-800" 
-                                : "bg-green-100 text-green-800"
-                          }`}>
-                            {cls.spotsAvailable === 0 
-                              ? "Γεμάτο" 
-                              : `${cls.spotsAvailable} θέσεις διαθέσιμες`}
-                          </span>
                           <div className="mt-2 text-xs text-muted-foreground">
                             {cls.type}
                           </div>

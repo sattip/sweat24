@@ -1,12 +1,16 @@
-
 import React from "react";
+import { useTheme } from "next-themes";
 
 const Logo: React.FC = () => {
+  const { theme } = useTheme();
+
   return (
     <div className="flex items-center">
-      <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-        Sweat24
-      </span>
+      <img 
+        src={theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'} 
+        alt="Sweat24 Logo" 
+        className="h-10" 
+      />
     </div>
   );
 };

@@ -1,10 +1,11 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Star, ThumbsUp, User } from "lucide-react";
+import { Star, ThumbsUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { trainers } from "@/data/trainers";
 
 interface RateWorkoutDialogProps {
   open: boolean;
@@ -13,8 +14,6 @@ interface RateWorkoutDialogProps {
     id: number;
     name: string;
     date: string;
-    instructor: string;
-    type: string;
   } | null;
 }
 
@@ -27,6 +26,7 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
 }) => {
   const { toast } = useToast();
   
+  const [selectedTrainer, setSelectedTrainer] = useState<string>("");
   const [overallRating, setOverallRating] = useState<number>(0);
   const [intensityRating, setIntensityRating] = useState<IntensityRating>("Moderate");
   const [coachRating, setCoachRating] = useState<number>(0);
@@ -36,6 +36,7 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
     // In a real application, this would send the rating to the backend
     console.log({
       workoutId: workout?.id,
+      selectedTrainer,
       overallRating,
       intensityRating,
       coachRating,
@@ -44,8 +45,8 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
     
     // Show success message
     toast({
-      title: "Thank you for your feedback!",
-      description: "Your rating has been submitted successfully.",
+      title: "Ευχαριστούμε για την αξιολόγηση!",
+      description: "Η αξιολόγησή σας υποβλήθηκε με επιτυχία.",
       duration: 3000,
     });
     
@@ -55,6 +56,7 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
   };
   
   const resetForm = () => {
+    setSelectedTrainer("");
     setOverallRating(0);
     setIntensityRating("Moderate");
     setCoachRating(0);
@@ -90,31 +92,39 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Rate your "{workout.name}" workout</DialogTitle>
+          <DialogTitle>Αξιολογήστε την προπόνηση "{workout.name}"</DialogTitle>
           <DialogDescription>
-            Completed on {workout.date} with instructor {workout.instructor}
+            Ολοκληρώθηκε στις {new Date(workout.date).toLocaleDateString('el-GR')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          {/* Instructor Information - Making it more prominent */}
-          <div className="bg-muted p-3 rounded-md flex items-center space-x-2">
-            <User className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-sm font-medium">Instructor</p>
-              <p className="text-base">{workout.instructor}</p>
-            </div>
+          {/* Trainer Selection */}
+          <div className="space-y-2">
+            <label htmlFor="trainer-select" className="text-sm font-medium">Επιλέξτε Εκπαιδευτή</label>
+            <Select value={selectedTrainer} onValueChange={setSelectedTrainer}>
+              <SelectTrigger id="trainer-select">
+                <SelectValue placeholder="Επιλέξτε τον εκπαιδευτή που σας έκανε μάθημα" />
+              </SelectTrigger>
+              <SelectContent>
+                {trainers.map((trainer) => (
+                  <SelectItem key={trainer.id} value={trainer.id}>
+                    {trainer.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           {/* Overall Experience Rating */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Overall Experience</label>
+            <label className="text-sm font-medium">Συνολική Εμπειρία</label>
             <StarRating rating={overallRating} setRating={setOverallRating} />
           </div>
           
           {/* Workout Intensity */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Workout Intensity</label>
+            <label className="text-sm font-medium">Ένταση Προπόνησης</label>
             <div className="flex flex-wrap gap-2">
               {intensityOptions.map((option) => (
                 <Button
@@ -131,18 +141,18 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
           
           {/* Coach Rating */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Coach Performance ({workout.instructor})</label>
+            <label className="text-sm font-medium">Απόδοση Εκπαιδευτή</label>
             <StarRating rating={coachRating} setRating={setCoachRating} />
           </div>
           
           {/* Comments/Feedback */}
           <div className="space-y-2">
             <label htmlFor="feedback" className="text-sm font-medium">
-              Comments (Optional)
+              Σχόλια (Προαιρετικά)
             </label>
             <Textarea
               id="feedback"
-              placeholder="Share your thoughts about this workout..."
+              placeholder="Μοιραστείτε τις σκέψεις σας για αυτή την προπόνηση..."
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               className="min-h-[100px]"
@@ -153,16 +163,16 @@ const RateWorkoutDialog: React.FC<RateWorkoutDialogProps> = ({
         <DialogFooter className="flex space-x-2 sm:justify-between sm:space-x-0">
           <DialogClose asChild>
             <Button type="button" variant="outline">
-              Cancel
+              Ακύρωση
             </Button>
           </DialogClose>
           <Button 
             onClick={handleSubmitRating}
-            disabled={overallRating === 0}
+            disabled={overallRating === 0 || !selectedTrainer}
             className="gap-2"
           >
             <ThumbsUp className="h-4 w-4" />
-            Submit Rating
+            Υποβολή Αξιολόγησης
           </Button>
         </DialogFooter>
       </DialogContent>

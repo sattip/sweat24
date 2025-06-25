@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -108,6 +107,24 @@ const MobileNavigation = () => {
           Πρόγραμμα Παραπομπών
         </Link>
         <Link 
+          to="/partners" 
+          className={cn(
+            "flex items-center gap-3 p-2 text-sm rounded-md",
+            isActive("/partners") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
+          )}
+        >
+          Συνεργαζόμενες Επιχειρήσεις
+        </Link>
+        <Link 
+          to="/events" 
+          className={cn(
+            "flex items-center gap-3 p-2 text-sm rounded-md",
+            isActive("/events") ? "bg-accent font-medium text-white" : "hover:bg-accent/50 text-black"
+          )}
+        >
+          Εκδηλώσεις
+        </Link>
+        <Link 
           to="/store" 
           className={cn(
             "flex items-center gap-3 p-2 text-sm rounded-md",
@@ -118,7 +135,7 @@ const MobileNavigation = () => {
         >
           <span className={cn(
             "px-2 py-0.5 rounded border-2", 
-            isActive("/store") ? "border-white" : "border-purple-500"
+            isActive("/store") ? "border-white" : "border-primary"
           )}>Κατάστημα</span>
         </Link>
         <Link 

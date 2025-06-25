@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +28,8 @@ import TrainersListPage from "./pages/TrainersListPage";
 import TrainerDetailsPage from "./pages/TrainerDetailsPage";
 import SettingsPage from "./pages/SettingsPage";
 import ContactPage from "./pages/ContactPage";
+import PartnersPage from "./pages/PartnersPage";
+import EventsPage from "./pages/EventsPage";
 import { CartProvider } from "./hooks/use-cart";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,8 @@ const App = () => (
             <Route path="/trainers/:trainerId" element={<TrainerDetailsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/events" element={<EventsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

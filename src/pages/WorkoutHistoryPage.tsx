@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -198,48 +197,39 @@ const WorkoutHistoryPage = () => {
                   <h2 className="text-lg font-semibold mb-3 text-muted-foreground">{monthYear}</h2>
                   <div className="space-y-3">
                     {workouts.map((workout) => (
-                      <Link to={`/workout/${workout.id}`} key={workout.id} className="block">
-                        <Card className="hover:border-primary transition-colors">
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-1">
-                                <div className="flex items-center">
-                                  <span className="bg-muted text-xs font-medium rounded-full px-2 py-1 mr-2">
-                                    {workout.type}
-                                  </span>
-                                  <h3 className="font-medium text-base">{workout.name}</h3>
-                                </div>
-                                
-                                <div className="flex flex-wrap items-center text-sm text-muted-foreground gap-y-1">
-                                  <div className="flex items-center mr-4">
-                                    <Calendar className="h-4 w-4 mr-1 text-primary" />
-                                    {workout.date}
-                                  </div>
-                                  <div className="flex items-center mr-4">
-                                    <Clock className="h-4 w-4 mr-1 text-primary" />
-                                    {workout.time}
-                                  </div>
-                                  <div className="flex items-center">
-                                    <User className="h-4 w-4 mr-1 text-primary" />
-                                    {workout.instructor}
-                                  </div>
-                                </div>
+                      <Card key={workout.id} className="transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div className="space-y-1">
+                              <div className="flex items-center">
+                                <span className="bg-muted text-xs font-medium rounded-full px-2 py-1 mr-2">
+                                  {workout.type}
+                                </span>
+                                <h3 className="font-medium text-base">{workout.name}</h3>
                               </div>
                               
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={(e) => {
-                                  e.preventDefault(); // Prevent Link navigation
-                                  handleOpenRatingDialog(workout);
-                                }}
-                              >
-                                Rate
-                              </Button>
+                              <div className="flex flex-wrap items-center text-sm text-muted-foreground gap-y-1">
+                                <div className="flex items-center mr-4">
+                                  <Calendar className="h-4 w-4 mr-1 text-primary" />
+                                  {new Date(workout.date).toLocaleDateString('el-GR')}
+                                </div>
+                                <div className="flex items-center mr-4">
+                                  <Clock className="h-4 w-4 mr-1 text-primary" />
+                                  {workout.time}
+                                </div>
+                              </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
+                            
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleOpenRatingDialog(workout)}
+                            >
+                              Αξιολόγηση
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -266,8 +256,8 @@ const WorkoutHistoryPage = () => {
       {/* Rating Dialog */}
       <RateWorkoutDialog 
         open={ratingDialogOpen} 
-        onOpenChange={setRatingDialogOpen}
-        workout={selectedWorkout}
+        onOpenChange={setRatingDialogOpen} 
+        workout={selectedWorkout ? { id: selectedWorkout.id, name: selectedWorkout.name, date: selectedWorkout.date } : null}
       />
     </div>
   );

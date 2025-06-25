@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -157,21 +156,21 @@ const DashboardPage = () => {
             
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Γνώρισε τους Προπονητές</CardTitle>
-                <CardDescription>Μάθε για το ειδικευμένο προπονητικό προσωπικό μας</CardDescription>
+                <CardTitle className="text-xl">Συστήστε έναν Φίλο</CardTitle>
+                <CardDescription>Κάντε δώρο μια προπόνηση γνωριμίας</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
-                    <User className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Ανακάλυψε την ομάδα πιστοποιημένων προπονητών και ειδικών μας</p>
+                    <Gift className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Μοιραστείτε την αγάπη για τη γυμναστική και κερδίστε ανταμοιβές</p>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/trainers" className="w-full">
+                <Link to="/referrals" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Προβολή Προπονητών
+                    Μάθετε Περισσότερα
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
