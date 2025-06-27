@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, Mail, Lock } from "lucide-react";
+import { User, Mail, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SignupPage: React.FC = () => {
   const [firstName, setFirstName] = useState("");
@@ -27,8 +28,9 @@ const SignupPage: React.FC = () => {
   const [referralName, setReferralName] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const navigate = useNavigate();
+  const { register, isLoading } = useAuth();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -47,9 +49,18 @@ const SignupPage: React.FC = () => {
       return;
     }
     
-    // Simulate signup success
-    toast.success("Επιτυχής εγγραφή! Καλώς ήρθατε στο Sweat24!");
-    navigate("/dashboard");
+    try {
+      await register({
+        name: `${firstName} ${lastName}`,
+        email,
+        password,
+        password_confirmation: confirmPassword,
+      });
+      
+      navigate("/dashboard");
+    } catch (error) {
+      // Error handling is done in the register function
+    }
   };
 
   return (
@@ -187,8 +198,15 @@ const SignupPage: React.FC = () => {
                 </Label>
               </div>
               
-              <Button type="submit" className="w-full">
-                Εγγραφή
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Εγγραφή...
+                  </>
+                ) : (
+                  "Εγγραφή"
+                )}
               </Button>
             </form>
           </CardContent>

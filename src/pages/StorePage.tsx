@@ -1,76 +1,43 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Search, ShoppingCart, Plus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Search, ShoppingCart, Plus, AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
-
-// Mock data for the store
-const products = [
-  {
-    id: "1",
-    name: "Premium Protein Powder",
-    price: 59.99,
-    description: "High-quality whey protein for optimal muscle recovery.",
-    image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop",
-    category: "supplements",
-  },
-  {
-    id: "2",
-    name: "Performance T-Shirt",
-    price: 34.99,
-    description: "Moisture-wicking fabric for intense workouts.",
-    image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=400&fit=crop",
-    category: "apparel",
-  },
-  {
-    id: "3",
-    name: "Sweat24 Water Bottle",
-    price: 24.99,
-    description: "BPA-free 32oz water bottle with measurement markings.",
-    image: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=400&h=400&fit=crop",
-    category: "accessories",
-  },
-  {
-    id: "4",
-    name: "Pre-Workout Formula",
-    price: 49.99,
-    description: "Energy-boosting formula to maximize your workout.",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=400&fit=crop",
-    category: "supplements",
-  },
-  {
-    id: "5",
-    name: "Compression Shorts",
-    price: 29.99,
-    description: "Supportive compression shorts for high-intensity training.",
-    image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=400&fit=crop",
-    category: "apparel",
-  },
-  {
-    id: "6",
-    name: "Fitness Tracker",
-    price: 129.99,
-    description: "Track your heart rate, steps, and calories burned.",
-    image: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=400&h=400&fit=crop",
-    category: "accessories",
-  },
-];
+import { productsService } from "@/services/productsService";
+import { toast } from "sonner";
 
 const StorePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const navigate = useNavigate();
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = activeCategory === "all" || product.category === activeCategory;
-    return matchesSearch && matchesCategory;
+  // Fetch products based on current filters
+  const { 
+    data: products, 
+    isLoading, 
+    error 
+  } = useQuery({
+    queryKey: ['products', activeCategory, searchTerm],
+    queryFn: () => {
+      const filters: any = {};
+      if (activeCategory !== 'all') {
+        filters.category = activeCategory;
+      }
+      if (searchTerm) {
+        filters.search = searchTerm;
+      }
+      return productsService.getAllProducts(filters);
+    },
   });
+
+  const filteredProducts = products || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -100,91 +67,171 @@ const StorePage = () => {
           </div>
         </div>
         
+        {/* Error Message */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Αποτυχία φόρτωσης προϊόντων: {error instanceof Error ? error.message : 'Άγνωστο σφάλμα'}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Tabs defaultValue="all" className="mb-6">
           <TabsList className="w-full justify-start overflow-auto pb-px">
             <TabsTrigger 
               value="all" 
               onClick={() => setActiveCategory("all")}
             >
-              All Products
+              Όλα τα Προϊόντα
             </TabsTrigger>
             <TabsTrigger 
               value="supplements" 
               onClick={() => setActiveCategory("supplements")}
             >
-              Supplements
+              Συμπληρώματα
             </TabsTrigger>
             <TabsTrigger 
               value="apparel" 
               onClick={() => setActiveCategory("apparel")}
             >
-              Apparel
+              Ρούχα
             </TabsTrigger>
             <TabsTrigger 
               value="accessories" 
               onClick={() => setActiveCategory("accessories")}
             >
-              Accessories
+              Αξεσουάρ
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="all" className="mt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+          {/* Loading State */}
+          {isLoading && (
+            <div className="mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} className="overflow-hidden">
+                    <Skeleton className="h-48 w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="h-4 w-20 mb-2" />
+                      <Skeleton className="h-6 w-full mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-6 w-24" />
+                    </CardContent>
+                    <CardFooter className="p-4 pt-0">
+                      <Skeleton className="h-10 w-full" />
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="supplements" className="mt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="apparel" className="mt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="accessories" className="mt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </TabsContent>
+          )}
+
+          {/* Products Content */}
+          {!isLoading && (
+            <>
+              <TabsContent value="all" className="mt-4">
+                <ProductGrid products={filteredProducts} />
+              </TabsContent>
+              
+              <TabsContent value="supplements" className="mt-4">
+                <ProductGrid products={filteredProducts} />
+              </TabsContent>
+              
+              <TabsContent value="apparel" className="mt-4">
+                <ProductGrid products={filteredProducts} />
+              </TabsContent>
+              
+              <TabsContent value="accessories" className="mt-4">
+                <ProductGrid products={filteredProducts} />
+              </TabsContent>
+            </>
+          )}
         </Tabs>
       </main>
     </div>
   );
 };
 
-const ProductCard = ({ product }) => {
+interface ProductGridProps {
+  products: any[];
+}
+
+const ProductGrid = ({ products }: ProductGridProps) => {
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Δεν βρέθηκαν προϊόντα</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+};
+
+interface ProductCardProps {
+  product: any;
+}
+
+const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
+  
+  const getStockBadge = () => {
+    const stockStatus = productsService.getStockStatus(product);
+    switch (stockStatus) {
+      case 'low_stock':
+        return <Badge variant="destructive">Λίγα σε απόθεμα</Badge>;
+      case 'out_of_stock':
+        return <Badge variant="outline">Εξαντλημένο</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels: Record<string, string> = {
+      supplements: 'Συμπληρώματα',
+      apparel: 'Ρούχα',
+      equipment: 'Εξοπλισμός',
+      accessories: 'Αξεσουάρ'
+    };
+    return labels[category] || category;
+  };
   
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div 
-        className="h-48 bg-muted cursor-pointer" 
+        className="h-48 bg-muted cursor-pointer relative" 
         onClick={() => navigate(`/product/${product.id}`)}
       >
         <img 
-          src={product.image} 
+          src={product.image_url || '/placeholder.svg'} 
           alt={product.name} 
           className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = '/placeholder.svg';
+          }}
         />
+        {product.featured && (
+          <Badge className="absolute top-2 left-2 bg-primary">
+            Προτεινόμενο
+          </Badge>
+        )}
       </div>
       <CardContent className="p-4">
         <div className="mb-2">
-          <Badge variant="outline" className="mb-2">
-            {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-          </Badge>
+          <div className="flex items-center justify-between mb-2">
+            <Badge variant="outline">
+              {getCategoryLabel(product.category)}
+            </Badge>
+            {getStockBadge()}
+          </div>
           <h3 
             className="font-medium text-lg cursor-pointer hover:text-primary transition-colors" 
             onClick={() => navigate(`/product/${product.id}`)}
@@ -195,7 +242,9 @@ const ProductCard = ({ product }) => {
             {product.description}
           </p>
         </div>
-        <div className="font-semibold">${product.price.toFixed(2)}</div>
+        <div className="font-semibold">
+          {productsService.formatPrice(product.price)}
+        </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 gap-2">
         <Button 
@@ -203,9 +252,17 @@ const ProductCard = ({ product }) => {
           variant="outline"
           onClick={() => navigate(`/product/${product.id}`)}
         >
-          View Details
+          Περισσότερα
         </Button>
-        <Button className="w-12" size="icon">
+        <Button 
+          className="w-12" 
+          size="icon"
+          disabled={!productsService.isInStock(product)}
+          onClick={(e) => {
+            e.stopPropagation();
+            toast.success('Προστέθηκε στο καλάθι!');
+          }}
+        >
           <Plus className="h-4 w-4" />
         </Button>
       </CardFooter>
