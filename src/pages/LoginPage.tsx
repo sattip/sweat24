@@ -1,21 +1,24 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isLoading } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -24,9 +27,15 @@ const LoginPage: React.FC = () => {
       return;
     }
     
-    // Simulate login success (we'll implement actual authentication later)
-    toast.success("Επιτυχής είσοδος!");
-    navigate("/dashboard");
+    try {
+      await login({ email, password });
+      
+      // Redirect to intended page or dashboard
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+    } catch (error) {
+      // Error handling is done in the login function
+    }
   };
 
   return (
@@ -97,8 +106,15 @@ const LoginPage: React.FC = () => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full">
-                Είσοδος
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Σύνδεση...
+                  </>
+                ) : (
+                  "Είσοδος"
+                )}
               </Button>
             </form>
           </CardContent>
