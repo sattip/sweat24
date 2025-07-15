@@ -111,8 +111,8 @@ const CartPage = () => {
                           </Button>
                         </div>
                         <div className="text-right">
-                          <div className="font-medium">${(item.price * item.quantity).toFixed(2)}</div>
-                          <div className="text-sm text-muted-foreground">${item.price.toFixed(2)} το κάθε ένα</div>
+                          <div className="font-medium">€{(item.price * item.quantity).toFixed(2)}</div>
+                          <div className="text-sm text-muted-foreground">€{item.price.toFixed(2)} το κάθε ένα</div>
                         </div>
                       </div>
                     </div>
@@ -130,7 +130,7 @@ const CartPage = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span>Υποσύνολο</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>€{subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Φόροι</span>
@@ -139,7 +139,7 @@ const CartPage = () => {
                     <Separator />
                     <div className="flex justify-between font-medium text-lg">
                       <span>Σύνολο</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>€{subtotal.toFixed(2)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -148,7 +148,7 @@ const CartPage = () => {
                     className="w-full" 
                     onClick={() => navigate("/checkout")}
                   >
-                    Συνέχεια στο Ταμείο
+                    Συνέχεια στην Παραγγελία
                   </Button>
                 </CardFooter>
               </Card>

@@ -1,27 +1,61 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { trainers } from "@/data/trainers";
-import { ArrowLeft, Star } from "lucide-react";
+import { trainerService } from "@/services/apiService";
+import { ArrowLeft, Star, Loader2 } from "lucide-react";
 
 const TrainerDetailsPage = () => {
   const { trainerId } = useParams();
-  const trainer = trainers.find((t) => t.id === trainerId);
-  
-  if (!trainer) {
+  const [trainer, setTrainer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTrainer = async () => {
+      try {
+        setLoading(true);
+        const data = await trainerService.getById(trainerId);
+        setTrainer(data);
+      } catch (err) {
+        console.error('Failed to fetch trainer:', err);
+        setError('Αποτυχία φόρτωσης προπονητή');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (trainerId) {
+      fetchTrainer();
+    }
+  }, [trainerId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container px-4 py-6 max-w-4xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !trainer) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container px-4 py-12 text-center">
-          <h1 className="text-3xl font-bold">Trainer Not Found</h1>
-          <p className="mt-4">The trainer you're looking for doesn't exist or has been removed.</p>
+          <h1 className="text-3xl font-bold">Προπονητής δεν βρέθηκε</h1>
+          <p className="mt-4">{error || 'Ο προπονητής που ψάχνετε δεν υπάρχει ή έχει αφαιρεθεί.'}</p>
           <Link to="/trainers" className="mt-6 inline-block">
-            <Button>Return to Trainers List</Button>
+            <Button>Επιστροφή στη λίστα προπονητών</Button>
           </Link>
         </main>
       </div>
@@ -83,7 +117,7 @@ const TrainerDetailsPage = () => {
       <main className="container px-4 py-6 max-w-4xl mx-auto">
         <Link to="/trainers" className="flex items-center text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to All Trainers
+          Επιστροφή στους προπονητές
         </Link>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -119,9 +153,6 @@ const TrainerDetailsPage = () => {
                   </div>
                 </div>
                 
-                <Link to={`/services/request/personal-training?trainer=${trainer.id}`} className="w-full block mt-4">
-                  <Button className="w-full">Request Appointment</Button>
-                </Link>
               </CardContent>
             </Card>
           </div>
@@ -129,7 +160,7 @@ const TrainerDetailsPage = () => {
           {/* Right column - Bio and services */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-3">About</h3>
+              <h3 className="text-lg font-semibold mb-3">Σχετικά</h3>
               <div className="prose prose-sm max-w-none">
                 {trainer.bio.split('\n\n').map((paragraph, idx) => (
                   <p key={idx} className="mb-4">{paragraph}</p>
@@ -138,7 +169,7 @@ const TrainerDetailsPage = () => {
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-3">Certifications</h3>
+              <h3 className="text-lg font-semibold mb-3">Πιστοποιήσεις</h3>
               <ul className="list-disc pl-5 space-y-1">
                 {trainer.certifications.map((cert, index) => (
                   <li key={index}>{cert}</li>
@@ -147,7 +178,7 @@ const TrainerDetailsPage = () => {
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-3">Services</h3>
+              <h3 className="text-lg font-semibold mb-3">Υπηρεσίες</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {trainer.services.map((service, index) => (
                   <Card key={index} className="hover:border-primary transition-colors">

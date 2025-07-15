@@ -1,18 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package, CreditCard, Euro } from "lucide-react";
+import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package, CreditCard, Euro, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import LoyaltyRewardAlert from "@/components/notifications/LoyaltyRewardAlert";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/contexts/AuthContext";
+import { packageService } from "@/services/apiService";
 
 const ProfilePage = () => {
   const [isRewardAlertOpen, setIsRewardAlertOpen] = useState(false);
+  const [packages, setPackages] = useState([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoadingPackages(true);
+        const data = await packageService.getAll();
+        // For demo purposes, show first 3 packages as user's active packages
+        // In a real app, you'd fetch user's actual purchased packages
+        const userPackages = data.slice(0, 3).map((pkg, index) => ({
+          id: pkg.id,
+          name: pkg.name,
+          remaining: [7, 15, 1][index], // Mock remaining sessions
+          expiresAt: ['2024-09-15', '2024-08-30', '2024-07-25'][index], // Mock expiry dates
+          type: pkg.type
+        }));
+        setPackages(userPackages);
+      } catch (err) {
+        console.error('Failed to fetch packages:', err);
+        // Fallback to mock data if API fails
+        setPackages([
+          {
+            id: "pkg_1",
+            name: "Πακέτο 10 EMS",
+            remaining: 7,
+            expiresAt: "2024-09-15",
+            type: "EMS"
+          },
+          {
+            id: "pkg_2",
+            name: "Πακέτο 20 Ομαδικών",
+            remaining: 15,
+            expiresAt: "2024-08-30",
+            type: "Ομαδικά"
+          },
+          {
+            id: "pkg_3",
+            name: "Πακέτο 5 Yoga",
+            remaining: 1,
+            expiresAt: "2024-07-25",
+            type: "Yoga"
+          }
+        ]);
+      } finally {
+        setLoadingPackages(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
   
   const handleRedeemReward = (reward) => {
     if (reward.status === "Διαθέσιμο") {
@@ -24,36 +78,14 @@ const ProfilePage = () => {
     }
   };
   
-  // Mock user data for the profile
+  // Use actual user data from auth context
   const userData = {
-    name: "Γιάννης Παπαδόπουλος",
-    email: "giannis.papadopoulos@example.com",
-    phone: "+30 6944 123456",
+    name: user?.name || "Χρήστης",
+    email: user?.email || "",
+    phone: user?.phone || "+30 6944 123456",
     dateOfBirth: "1990-05-15",
     fitnessGoals: ["Απώλεια Βάρους", "Αύξηση Μυϊκής Μάζας", "Καρδιοαναπνευστική Φυσική Κατάσταση"],
-    activePackages: [
-      {
-        id: "pkg_1",
-        name: "Πακέτο 10 EMS",
-        remaining: 7,
-        expiresAt: "2024-09-15",
-        type: "EMS"
-      },
-      {
-        id: "pkg_2",
-        name: "Πακέτο 20 Ομαδικών",
-        remaining: 15,
-        expiresAt: "2024-08-30",
-        type: "Ομαδικά"
-      },
-       {
-        id: "pkg_3",
-        name: "Πακέτο 5 Yoga",
-        remaining: 1,
-        expiresAt: "2024-07-25",
-        type: "Yoga"
-      }
-    ],
+    activePackages: packages,
     financialInfo: {
       packages: [
         {
@@ -156,7 +188,11 @@ const ProfilePage = () => {
                 <CardDescription>Τα ενεργά πακέτα προπονήσεων και το υπόλοιπό τους.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {userData.activePackages.length > 0 ? (
+                {loadingPackages ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : userData.activePackages.length > 0 ? (
                   <div className="space-y-4">
                     {userData.activePackages.map((pkg) => (
                       <div key={pkg.id} className="p-4 rounded-lg border bg-muted/20">

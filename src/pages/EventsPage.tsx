@@ -1,67 +1,87 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Users, Bell } from "lucide-react";
 import EventNotification from "@/components/notifications/EventNotification";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/config/api";
 
-// Mock data for events
-const mockEvents = [
-  {
-    id: "1",
-    name: "Καλοκαιρινό Πάρτι στην παραλία",
-    date: "2024-08-02",
-    time: "18:00",
-    location: "Beach Bar 'Ammos'",
-    imageUrl: "/placeholder.svg",
-    description: "Ελάτε να γιορτάσουμε το καλοκαίρι με μουσική, χορό και κοκτέιλ διπλά στη θάλασσα. Μια βραδιά για να γνωριστούμε καλύτερα εκτός γυμναστηρίου!",
-    attendees: 87,
-    type: "Κοινωνική Εκδήλωση",
-    details: [
-      "Δωρεάν είσοδος για μέλη του γυμναστηρίου",
-      "Έκπτωση 20% σε όλα τα ποτά",
-      "Live DJ από τις 20:00",
-      "Δώρα και διαγωνισμοί όλο το βράδυ",
-      "Ειδικό μενού με υγιεινά snacks"
-    ]
-  },
-  {
-    id: "2",
-    name: "Σεμινάριο Διατροφής & Performance",
-    date: "2024-09-15",
-    time: "11:00",
-    location: "Sweat24 - Αίθουσα Yoga",
-    imageUrl: "/placeholder.svg",
-    description: "Ο διατροφολόγος μας, κ. Νίκος Γεωργίου, θα μας μιλήσει για το πώς η σωστή διατροφή μπορεί να εκτοξεύσει την απόδοσή μας. Θα ακολουθήσει Q&A.",
-    attendees: 45,
-    type: "Εκπαιδευτικό",
-    details: [
-      "Διάρκεια: 2 ώρες",
-      "Περιλαμβάνεται δωρεάν υλικό",
-      "Δωρεάν δείγματα συμπληρωμάτων",
-      "Εξατομικευμένες συμβουλές διατροφής",
-      "Πιστοποιητικό συμμετοχής"
-    ]
+const fetchEvents = async () => {
+  try {
+    const response = await apiRequest('/events');
+    if (!response.ok) throw new Error('Failed to fetch events');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
   }
-];
+};
+
+const submitRSVP = async (eventId: string, rsvpStatus: string) => {
+  try {
+    const response = await apiRequest(`/events/${eventId}/rsvp`, {
+      method: 'POST',
+      body: JSON.stringify({
+        response: rsvpStatus,
+      }),
+    });
+    
+    if (!response.ok) throw new Error('Failed to submit RSVP');
+    return await response.json();
+  } catch (error) {
+    console.error('Error submitting RSVP:', error);
+    throw error;
+  }
+};
 
 const EventsPage = () => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isEventDetailsOpen, setIsEventDetailsOpen] = useState(false);
   const [rsvpStatus, setRsvpStatus] = useState({});
   const { toast } = useToast();
 
-  const handleRSVP = (eventId, status) => {
-    setRsvpStatus(prev => ({ ...prev, [eventId]: status }));
-    toast({
-      title: "Η απάντησή σας καταχωρήθηκε!",
-      description: `Επιλέξατε "${status === 'yes' ? 'Θα παρευρεθώ' : 'Όχι'}" για την εκδήλωση.`,
-      duration: 3000,
-    });
+  useEffect(() => {
+    const loadEvents = async () => {
+      setLoading(true);
+      const eventsData = await fetchEvents();
+      setEvents(eventsData);
+      setLoading(false);
+    };
+    
+    loadEvents();
+  }, []);
+
+  const handleRSVP = async (eventId, status) => {
+    try {
+      await submitRSVP(eventId, status);
+      setRsvpStatus(prev => ({ ...prev, [eventId]: status }));
+      
+      // Update attendee count locally
+      setEvents(prev => prev.map(event => 
+        event.id === eventId 
+          ? { ...event, attendees: event.attendees + (status === 'yes' ? 1 : -1) }
+          : event
+      ));
+      
+      toast({
+        title: "Η απάντησή σας καταχωρήθηκε!",
+        description: `Επιλέξατε "${status === 'yes' ? 'Θα παρευρεθώ' : 'Όχι'}" για την εκδήλωση.`,
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Σφάλμα",
+        description: "Δεν μπορέσαμε να καταχωρήσουμε την απάντησή σας. Δοκιμάστε ξανά.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
   };
 
   const showEventDetails = (event) => {
@@ -90,8 +110,13 @@ const EventsPage = () => {
             </Button>
           </div>
           
-          <div className="space-y-8">
-            {mockEvents.map((event) => (
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-lg">Φόρτωση εκδηλώσεων...</div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {events.map((event) => (
               <Card key={event.id} className="overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   <div className="md:w-1/3">
@@ -157,25 +182,28 @@ const EventsPage = () => {
                   </div>
                 </div>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </main>
       </div>
 
       <EventNotification 
         open={isNotificationOpen}
         onOpenChange={setIsNotificationOpen}
-        event={{
-          id: mockEvents[0].id,
-          name: mockEvents[0].name,
+        event={events.length > 0 ? {
+          id: events[0].id,
+          name: events[0].name,
           date: "2 Αυγούστου 2024",
-          time: mockEvents[0].time,
-          location: mockEvents[0].location,
-          imageUrl: mockEvents[0].imageUrl
-        }}
+          time: events[0].time,
+          location: events[0].location,
+          imageUrl: events[0].imageUrl
+        } : null}
         onViewEvent={() => {
           setIsNotificationOpen(false);
-          showEventDetails(mockEvents[0]);
+          if (events.length > 0) {
+            showEventDetails(events[0]);
+          }
         }}
       />
 
@@ -184,6 +212,9 @@ const EventsPage = () => {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">{selectedEvent?.name}</DialogTitle>
+            <DialogDescription>
+              Λεπτομέρειες εκδήλωσης
+            </DialogDescription>
           </DialogHeader>
           {selectedEvent && (
             <div className="space-y-4">

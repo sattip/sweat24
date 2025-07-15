@@ -9,6 +9,7 @@ import {
   DialogContent, 
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -194,6 +195,9 @@ const ProgressPhotosPage = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Συμβουλές για Φωτογραφίες Προόδου</DialogTitle>
+              <DialogDescription>
+                Βελτιώστε την ποιότητα των φωτογραφιών προόδου σας
+              </DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-4">
               <div>

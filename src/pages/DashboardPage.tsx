@@ -1,35 +1,99 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Dumbbell, ShoppingCart, Gift } from "lucide-react";
+import { ArrowRight, User, Dumbbell, ShoppingCart, Gift, Loader2, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import PackageAlert from "@/components/notifications/PackageAlert";
+import SimulationPanel from "@/components/SimulationPanel";
+import SessionCountIndicator from "@/components/SessionCountIndicator";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSimulation } from "@/hooks/useSimulation";
+import { dashboardService, bookingService, classService } from "@/services/apiService";
+import { toast } from "sonner";
+import { BookingCalendar } from "@/components/BookingCalendar";
+import { UpcomingBookings } from "@/components/UpcomingBookings";
 
-// Mock function to check if it's the user's birthday week
-const isBirthdayWeek = (dateOfBirth: string): boolean => {
-  // For demo purposes, we'll just return true to show the birthday card
-  // In a real app, this would compare the current date with the user's birthday
-  return true;
+// Function to check if it's the user's birthday week
+const isBirthdayWeek = (birthDate: string | undefined): boolean => {
+  if (!birthDate) return false;
+  const today = new Date();
+  const birthday = new Date(birthDate);
+  birthday.setFullYear(today.getFullYear());
+  
+  const weekBefore = new Date(birthday);
+  weekBefore.setDate(birthday.getDate() - 7);
+  
+  return today >= weekBefore && today <= birthday;
+};
+
+// Function to determine package status
+const getPackageStatus = (remainingSessions: number | undefined, lastVisit: string | undefined) => {
+  if (!remainingSessions || remainingSessions === 0) return "expired";
+  if (remainingSessions === 1) return "last-session";
+  if (remainingSessions <= 3) return "expiring-soon";
+  return "normal";
 };
 
 const DashboardPage = () => {
-  // Mock data for the dashboard
-  const userData = {
-    name: "Γιάννης",
-    activePackage: {
-      name: "Premium Συνδρομή",
-      expiresAt: "2023-12-31",
-      remainingDays: 45,
-    },
-    dateOfBirth: "1990-05-15", // Example date of birth
+  const { user } = useAuth();
+  const { 
+    isAdminTester, 
+    getSimulatedUser, 
+    getPackageStatus, 
+    isBirthdayWeek: isSimulatedBirthdayWeek,
+    updateSimulationState 
+  } = useSimulation();
+  const [stats, setStats] = useState<any>(null);
+  const [upcomingClasses, setUpcomingClasses] = useState<any[]>([]);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+  
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all data in parallel
+      const [statsData, classesData, bookingsData] = await Promise.all([
+        dashboardService.getStats(),
+        classService.getAll(),
+        bookingService.getAll()
+      ]);
+      
+      setStats(statsData);
+      setUpcomingClasses(classesData.data?.slice(0, 3) || []);
+      setRecentBookings(bookingsData.data?.slice(0, 5) || []);
+    } catch (error) {
+      toast.error("Σφάλμα κατά τη φόρτωση δεδομένων");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
   
-  // Check if it's the user's birthday week
-  const birthdayWeek = isBirthdayWeek(userData.dateOfBirth);
+  // Get the appropriate user data (simulated for admin, real for others)
+  const displayUser = isAdminTester ? getSimulatedUser() : user;
   
-  // State for package status (for demo purposes)
-  const [packageStatus, setPackageStatus] = useState<"normal" | "last-session" | "expiring-soon" | "expired">("normal");
+  // Check if it's the user's birthday week (simulated or real)
+  const birthdayWeek = isAdminTester ? isSimulatedBirthdayWeek() : (displayUser ? isBirthdayWeek(displayUser.birth_date) : false);
+  
+  // Determine package status (simulated for admin, real for others)
+  const packageStatus = isAdminTester ? getPackageStatus() : getPackageStatus(displayUser?.remaining_sessions, displayUser?.last_visit);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background">
@@ -38,28 +102,16 @@ const DashboardPage = () => {
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">
-            Καλώς ήρθες πίσω, {userData.name}!
+            Καλώς ήρθες πίσω, {displayUser?.name?.split(' ')[0] || 'φίλε'}!
           </h1>
         </div>
         
-        {/* Demo controls (for testing only - would be removed in production) */}
-        <div className="mb-6 p-4 bg-muted/20 border rounded-md">
-          <h2 className="text-lg font-medium mb-2">Δοκιμαστικά Κοντρόλ</h2>
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              size="sm" 
-              onClick={() => {
-                const statuses = ["normal", "last-session", "expiring-soon", "expired"];
-                const currentIndex = statuses.indexOf(packageStatus);
-                const nextIndex = (currentIndex + 1) % statuses.length;
-                setPackageStatus(statuses[nextIndex] as any);
-              }} 
-              variant="outline"
-            >
-              Αλλαγή Κατάστασης Πακέτου: {packageStatus}
-            </Button>
+        {/* Simulation Panel - Only visible to admin@sweat24.gr */}
+        {isAdminTester && (
+          <div className="mb-6">
+            <SimulationPanel onStateChange={updateSimulationState} />
           </div>
-        </div>
+        )}
         
         {/* Package alerts based on status */}
         {packageStatus === "last-session" && (
@@ -113,35 +165,71 @@ const DashboardPage = () => {
             <CardContent>
               <div className="flex flex-col md:flex-row justify-between md:items-center space-y-3 md:space-y-0">
                 <div>
-                  <h3 className="font-medium text-lg">{userData.activePackage.name}</h3>
+                  <h3 className="font-medium text-lg flex items-center gap-2">
+                    Συνδρομή
+                    {displayUser?.total_sessions !== undefined && displayUser?.remaining_sessions !== undefined && (
+                      <SessionCountIndicator 
+                        usedSessions={displayUser.total_sessions - displayUser.remaining_sessions}
+                        totalSessions={displayUser.total_sessions}
+                        remainingSessions={displayUser.remaining_sessions}
+                        membershipType="Μηνιαίο"
+                      />
+                    )}
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Λήγει στις {new Date(userData.activePackage.expiresAt).toLocaleDateString()}
+                    {displayUser?.join_date ? (
+                      <>Μέλος από {new Date(displayUser.join_date).toLocaleDateString()}</>
+                    ) : (
+                      <>Νέο μέλος</>
+                    )}
                   </p>
                 </div>
                 <div className="bg-primary/10 text-primary font-medium rounded-full px-4 py-1 text-center">
-                  {userData.activePackage.remainingDays} ημέρες απομένουν
+                  {displayUser?.status === 'active' ? 'Ενεργή' : 'Ανενεργή'}
                 </div>
               </div>
+              {displayUser?.package_start_date && displayUser?.package_end_date && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Περίοδος πακέτου: {new Date(displayUser.package_start_date).toLocaleDateString()} - {new Date(displayUser.package_end_date).toLocaleDateString()}
+                </p>
+              )}
+              {displayUser?.last_visit && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Τελευταία επίσκεψη: {new Date(displayUser.last_visit).toLocaleDateString()}
+                </p>
+              )}
             </CardContent>
             <CardFooter className="border-t pt-4 flex justify-end">
-              <Button variant="outline" size="sm">
-                Ανανέωση Συνδρομής
-              </Button>
+              {/* Package purchase button removed per user request */}
             </CardFooter>
           </Card>
           
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">Κλείσε Μάθημα</CardTitle>
                 <CardDescription>Δες το πρόγραμμα και κλείσε την επόμενη προπόνησή σου</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <p className="text-sm">Δες το πρόγραμμα μαθημάτων και κρατά τη θέση σου</p>
-                  </div>
+                <div className="h-40 bg-muted rounded-md p-4">
+                  {upcomingClasses.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Προσεχή μαθήματα:</p>
+                      {upcomingClasses.map((cls, idx) => (
+                        <div key={idx} className="text-xs">
+                          <span className="font-medium">{cls.name}</span>
+                          <span className="text-muted-foreground ml-1">
+                            - {new Date(cls.date).toLocaleDateString()} στις {cls.time?.substring(0, 5)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-sm text-muted-foreground">Δεν υπάρχουν διαθέσιμα μαθήματα</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
@@ -199,6 +287,39 @@ const DashboardPage = () => {
                 </Link>
               </CardFooter>
             </Card>
+            
+            <Card className="hover:border-primary transition-colors">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Οι Παραγγελίες μου</CardTitle>
+                <CardDescription>Δες την κατάσταση των παραγγελιών σου</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-4">
+                    <Package className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Παρακολούθησε τις παραγγελίες σου και δες πότε είναι έτοιμες</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link to="/orders" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
+                    Προβολή Παραγγελιών
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
+          
+          {/* Personal Booking Calendar & Upcoming Bookings */}
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <BookingCalendar />
+            </div>
+            <div className="lg:col-span-1">
+              <UpcomingBookings />
+            </div>
           </div>
         </div>
       </main>

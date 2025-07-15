@@ -1,21 +1,69 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { trainers } from "@/data/trainers";
+import { trainerService } from "@/services/apiService";
+import { Loader2 } from "lucide-react";
 
 const TrainersListPage = () => {
+  const [trainers, setTrainers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTrainers = async () => {
+      try {
+        setLoading(true);
+        const data = await trainerService.getAll();
+        setTrainers(data);
+      } catch (err) {
+        console.error('Failed to fetch trainers:', err);
+        setError('Αποτυχία φόρτωσης προπονητών');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainers();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container px-4 py-6 max-w-5xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container px-4 py-6 max-w-5xl mx-auto">
+          <div className="text-center text-red-500 mt-8">
+            {error}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Meet Our Team</h1>
+          <h1 className="text-3xl font-bold">Γνωρίστε την Ομάδα μας</h1>
           <p className="text-muted-foreground mt-2">
-            Our certified trainers are here to help you reach your fitness goals
+            Οι πιστοποιημένοι προπονητές μας είναι εδώ για να σας βοηθήσουν να επιτύχετε τους στόχους σας
           </p>
         </div>
         

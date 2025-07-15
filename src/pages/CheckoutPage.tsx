@@ -20,15 +20,20 @@ import {
 import { ChevronLeft } from "lucide-react";
 import Header from "@/components/Header";
 import { useCart } from "@/hooks/use-cart";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiRequest } from "@/config/api";
+import { toast } from "sonner";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: "Γιάννης Παπαδόπουλος",
-    email: "giannis.papadopoulos@example.com",
-    phone: "69X-XXX-XXXX",
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
     pickupOption: "gym",
     notes: "",
   });
@@ -48,11 +53,50 @@ const CheckoutPage = () => {
     }));
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you would process the order here
-    clearCart();
-    navigate("/order-confirmation");
+    
+    // Allow guest checkout - no authentication required
+
+    setLoading(true);
+
+    try {
+      // Prepare order data
+      const orderData = {
+        user_id: user?.id || 1, // Use logged in user or default to admin user for guest orders
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        notes: formData.notes,
+        items: items.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity
+        }))
+      };
+
+      // Submit order
+      const response = await apiRequest('/orders', {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        clearCart();
+        // Pass order number to confirmation page
+        navigate("/order-confirmation", { 
+          state: { orderNumber: result.order.order_number } 
+        });
+      } else {
+        toast.error(result.message || "Σφάλμα κατά την υποβολή της παραγγελίας");
+      }
+    } catch (error) {
+      console.error("Order submission error:", error);
+      toast.error("Σφάλμα κατά την υποβολή της παραγγελίας");
+    } finally {
+      setLoading(false);
+    }
   };
   
   if (items.length === 0) {
@@ -79,7 +123,7 @@ const CheckoutPage = () => {
           </Button>
         </div>
         
-        <h1 className="text-3xl font-bold mb-6">Ταμείο</h1>
+        <h1 className="text-3xl font-bold mb-6">Ολοκλήρωση Παραγγελίας</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
@@ -129,34 +173,16 @@ const CheckoutPage = () => {
               
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle>Επιλογές Παραλαβής</CardTitle>
+                  <CardTitle>Τρόπος Παραλαβής</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup 
-                    value={formData.pickupOption} 
-                    onValueChange={handleRadioChange}
-                    className="space-y-3"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="gym" id="gym" />
-                      <Label htmlFor="gym" className="flex-1">
-                        <div className="font-medium">Παραλαβή από το Γυμναστήριο</div>
-                        <div className="text-sm text-muted-foreground">
-                          Παραλάβετε την παραγγελία σας από την υποδοχή του Sweat24 κατά τις ώρες λειτουργίας.
-                        </div>
-                      </Label>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <div className="font-medium">Παραλαβή από το Γυμναστήριο</div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Θα παραλάβετε την παραγγελία σας από την υποδοχή του Sweat24 κατά τις ώρες λειτουργίας.
+                      Θα σας ειδοποιήσουμε όταν είναι έτοιμη.
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="locker" id="locker" />
-                      <Label htmlFor="locker" className="flex-1">
-                        <div className="font-medium">Παράδοση στο Ντουλάπι</div>
-                        <div className="text-sm text-muted-foreground">
-                          Θα τοποθετήσουμε την παραγγελία σας στο ντουλάπι σας (μόνο για μέλη με ντουλάπια).
-                        </div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                  </div>
                 </CardContent>
               </Card>
               
@@ -176,8 +202,8 @@ const CheckoutPage = () => {
               </Card>
               
               <div className="flex justify-end">
-                <Button type="submit" size="lg">
-                  Υποβολή Παραγγελίας
+                <Button type="submit" size="lg" disabled={loading}>
+                  {loading ? "Υποβολή..." : "Υποβολή Παραγγελίας"}
                 </Button>
               </div>
             </form>
@@ -201,7 +227,7 @@ const CheckoutPage = () => {
                         </span>
                       )}
                     </span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span>€{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
                 
@@ -209,7 +235,7 @@ const CheckoutPage = () => {
                 
                 <div className="flex justify-between">
                   <span>Υποσύνολο</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>€{subtotal.toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between text-muted-foreground">
@@ -221,7 +247,7 @@ const CheckoutPage = () => {
                 
                 <div className="flex justify-between font-medium text-lg">
                   <span>Σύνολο</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>€{subtotal.toFixed(2)}</span>
                 </div>
               </CardContent>
             </Card>
