@@ -1,73 +1,121 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, Clock } from "lucide-react";
+import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock data for partner businesses
-const mockPartners = [
-  {
-    id: "partner_1",
-    name: "The Coffee Spot",
-    logoUrl: "/placeholder.svg",
-    offer: "15% έκπτωση σε όλους τους καφέδες",
-    description: "Το ιδανικό μέρος για να χαλαρώσετε μετά την προπόνηση με τον καλύτερο καφέ της πόλης.",
-  },
-  {
-    id: "partner_2",
-    name: "Healthy Bites",
-    logoUrl: "/placeholder.svg",
-    offer: "10% έκπτωση σε όλα τα γεύματα",
-    description: "Θρεπτικά και νόστιμα γεύματα για να υποστηρίξετε τους στόχους της φυσικής σας κατάστασης.",
-  },
-  {
-    id: "partner_3",
-    name: "Sports Gear Pro",
-    logoUrl: "/placeholder.svg",
-    offer: "20% έκπτωση σε είδη ρουχισμού",
-    description: "Βρείτε τον καλύτερο εξοπλισμό και ρουχισμό για τις προπονήσεις σας.",
-  },
-];
-
-// Mock user data for verification
-const mockUserData = {
-    name: "Γιάννης Παπαδόπουλος",
-    avatarUrl: "/placeholder.svg",
-    membershipStatus: "Ενεργός",
-    membershipId: "SW24-2025-001"
-};
+import { apiRequest } from "@/config/api";
 
 const PartnersPage = () => {
   const { toast } = useToast();
+  const [partners, setPartners] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isVerificationOpen, setIsVerificationOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [redemptionData, setRedemptionData] = useState(null);
   const [usedOffers, setUsedOffers] = useState<{ [key: string]: string }>({});
 
-  const handleShowCode = (partner) => {
-    setSelectedPartner(partner);
-    setIsVerificationOpen(true);
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const response = await apiRequest('/partners');
+        const data = await response.json();
+        setPartners(data);
+      } catch (error) {
+        console.error('Error fetching partners:', error);
+        toast({
+          title: "Σφάλμα",
+          description: "Αποτυχία φόρτωσης συνεργατών",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartners();
+  }, [toast]);
+
+  const handleShowCode = async (partner) => {
+    try {
+      if (!partner.offer_id) {
+        toast({
+          title: "Σφάλμα",
+          description: "Δεν υπάρχει διαθέσιμη προσφορά",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await apiRequest(`/partners/offers/${partner.offer_id}/redeem`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedPartner(partner);
+        setRedemptionData(data);
+        setIsVerificationOpen(true);
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Σφάλμα",
+          description: error.message || "Αποτυχία δημιουργίας κωδικού",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error generating redemption code:', error);
+      toast({
+        title: "Σφάλμα",
+        description: "Αποτυχία δημιουργίας κωδικού",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRedeemOffer = () => {
-    const today = new Date().toDateString();
-    const partnerId = selectedPartner?.id;
-    
-    if (partnerId) {
-      setUsedOffers(prev => ({
-        ...prev,
-        [partnerId]: today
-      }));
-      
-      toast({
-        title: "Προσφορά Εξαργυρώθηκε!",
-        description: `Η προσφορά στο ${selectedPartner?.name} χρησιμοποιήθηκε για σήμερα.`,
-        duration: 3000,
+  const handleRedeemOffer = async () => {
+    try {
+      if (!redemptionData?.redemption?.id) return;
+
+      const response = await apiRequest(`/partners/redemptions/${redemptionData.redemption.id}/use`, {
+        method: 'POST'
       });
-      
-      setIsVerificationOpen(false);
+
+      if (response.ok) {
+        const today = new Date().toDateString();
+        const partnerId = selectedPartner?.id;
+        
+        if (partnerId) {
+          setUsedOffers(prev => ({
+            ...prev,
+            [partnerId]: today
+          }));
+        }
+        
+        toast({
+          title: "Προσφορά Εξαργυρώθηκε!",
+          description: `Η προσφορά στο ${selectedPartner?.name} χρησιμοποιήθηκε για σήμερα.`,
+          duration: 3000,
+        });
+        
+        setIsVerificationOpen(false);
+      } else {
+        toast({
+          title: "Σφάλμα",
+          description: "Αποτυχία εξαργύρωσης",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error using redemption:', error);
+      toast({
+        title: "Σφάλμα", 
+        description: "Αποτυχία εξαργύρωσης",
+        variant: "destructive",
+      });
     }
   };
 
@@ -87,8 +135,13 @@ const PartnersPage = () => {
             <p className="text-muted-foreground mt-1">Αποκλειστικές προσφορές για τα μέλη του Sweat24.</p>
           </div>
           
+          {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockPartners.map((partner) => (
+            {partners.map((partner) => (
               <Card key={partner.id} className="flex flex-col">
                 <CardHeader className="flex-row items-center gap-4">
                   <Avatar className="h-16 w-16">
@@ -121,6 +174,7 @@ const PartnersPage = () => {
               </Card>
             ))}
           </div>
+        )}
         </main>
       </div>
 
@@ -145,17 +199,17 @@ const PartnersPage = () => {
           
           <div className="py-4 flex flex-col items-center gap-4">
             <Avatar className="h-24 w-24">
-                <AvatarImage src={mockUserData.avatarUrl} alt={mockUserData.name} />
-                <AvatarFallback>{mockUserData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                <AvatarImage src={redemptionData?.user?.avatarUrl} alt={redemptionData?.user?.name} />
+                <AvatarFallback>{redemptionData?.user?.name?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback>
             </Avatar>
             <div className="text-center">
-                <p className="font-bold text-xl">{mockUserData.name}</p>
-                <p className="text-green-600 font-semibold">{mockUserData.membershipStatus}</p>
-                <p className="text-sm text-muted-foreground">ID: {mockUserData.membershipId}</p>
+                <p className="font-bold text-xl">{redemptionData?.user?.name || 'Χρήστης'}</p>
+                <p className="text-green-600 font-semibold">{redemptionData?.user?.membership_status || 'Ενεργός'}</p>
+                <p className="text-sm text-muted-foreground">ID: {redemptionData?.user?.membership_id || 'SW24-XXXX'}</p>
             </div>
             <div className="bg-muted p-4 rounded-lg w-full text-center">
                 <p className="text-sm text-muted-foreground">Κωδικός Προσφοράς</p>
-                <p className="text-2xl font-bold tracking-widest">S24-PROMO</p>
+                <p className="text-2xl font-bold tracking-widest">{redemptionData?.redemption?.verification_code || 'S24-PROMO'}</p>
             </div>
           </div>
           <DialogFooter className="flex gap-2">

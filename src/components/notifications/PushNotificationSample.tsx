@@ -20,29 +20,29 @@ const PushNotificationSample: React.FC<PushNotificationSampleProps> = ({
         return {
           icon: <Calendar className="h-5 w-5 text-primary" />,
           title: "Sweat24",
-          message: "Your Power Yoga booking for tomorrow at 10:00 AM is confirmed!",
-          greekMessage: "Η κράτησή σας για Power Yoga αύριο στις 10:00 π.μ. επιβεβαιώθηκε!"
+          message: "Η κράτησή σας για Power Yoga αύριο στις 10:00 π.μ. επιβεβαιώθηκε!",
+          greekMessage: "Θα σας στείλουμε υπενθύμιση μία ώρα πριν το μάθημα."
         };
       case "reminder":
         return {
           icon: <Bell className="h-5 w-5 text-secondary" />,
           title: "Sweat24",
-          message: "Reminder! Your Personal Training with Sarah Johnson is in 2 hours.",
-          greekMessage: "Υπενθύμιση! Το Personal Training σας με την Sarah Johnson είναι σε 2 ώρες."
+          message: "Υπενθύμιση! Το Personal Training σας είναι σε 2 ώρες.",
+          greekMessage: "Με την προπονήτρια Μαρία Παπαδοπούλου στο Studio 1."
         };
       case "offer":
         return {
           icon: <Zap className="h-5 w-5 text-yellow-500" />,
           title: "Sweat24",
-          message: "Don't miss our offer! 20% discount on all supplements this week!",
-          greekMessage: "Μην χάσετε την προσφορά μας! 20% έκπτωση σε όλα τα συμπληρώματα αυτή την εβδομάδα!"
+          message: "Μην χάσετε την προσφορά μας! 20% έκπτωση σε όλα τα συμπληρώματα!",
+          greekMessage: "Η προσφορά ισχύει μέχρι την Κυριακή."
         };
       default:
         return {
           icon: <Bell className="h-5 w-5 text-primary" />,
           title: "Sweat24",
-          message: "You have a new notification",
-          greekMessage: "Έχετε μια νέα ειδοποίηση"
+          message: "Έχετε μια νέα ειδοποίηση",
+          greekMessage: "Πατήστε για να δείτε περισσότερα."
         };
     }
   };
@@ -51,7 +51,7 @@ const PushNotificationSample: React.FC<PushNotificationSampleProps> = ({
   
   return (
     <div className="max-w-sm mx-auto my-6">
-      <p className="text-xs text-muted-foreground mb-2 text-center">Preview of mobile notification</p>
+      <p className="text-xs text-muted-foreground mb-2 text-center">Προεπισκόπηση ειδοποίησης κινητού</p>
       <Card className="border shadow-lg overflow-hidden">
         <div className="h-6 bg-neutral-800 dark:bg-neutral-700 flex items-center px-4">
           <div className="w-1/4">
@@ -76,7 +76,7 @@ const PushNotificationSample: React.FC<PushNotificationSampleProps> = ({
             <div className="flex-1">
               <div className="flex justify-between items-center mb-1">
                 <h3 className="font-semibold">{content.title}</h3>
-                <span className="text-xs text-muted-foreground">{time}</span>
+                <span className="text-xs text-muted-foreground">Τώρα</span>
               </div>
               <div className="space-y-1">
                 <p className="text-sm">{content.message}</p>

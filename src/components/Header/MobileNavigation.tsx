@@ -1,13 +1,21 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const MobileNavigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.includes(path);
+  };
+  
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -15,10 +23,10 @@ const MobileNavigation = () => {
       <div className="border-b pb-4 mb-2">
         <Link to="/profile" className="flex items-center gap-4 p-2 rounded-md hover:bg-accent">
           <Avatar>
-            <AvatarFallback>ΧΡ</AvatarFallback>
+            <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase() || 'ΧΡ'}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">Χρήστης</p>
+            <p className="font-medium">{user?.name || 'Χρήστης'}</p>
             <p className="text-sm text-muted-foreground">Προβολή Προφίλ</p>
           </div>
         </Link>
@@ -159,12 +167,12 @@ const MobileNavigation = () => {
         >
           Ρυθμίσεις
         </Link>
-        <Link 
-          to="/" 
-          className="flex items-center gap-3 p-2 text-sm rounded-md text-destructive hover:bg-accent/50"
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 p-2 text-sm rounded-md text-destructive hover:bg-accent/50 w-full text-left"
         >
           Αποσύνδεση
-        </Link>
+        </button>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ interface EventNotificationProps {
     time: string;
     location: string;
     imageUrl: string;
-  };
+  } | null;
   onViewEvent: () => void;
 }
 
@@ -36,38 +36,47 @@ const EventNotification: React.FC<EventNotificationProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4 space-y-4">
-          <img 
-            src={event.imageUrl} 
-            alt={event.name} 
-            className="w-full h-32 object-cover rounded-lg"
-          />
-          
-          <div className="text-center">
-            <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
-            <div className="space-y-1 text-sm text-muted-foreground">
-              <div className="flex items-center justify-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{event.date} στις {event.time}</span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>{event.location}</span>
+        {event && (
+          <div className="py-4 space-y-4">
+            <img 
+              src={event.imageUrl} 
+              alt={event.name} 
+              className="w-full h-32 object-cover rounded-lg"
+            />
+            
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-2">{event.name}</h3>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <div className="flex items-center justify-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{event.date} στις {event.time}</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{event.location}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+        {!event && (
+          <div className="py-4 text-center text-muted-foreground">
+            Δεν υπάρχουν διαθέσιμες εκδηλώσεις αυτή τη στιγμή.
+          </div>
+        )}
         
         <DialogFooter className="flex-col sm:flex-row gap-3">
-          <Button
-            onClick={() => {
-              onViewEvent();
-            }}
-            variant="outline"
-            className="w-full"
-          >
-            Δείτε Λεπτομέρειες
-          </Button>
+          {event && (
+            <Button
+              onClick={() => {
+                onViewEvent();
+              }}
+              variant="outline"
+              className="w-full"
+            >
+              Δείτε Λεπτομέρειες
+            </Button>
+          )}
           <Button onClick={() => onOpenChange(false)} className="w-full">
             Εντάξει
           </Button>
