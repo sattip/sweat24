@@ -15,6 +15,7 @@ import Header from "@/components/Header";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
+import { apiRequest } from "@/config/api";
 
 // Mock trainer data
 const trainers = [
@@ -72,7 +73,7 @@ const AppointmentRequestPage = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate at least one time slot is selected
@@ -86,16 +87,53 @@ const AppointmentRequestPage = () => {
       return;
     }
     
-    // In a real app, you would send the data to the server here
-    console.log({
-      service,
-      trainer: selectedTrainer,
-      timeSlots: timeSlots.filter(slot => slot.date && slot.time),
-      notes
-    });
-    
-    // Navigate to confirmation page
-    navigate("/services/confirmation");
+    try {
+      // Get service ID from backend by slug
+      const servicesResponse = await apiRequest('/specialized-services');
+      const services = await servicesResponse.json();
+      const matchedService = services.find(s => s.slug === serviceId);
+      
+      if (!matchedService) {
+        toast({
+          title: "Service not found",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Prepare appointment request data
+      const appointmentData = {
+        specialized_service_id: matchedService.id,
+        instructor_id: selectedTrainer || null,
+        preferred_time_slots: timeSlots.filter(slot => slot.date && slot.time).map(slot => ({
+          date: slot.date?.toISOString().split('T')[0],
+          time: slot.time
+        })),
+        notes: notes
+      };
+
+      const response = await apiRequest('/appointment-requests', {
+        method: 'POST',
+        body: JSON.stringify(appointmentData)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Appointment request submitted successfully!",
+          description: "We will contact you soon to confirm your appointment."
+        });
+        navigate("/services/confirmation");
+      } else {
+        throw new Error('Failed to submit appointment request');
+      }
+    } catch (error) {
+      console.error('Error submitting appointment request:', error);
+      toast({
+        title: "Error submitting request",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

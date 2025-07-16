@@ -1,34 +1,77 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
-import { Copy, Facebook, Instagram, Mail, Share2, Twitter } from "lucide-react";
+import { Copy, Facebook, Instagram, Mail, Share2, Twitter, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { apiRequest } from "@/config/api";
 
 const ReferralProgramPage = () => {
   const [copied, setCopied] = useState(false);
-  
-  // Mock data for the referral program
-  const referralData = {
-    code: "JOHN50",
-    link: "sweat24.com/join?ref=JOHN50",
-    referrals: 2,
-    nextRewardAt: 3,
-    nextReward: "50% έκπτωση τον επόμενο μήνα",
-    rewards: [
-      { name: "Δωρεάν Προσωπική Προπόνηση", status: "Διαθέσιμο", expiry: "2024-07-15" },
-      { name: "50% Έκπτωση σε Protein Shake", status: "Εξαργυρώθηκε", expiry: "2024-04-01" }
-    ],
-    friends: [
-      { name: "Σάρα Ιωάννου", joinDate: "2024-03-15" },
-      { name: "Μιχάλης Πέτρου", joinDate: "2024-04-02" }
-    ]
+  const [loading, setLoading] = useState(true);
+  const [referralData, setReferralData] = useState(null);
+
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      try {
+        const response = await apiRequest('/referral/data');
+        if (response.ok) {
+          const data = await response.json();
+          setReferralData(data);
+        } else {
+          // If not authenticated, show default/empty state
+          setReferralData({
+            code: "LOGIN_REQUIRED",
+            link: "Συνδεθείτε για να δείτε τον κωδικό σας",
+            referrals: 0,
+            nextRewardAt: 1,
+            nextReward: "Δωρεάν προσωπική προπόνηση",
+            rewards: [],
+            friends: []
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching referral data:', error);
+        setReferralData({
+          code: "ERROR",
+          link: "Σφάλμα φόρτωσης",
+          referrals: 0,
+          nextRewardAt: 1,
+          nextReward: "Δωρεάν προσωπική προπόνηση",
+          rewards: [],
+          friends: []
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReferralData();
+  }, []);
+
+  const handleRedeemReward = async (rewardId) => {
+    try {
+      const response = await apiRequest(`/referral/redeem/${rewardId}`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        toast.success("Το δώρο εξαργυρώθηκε επιτυχώς!");
+        // Refresh data
+        window.location.reload();
+      } else {
+        toast.error("Σφάλμα κατά την εξαργύρωση");
+      }
+    } catch (error) {
+      console.error('Error redeeming reward:', error);
+      toast.error("Σφάλμα κατά την εξαργύρωση");
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -37,6 +80,33 @@ const ReferralProgramPage = () => {
     toast.success("Αντιγράφηκε στο πρόχειρο!");
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container px-4 py-6 max-w-5xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!referralData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container px-4 py-6 max-w-5xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold">Σφάλμα φόρτωσης</h1>
+            <p className="text-muted-foreground mt-2">Παρακαλώ δοκιμάστε ξανά.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -179,16 +249,24 @@ const ReferralProgramPage = () => {
                       <div>
                         <p className="font-medium text-sm">{reward.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {reward.status === "Διαθέσιμο" 
-                            ? `Λήγει: ${new Date(reward.expiry).toLocaleDateString()}`
-                            : `Εξαργυρώθηκε στις: ${new Date(reward.expiry).toLocaleDateString()}`}
+                          {reward.status === "available" 
+                            ? `Λήγει: ${reward.expires_at ? new Date(reward.expires_at).toLocaleDateString() : 'Χωρίς λήξη'}`
+                            : `Εξαργυρώθηκε στις: ${reward.redeemed_at ? new Date(reward.redeemed_at).toLocaleDateString() : 'Άγνωστη ημερομηνία'}`}
                         </p>
                       </div>
                       <div>
-                        {reward.status === "Διαθέσιμο" ? (
-                          <Button size="sm" variant="default">Εξαργύρωση</Button>
+                        {reward.status === "available" ? (
+                          <Button 
+                            size="sm" 
+                            variant="default"
+                            onClick={() => handleRedeemReward(reward.id)}
+                          >
+                            Εξαργύρωση
+                          </Button>
                         ) : (
-                          <span className="text-xs bg-muted px-2 py-1 rounded-full">Εξαργυρώθηκε</span>
+                          <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                            {reward.status === "redeemed" ? "Εξαργυρώθηκε" : "Έληξε"}
+                          </span>
                         )}
                       </div>
                     </div>

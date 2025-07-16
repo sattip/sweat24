@@ -3,11 +3,12 @@ import React from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 
 const OrderConfirmationPage = () => {
-  const orderNumber = `SW24-${Math.floor(100000 + Math.random() * 900000)}`;
+  const location = useLocation();
+  const orderNumber = location.state?.orderNumber || `SW24-${Math.floor(100000 + Math.random() * 900000)}`;
   
   return (
     <div className="min-h-screen bg-background">

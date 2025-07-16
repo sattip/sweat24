@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { 
   Tabs, 
@@ -7,95 +7,126 @@ import {
   TabsContent 
 } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, User } from "lucide-react";
+import { Calendar, Clock, User, Users, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { classService } from "@/services/apiService";
+import { toast } from "sonner";
+import { BookingCalendar } from "@/components/BookingCalendar";
+import { format, startOfWeek, addDays } from "date-fns";
+import { el } from "date-fns/locale";
 
-// Mock data for the class schedule
+// Constants
 const DAYS_OF_WEEK = ["Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
-const CLASS_TYPES = ["Όλα", "Καρδιο", "Δύναμη", "Yoga", "HIIT", "Ποδηλασία"];
+const CLASS_TYPES = ["Όλα", "group", "personal", "Yoga", "HIIT", "Strength"];
 
-const mockClasses = [
-  {
-    id: 1,
-    name: "Power Yoga",
-    time: "07:30 - 08:30",
-    instructor: "Emma Wilson",
-    spotsAvailable: 8,
-    totalSpots: 20,
-    type: "Yoga",
-    day: "Δευτέρα"
-  },
-  {
-    id: 2,
-    name: "HIIT Blast",
-    time: "12:00 - 12:45",
-    instructor: "Mike Johnson",
-    spotsAvailable: 3,
-    totalSpots: 15,
-    type: "HIIT",
-    day: "Δευτέρα"
-  },
-  {
-    id: 3,
-    name: "Spin Class",
-    time: "18:00 - 19:00",
-    instructor: "Sarah Davis",
-    spotsAvailable: 0,
-    totalSpots: 12,
-    type: "Ποδηλασία",
-    day: "Δευτέρα"
-  },
-  {
-    id: 4,
-    name: "Προπόνηση Δύναμης",
-    time: "08:00 - 09:00",
-    instructor: "Chris Taylor",
-    spotsAvailable: 6,
-    totalSpots: 15,
-    type: "Δύναμη",
-    day: "Τρίτη"
-  },
-  {
-    id: 5,
-    name: "Zumba",
-    time: "17:30 - 18:30",
-    instructor: "Sophia Martinez",
-    spotsAvailable: 10,
-    totalSpots: 25,
-    type: "Καρδιο",
-    day: "Τετάρτη"
-  },
-  {
-    id: 6,
-    name: "Ενδυνάμωση Κορμού",
-    time: "19:00 - 19:45",
-    instructor: "James Wilson",
-    spotsAvailable: 8,
-    totalSpots: 20,
-    type: "Δύναμη",
-    day: "Πέμπτη"
-  },
-  {
-    id: 7,
-    name: "Πυγμαχία",
-    time: "20:00 - 21:00",
-    instructor: "Alex Rodriguez",
-    spotsAvailable: 2,
-    totalSpots: 15,
-    type: "Καρδιο",
-    day: "Παρασκευή"
-  }
-];
+// Get dates starting from today
+const getWeekDates = () => {
+  const today = new Date();
+  
+  return DAYS_OF_WEEK.map((day, index) => {
+    const date = addDays(today, index);
+    return {
+      day: format(date, 'EEEE', { locale: el }),
+      originalDay: day,
+      date: format(date, 'dd/MM'),
+      fullDate: format(date, 'yyyy-MM-dd')
+    };
+  });
+};
+
+// Helper function to get day of week in Greek
+const getDayOfWeek = (date: string) => {
+  const dayIndex = new Date(date).getDay();
+  return DAYS_OF_WEEK[dayIndex === 0 ? 6 : dayIndex - 1];
+};
+
+// Helper function to format time range
+const formatTimeRange = (time: string, duration: number) => {
+  // Handle time that comes as "HH:MM" string
+  const [hours, minutes] = time.split(':').map(Number);
+  
+  // Calculate end time
+  const totalMinutes = hours * 60 + minutes + duration;
+  const endHours = Math.floor(totalMinutes / 60) % 24;
+  const endMinutes = totalMinutes % 60;
+  
+  // Format times with leading zeros
+  const startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+  
+  return `${startTime} - ${endTime}`;
+};
 
 const ClassSchedulePage = () => {
   const navigate = useNavigate();
-  const [activeDay, setActiveDay] = useState("Δευτέρα");
+  const weekDates = getWeekDates();
+  const [activeDay, setActiveDay] = useState(weekDates[0]?.fullDate || "");
   const [activeFilter, setActiveFilter] = useState("Όλα");
+  const [classes, setClasses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const filteredClasses = mockClasses.filter(cls => 
-    cls.day === activeDay && 
-    (activeFilter === "Όλα" || cls.type === activeFilter)
-  );
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+  
+  const fetchClasses = async () => {
+    try {
+      setLoading(true);
+      const response = await classService.getAll();
+      const formattedClasses = response.map((cls: any) => ({
+        ...cls,
+        day: getDayOfWeek(cls.date),
+        originalTime: cls.time, // Keep original time for sorting
+        time: formatTimeRange(cls.time, cls.duration),
+        spotsAvailable: cls.max_participants - cls.current_participants,
+        totalSpots: cls.max_participants
+      })) || [];
+      setClasses(formattedClasses);
+    } catch (error) {
+      toast.error("Σφάλμα κατά τη φόρτωση μαθημάτων");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const filteredClasses = classes.filter(cls => {
+    // Basic filters
+    if (cls.date !== activeDay || cls.status === 'cancelled') return false;
+    if (activeFilter !== "Όλα" && cls.type !== activeFilter) return false;
+    
+    // Time-based filtering: hide classes that have already started (for today only)
+    const today = new Date().toISOString().split('T')[0];
+    if (cls.date === today) {
+      const now = new Date();
+      const [hours, minutes] = cls.originalTime.split(':').map(Number);
+      const classTime = new Date();
+      classTime.setHours(hours, minutes, 0, 0);
+      
+      // Hide if class has already started
+      if (now > classTime) return false;
+    }
+    
+    return true;
+  }).sort((a, b) => {
+    // Sort by original time (convert HH:MM to minutes for comparison)
+    const timeToMinutes = (time: string) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+    return timeToMinutes(a.originalTime) - timeToMinutes(b.originalTime);
+  });
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   const handleClassClick = (classId: number) => {
     navigate(`/class/${classId}`);
@@ -106,20 +137,27 @@ const ClassSchedulePage = () => {
       <Header />
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Πρόγραμμα Μαθημάτων</h1>
+        {/* Personal Booking Calendar */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Το Ημερολόγιό σου</h2>
+          <BookingCalendar />
+        </div>
+        
+        <div className="flex items-center justify-between mb-4 mt-12">
+          <h1 className="text-2xl font-bold">Διαθέσιμα Μαθήματα</h1>
         </div>
         
         {/* Day Tabs */}
         <Tabs defaultValue={activeDay} onValueChange={setActiveDay} className="w-full mb-6">
           <TabsList className="w-full flex overflow-x-auto mb-2 no-scrollbar">
-            {DAYS_OF_WEEK.map((day) => (
+            {weekDates.map(({ day, date, fullDate }) => (
               <TabsTrigger 
-                key={day} 
-                value={day}
-                className="flex-1 min-w-[100px]"
+                key={fullDate} 
+                value={fullDate}
+                className="flex-1 min-w-[100px] flex flex-col py-2"
               >
-                {day}
+                <span className="text-sm font-medium">{day}</span>
+                <span className="text-xs text-muted-foreground">{date}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -142,8 +180,8 @@ const ClassSchedulePage = () => {
           </div>
           
           {/* Content for each day */}
-          {DAYS_OF_WEEK.map((day) => (
-            <TabsContent key={day} value={day} className="space-y-4">
+          {weekDates.map(({ fullDate }) => (
+            <TabsContent key={fullDate} value={fullDate} className="space-y-4">
               {filteredClasses.length > 0 ? (
                 filteredClasses.map((cls) => (
                   <Card 
@@ -158,6 +196,10 @@ const ClassSchedulePage = () => {
                           <div className="flex items-center text-muted-foreground text-sm mt-1">
                             <Clock className="mr-1 h-4 w-4" />
                             <span>{cls.time}</span>
+                          </div>
+                          <div className="flex items-center text-muted-foreground text-sm mt-1">
+                            <Users className="mr-1 h-4 w-4" />
+                            <span>{cls.current_participants || 0}/{cls.max_participants || 0} θέσεις</span>
                           </div>
                         </div>
                         <div className="text-right">

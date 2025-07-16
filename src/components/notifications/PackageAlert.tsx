@@ -19,22 +19,22 @@ const PackageAlert: React.FC<PackageAlertProps> = ({ type, daysRemaining = 0 }) 
         return {
           icon: <Package className="h-4 w-4" />,
           title: "Ειδοποίηση Τελευταίας Συνεδρίας",
-          description: "Αυτή είναι η τελευταία σας συνεδρία στο τρέχον πακέτο σας. Παρακαλούμε ανανεώστε για να συνεχίσετε να κλείνετε μαθήματα.",
-          greekDescription: "Προσοχή! Αυτή είναι η τελευταία σας συνεδρία. Παρακαλούμε ανανεώστε το πακέτο σας για να συνεχίσετε."
+          description: "Αυτή είναι η τελευταία σας συνεδρία! Για να συνεχίσετε να έχετε πρόσβαση στην εφαρμογή, θα πρέπει να κλείσετε νέο πακέτο.",
+          greekDescription: "Παρακαλούμε πληρώστε κατά τη διάρκεια της σημερινής σας συνεδρίας για να συνεχίσετε."
         };
       case "expiring-soon":
         return {
           icon: <Clock className="h-4 w-4" />,
           title: "Το Πακέτο σας Λήγει Σύντομα",
-          description: `Το πακέτο σας θα λήξει σε ${daysRemaining} ${daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}. Ανανεώστε τώρα για να διατηρήσετε την πρόσβαση.`,
-          greekDescription: `Το πακέτο σας λήγει σε ${daysRemaining} ${daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}! Ανανεώστε το τώρα.`
+          description: `Σας απομένουν μόνο ${daysRemaining} ${daysRemaining === 1 ? 'συνεδρία' : 'συνεδρίες'}! Για να συνεχίσετε να έχετε πρόσβαση στην εφαρμογή θα πρέπει να κλείσετε νέο πακέτο.`,
+          greekDescription: `Σκεφτείτε να αναβαθμίσετε σε μεγαλύτερο πακέτο για καλύτερη τιμή!`
         };
       case "expired":
         return {
           icon: <CircleAlert className="h-4 w-4" />,
           title: "Το Πακέτο σας Έληξε",
-          description: "Το πακέτο σας έχει λήξει. Ανανεώστε τώρα για να συνεχίσετε να κλείνετε μαθήματα και να χρησιμοποιείτε τις εγκαταστάσεις του γυμναστηρίου.",
-          greekDescription: "Το πακέτο σας έχει λήξει. Ανανεώστε τώρα για να συνεχίσετε να κάνετε κρατήσεις και να χρησιμοποιείτε τις εγκαταστάσεις του γυμναστηρίου."
+          description: "Δεν μπορείτε να κλείσετε νέα μαθήματα μέχρι να αγοράσετε νέο πακέτο.",
+          greekDescription: "Παρακαλούμε επικοινωνήστε με τη γραμματεία για να ανανεώσετε την συνδρομή σας."
         };
       default:
         return {
@@ -75,14 +75,6 @@ const PackageAlert: React.FC<PackageAlertProps> = ({ type, daysRemaining = 0 }) 
           <AlertDescription className="mt-1">
             <p className="mb-1">{content.description}</p>
             <p className="mb-3 text-sm opacity-80">{content.greekDescription}</p>
-            <Link to="/dashboard?tab=membership">
-              <Button 
-                size="sm"
-                variant={type === "expired" ? "destructive" : "default"}
-              >
-                Ανανεώστε Τώρα
-              </Button>
-            </Link>
           </AlertDescription>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,9 @@ import {
   Clock, 
   User, 
   Calendar as CalendarIcon, 
-  Dumbbell 
+  Dumbbell,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 import {
   Select,
@@ -18,97 +20,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import RateWorkoutDialog from "@/components/workouts/RateWorkoutDialog";
+import { bookingService } from "@/services/apiService";
+import { toast } from "sonner";
 
 // Define types for workout data
 interface Workout {
   id: number;
-  name: string;
+  class_name: string;
   date: string;
   time: string;
   instructor: string;
   type: string;
-  duration: string;
+  attended: boolean | number;
 }
 
-// Mock data for workout history
-const mockWorkoutHistory: Workout[] = [
-  {
-    id: 101,
-    name: "Power Yoga",
-    date: "May 22, 2025",
-    time: "07:30 - 08:30",
-    instructor: "Emma Wilson",
-    type: "Yoga",
-    duration: "60 minutes",
-  },
-  {
-    id: 102,
-    name: "HIIT Blast",
-    date: "May 20, 2025",
-    time: "12:00 - 12:45",
-    instructor: "Mike Johnson",
-    type: "HIIT",
-    duration: "45 minutes",
-  },
-  {
-    id: 103,
-    name: "Spin Class",
-    date: "May 18, 2025",
-    time: "18:00 - 19:00",
-    instructor: "Sarah Davis",
-    type: "Cycling",
-    duration: "60 minutes",
-  },
-  {
-    id: 104,
-    name: "Strength Training",
-    date: "May 15, 2025",
-    time: "08:00 - 09:00",
-    instructor: "Chris Taylor",
-    type: "Strength",
-    duration: "60 minutes",
-  },
-  {
-    id: 105,
-    name: "Personal Training",
-    date: "May 10, 2025",
-    time: "14:00 - 15:00",
-    instructor: "James Miller",
-    type: "Personal",
-    duration: "60 minutes",
-  },
-  {
-    id: 106,
-    name: "Boxing",
-    date: "May 5, 2025",
-    time: "19:00 - 20:00",
-    instructor: "Alex Johnson",
-    type: "Combat",
-    duration: "60 minutes",
-  },
-  {
-    id: 107,
-    name: "Pilates",
-    date: "April 28, 2025",
-    time: "10:00 - 11:00",
-    instructor: "Lisa Chen",
-    type: "Pilates",
-    duration: "60 minutes",
-  },
-];
 
 // Define the type for grouped workouts
 interface GroupedWorkouts {
   [monthYear: string]: Workout[];
 }
 
-// Group workouts by month
+// Group workouts by month  
 const groupWorkoutsByMonth = (workouts: Workout[]): GroupedWorkouts => {
   const grouped: GroupedWorkouts = {};
   
   workouts.forEach(workout => {
     const date = new Date(workout.date);
-    const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const monthYear = date.toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
     
     if (!grouped[monthYear]) {
       grouped[monthYear] = [];
@@ -124,24 +62,42 @@ const WorkoutHistoryPage = () => {
   const [filter, setFilter] = useState("all");
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWorkoutHistory();
+  }, []);
+
+  const fetchWorkoutHistory = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching workout history...');
+      const data = await bookingService.getUserPastBookings();
+      console.log('Received data:', data);
+      console.log('Data length:', data.length);
+      setWorkouts(data);
+    } catch (error) {
+      console.error('Error fetching workout history:', error);
+      toast.error('Σφάλμα κατά τη φόρτωση του ιστορικού προπονήσεων');
+    } finally {
+      setLoading(false);
+    }
+  };
   
-  // For demo purposes, we'll show the empty state if filter is set to "empty"
-  const hasWorkouts = filter !== "empty" && mockWorkoutHistory.length > 0;
+  const hasWorkouts = workouts.length > 0;
   
-  const filteredWorkouts = mockWorkoutHistory.filter(workout => {
+  const filteredWorkouts = workouts.filter(workout => {
     if (filter === "all") return true;
-    if (filter === "yoga") return workout.type === "Yoga";
-    if (filter === "hiit") return workout.type === "HIIT";
-    if (filter === "strength") return workout.type === "Strength";
+    if (filter === "yoga") return workout.type.toLowerCase().includes("yoga");
+    if (filter === "hiit") return workout.type.toLowerCase().includes("hiit");
+    if (filter === "strength") return workout.type.toLowerCase().includes("strength");
     return true;
   });
   
   const groupedWorkouts = groupWorkoutsByMonth(filteredWorkouts);
   const totalWorkouts = filteredWorkouts.length;
-  const totalMinutes = filteredWorkouts.reduce((acc, curr) => {
-    const minutes = parseInt(curr.duration.split(" ")[0]);
-    return acc + minutes;
-  }, 0);
+  const totalMinutes = filteredWorkouts.length * 60; // Assume 60 minutes per workout
   
   const handleOpenRatingDialog = (workout: Workout) => {
     setSelectedWorkout(workout);
@@ -170,7 +126,11 @@ const WorkoutHistoryPage = () => {
           </Select>
         </div>
         
-        {hasWorkouts ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-pulse text-lg">Φόρτωση ιστορικού προπονήσεων...</div>
+          </div>
+        ) : hasWorkouts ? (
           <>
             {/* Stats Summary */}
             <Card className="mb-6">
@@ -205,7 +165,12 @@ const WorkoutHistoryPage = () => {
                                 <span className="bg-muted text-xs font-medium rounded-full px-2 py-1 mr-2">
                                   {workout.type}
                                 </span>
-                                <h3 className="font-medium text-base">{workout.name}</h3>
+                                <h3 className="font-medium text-base">{workout.class_name}</h3>
+                                {(workout.attended === true || workout.attended === 1) ? (
+                                  <CheckCircle className="h-5 w-5 text-green-600 ml-2" />
+                                ) : (
+                                  <XCircle className="h-5 w-5 text-red-600 ml-2" />
+                                )}
                               </div>
                               
                               <div className="flex flex-wrap items-center text-sm text-muted-foreground gap-y-1">
@@ -217,16 +182,29 @@ const WorkoutHistoryPage = () => {
                                   <Clock className="h-4 w-4 mr-1 text-primary" />
                                   {workout.time}
                                 </div>
+                                <div className="flex items-center mr-4">
+                                  <User className="h-4 w-4 mr-1 text-primary" />
+                                  {workout.instructor}
+                                </div>
                               </div>
                             </div>
                             
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleOpenRatingDialog(workout)}
-                            >
-                              Αξιολόγηση
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-sm font-medium ${
+                                (workout.attended === true || workout.attended === 1) ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {(workout.attended === true || workout.attended === 1) ? 'Παρουσία' : 'Απουσία'}
+                              </span>
+                              {(workout.attended === true || workout.attended === 1) && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleOpenRatingDialog(workout)}
+                                >
+                                  Αξιολόγηση
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -242,12 +220,12 @@ const WorkoutHistoryPage = () => {
             <div className="bg-muted/40 rounded-full p-6 mb-4">
               <Dumbbell className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">No workout history yet</h2>
+            <h2 className="text-xl font-semibold mb-2">Δεν υπάρχει ιστορικό προπονήσεων</h2>
             <p className="text-muted-foreground max-w-md mb-6">
-              Your workout history is empty. Time to hit the gym and start logging those workouts!
+              Το ιστορικό προπονήσεών σου είναι άδειο. Ώρα να ξεκινήσεις!
             </p>
             <Link to="/schedule">
-              <Button>Book a Class</Button>
+              <Button>Κλείσε ένα Μάθημα</Button>
             </Link>
           </div>
         )}
@@ -257,7 +235,7 @@ const WorkoutHistoryPage = () => {
       <RateWorkoutDialog 
         open={ratingDialogOpen} 
         onOpenChange={setRatingDialogOpen} 
-        workout={selectedWorkout ? { id: selectedWorkout.id, name: selectedWorkout.name, date: selectedWorkout.date } : null}
+        workout={selectedWorkout ? { id: selectedWorkout.id, name: selectedWorkout.class_name, date: selectedWorkout.date } : null}
       />
     </div>
   );
