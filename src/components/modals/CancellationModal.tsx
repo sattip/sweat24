@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, Calendar as CalendarIcon, Clock, Info, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { apiRequest, API_ENDPOINTS } from "@/config/api";
+import { apiRequest, API_ENDPOINTS, buildApiUrl } from "@/config/api";
 import { bookingService } from "@/services/apiService";
 
 interface CancellationModalProps {
@@ -61,7 +61,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       }
       const user = JSON.parse(userStr);
       
-      const response = await fetch(`http://localhost:8000/api/test-policy/${booking.id}`, {
+      const response = await fetch(buildApiUrl(`/test-policy/${booking.id}`), {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -96,7 +96,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
   const fetchAvailableClasses = async () => {
     try {
       // Use direct fetch to avoid auth issues
-      const response = await fetch("http://localhost:8000/api/v1/classes?status=active", {
+      const response = await fetch(buildApiUrl("/classes?status=active"), {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

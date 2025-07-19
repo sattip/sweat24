@@ -1,9 +1,9 @@
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import { apiRequest, API_ENDPOINTS, buildApiUrl } from '@/config/api';
 
 // Authentication
 export const authService = {
   async login(email: string, password: string) {
-    const response = await fetch('http://localhost:8080/api/v1/auth/login-simple', {
+    const response = await fetch(buildApiUrl('/auth/login-simple'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const authService = {
 export const classService = {
   async getAll() {
     // Public endpoint - no authentication needed
-    const response = await fetch(`http://localhost:8080/api/v1/classes`, {
+    const response = await fetch(buildApiUrl('/classes'), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -56,7 +56,7 @@ export const classService = {
 
   async getById(id: string | number) {
     // Public endpoint - no authentication needed
-    const response = await fetch(`http://localhost:8080/api/v1/classes/${id}`, {
+    const response = await fetch(buildApiUrl(`/classes/${id}`), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -79,7 +79,7 @@ export const bookingService = {
     const user = JSON.parse(userStr);
     
     // Use direct fetch with user_id parameter
-    const url = `http://localhost:8080/api/v1/bookings?user_id=${user.id}`;
+    const url = buildApiUrl(`/bookings?user_id=${user.id}`);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -101,7 +101,7 @@ export const bookingService = {
     const user = JSON.parse(userStr);
     
     // Use direct fetch with user_id parameter
-    const url = `http://localhost:8080/api/v1/bookings?user_id=${user.id}`;
+    const url = buildApiUrl(`/bookings?user_id=${user.id}`);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -129,7 +129,7 @@ export const bookingService = {
     };
     
     // Use direct fetch with user_id
-    const response = await fetch(`http://localhost:8080/api/v1/bookings`, {
+    const response = await fetch(buildApiUrl('/bookings'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ export const bookingService = {
     if (!userStr) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
-    const response = await fetch(`http://localhost:8080/api/v1/bookings/${id}/cancel`, {
+    const response = await fetch(buildApiUrl(`/bookings/${id}/cancel`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ export const bookingService = {
     if (!userStr) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
-    const response = await fetch(`http://localhost:8080/api/v1/bookings/${id}/reschedule`, {
+    const response = await fetch(buildApiUrl(`/bookings/${id}/reschedule`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ export const bookingService = {
     console.log('getUserPastBookings - user:', user);
     
     // Use test endpoint to bypass auth issues for now
-    const url = `http://localhost:8080/api/test-history?user_id=${user.id}`;
+    const url = buildApiUrl(`/test-history?user_id=${user.id}`);
     console.log('getUserPastBookings - URL:', url);
     const response = await fetch(url, {
       method: 'GET',
@@ -229,7 +229,7 @@ export const bookingService = {
 // Trainers
 export const trainerService = {
   async getAll() {
-    const response = await fetch(`http://localhost:8080/api/v1/trainers`, {
+    const response = await fetch(buildApiUrl('/trainers'), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -240,7 +240,7 @@ export const trainerService = {
   },
 
   async getById(id: string | number) {
-    const response = await fetch(`http://localhost:8080/api/v1/trainers/${id}`, {
+    const response = await fetch(buildApiUrl(`/trainers/${id}`), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -255,7 +255,7 @@ export const trainerService = {
 export const packageService = {
   async getAll() {
     // Use direct fetch to avoid auth issues
-    const response = await fetch(`http://localhost:8080/api/v1/packages`, {
+    const response = await fetch(buildApiUrl('/packages'), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -266,7 +266,7 @@ export const packageService = {
   },
 
   async getById(id: string | number) {
-    const response = await fetch(`http://localhost:8080/api/v1/packages/${id}`, {
+    const response = await fetch(buildApiUrl(`/packages/${id}`), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -282,7 +282,7 @@ export const dashboardService = {
   async getStats() {
     try {
       // Use direct fetch to avoid auth redirect
-      const response = await fetch(`http://localhost:8080/api/v1/dashboard/stats`, {
+      const response = await fetch(buildApiUrl('/dashboard/stats'), {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -329,7 +329,7 @@ export const waitlistService = {
     if (!userStr) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
-    const response = await fetch(`http://localhost:8080/api/v1/classes/${classId}/waitlist/join`, {
+    const response = await fetch(buildApiUrl(`/classes/${classId}/waitlist/join`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -347,7 +347,7 @@ export const waitlistService = {
     if (!userStr) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
-    const response = await fetch(`http://localhost:8080/api/v1/classes/${classId}/waitlist/leave`, {
+    const response = await fetch(buildApiUrl(`/classes/${classId}/waitlist/leave`), {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -370,8 +370,8 @@ export const waitlistService = {
 export const storeProductService = {
   async getAll(category?: string) {
     const url = category 
-      ? `http://localhost:8080/api/v1/store/products?category=${category}`
-      : `http://localhost:8080/api/v1/store/products`;
+      ? buildApiUrl(`/store/products?category=${category}`)
+      : buildApiUrl('/store/products');
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -383,7 +383,7 @@ export const storeProductService = {
   },
 
   async getById(slug: string) {
-    const response = await fetch(`http://localhost:8080/api/v1/store/products/${slug}`, {
+    const response = await fetch(buildApiUrl(`/store/products/${slug}`), {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -400,7 +400,7 @@ export const apiService = {
     const userStr = localStorage.getItem('sweat24_user');
     if (!userStr) throw new Error('Not authenticated');
     
-    const response = await fetch(`http://localhost:8080/api/v1${url}`, {
+    const response = await fetch(buildApiUrl(url), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -416,7 +416,7 @@ export const apiService = {
     const userStr = localStorage.getItem('sweat24_user');
     if (!userStr) throw new Error('Not authenticated');
     
-    const response = await fetch(`http://localhost:8080/api/v1${url}`, {
+    const response = await fetch(buildApiUrl(url), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -433,7 +433,7 @@ export const apiService = {
     const userStr = localStorage.getItem('sweat24_user');
     if (!userStr) throw new Error('Not authenticated');
     
-    const response = await fetch(`http://localhost:8080/api/v1${url}`, {
+    const response = await fetch(buildApiUrl(url), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
