@@ -131,9 +131,11 @@ export const bookingService = {
   },
 
   async create(data: any) {
-    // Get user from localStorage
+    // Get user from localStorage and auth token
     const userStr = localStorage.getItem('sweat24_user');
-    if (!userStr) {
+    const token = localStorage.getItem('auth_token');
+    
+    if (!userStr || !token) {
       throw new Error('Not authenticated');
     }
     
@@ -145,10 +147,11 @@ export const bookingService = {
       user_id: user.id
     };
     
-    // Use direct fetch with user_id
+    // Use direct fetch with authorization header
     const response = await fetch(buildApiUrl('/bookings'), {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -167,17 +170,19 @@ export const bookingService = {
   },
 
   async cancel(id: string | number, reason?: string) {
-    // Use direct fetch to avoid auth issues
+    // Get user and auth token
     const userStr = localStorage.getItem('sweat24_user');
-    if (!userStr) throw new Error('Not authenticated');
+    const token = localStorage.getItem('auth_token');
+    
+    if (!userStr || !token) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
     const response = await fetch(buildApiUrl(`/bookings/${id}/cancel`), {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'X-User-ID': user.id.toString()
       },
       body: JSON.stringify({ 
         cancellation_reason: reason,
@@ -190,15 +195,17 @@ export const bookingService = {
 
   async reschedule(id: string | number, newClassId: string | number, reason?: string) {
     const userStr = localStorage.getItem('sweat24_user');
-    if (!userStr) throw new Error('Not authenticated');
+    const token = localStorage.getItem('auth_token');
+    
+    if (!userStr || !token) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
     const response = await fetch(buildApiUrl(`/bookings/${id}/reschedule`), {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'X-User-ID': user.id.toString()
       },
       body: JSON.stringify({ 
         new_class_id: newClassId,
