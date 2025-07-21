@@ -51,8 +51,13 @@ class AuthService {
     // Clear any existing auth data before login
     this.clearAuth();
     
-    const response = await apiRequest('/auth/login', {
+    // Use direct fetch to the correct backend domain
+    const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/login', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: JSON.stringify(credentials),
     });
 
@@ -81,9 +86,13 @@ class AuthService {
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    // First, create the user
-    const registerResponse = await apiRequest(API_ENDPOINTS.auth.register, {
+    // First, create the user - use direct fetch to correct backend domain
+    const registerResponse = await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/register', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: JSON.stringify({
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
@@ -105,8 +114,13 @@ class AuthService {
     
     // Then, save the signature
     try {
-      await apiRequest(API_ENDPOINTS.signatures, {
+      const signatureResponse = await fetch('https://sweat93laravel.obs.com.gr/api/v1/signatures', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authData.token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: JSON.stringify({
           user_id: authData.user.id,
           signature_data: data.signature,
@@ -124,9 +138,16 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await apiRequest(API_ENDPOINTS.auth.logout, {
-        method: 'POST',
-      });
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
