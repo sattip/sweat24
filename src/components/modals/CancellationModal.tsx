@@ -87,15 +87,23 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       setPolicy(data);
     } catch (error) {
       console.error("Error checking policy:", error);
-      // Fallback to basic policy
+      
+      // Calculate hours until class for fallback
+      const classDateTime = new Date(booking.date + ' ' + booking.time);
+      const now = new Date();
+      const hoursUntilClass = (classDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+      
+      console.log('🔍 FALLBACK: Calculated hours until class:', hoursUntilClass);
+      
+      // Fallback to basic policy with correct hours calculation
       setPolicy({
-        can_cancel: true,
-        can_reschedule: false,
-        can_cancel_without_penalty: false,
+        can_cancel: hoursUntilClass >= 6,
+        can_reschedule: hoursUntilClass >= 3,
+        can_cancel_without_penalty: hoursUntilClass >= 6,
         penalty_percentage: 0,
-        hours_until_class: 0,
+        hours_until_class: hoursUntilClass,
         policy: {
-          name: "Βασική Πολιτική",
+          name: "Βασική Πολιτική (Fallback)",
           description: "Βασική πολιτική ακύρωσης και μετάθεσης"
         }
       });
