@@ -66,8 +66,10 @@ const DashboardPage = () => {
       ]);
       
       setStats(statsData);
-      setUpcomingClasses(classesData.data?.slice(0, 3) || []);
-      setRecentBookings(bookingsData.data?.slice(0, 5) || []);
+      const classesArray = Array.isArray(classesData) ? classesData : (Array.isArray(classesData?.data) ? classesData.data : []);
+      const bookingsArray = Array.isArray(bookingsData) ? bookingsData : (Array.isArray(bookingsData?.data) ? bookingsData.data : []);
+      setUpcomingClasses(classesArray.slice(0, 3));
+      setRecentBookings(bookingsArray.slice(0, 5));
     } catch (error) {
       toast.error("Σφάλμα κατά τη φόρτωση δεδομένων");
       console.error(error);

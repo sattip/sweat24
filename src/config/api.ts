@@ -1,5 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-const API_VERSION = '/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://sweat93laravel.obs.com.gr';
+const API_VERSION = '/api';
 
 export const API_URL = `${API_BASE_URL}${API_VERSION}`;
 

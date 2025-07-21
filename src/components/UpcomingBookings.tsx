@@ -40,8 +40,9 @@ export const UpcomingBookings: React.FC = () => {
     try {
       setLoading(true);
       const allBookings = await bookingService.getUserBookings();
-      // Filter for upcoming bookings only
-      const upcoming = allBookings
+      // Ensure we have an array and filter for upcoming bookings only
+      const bookingsArray = Array.isArray(allBookings) ? allBookings : [];
+      const upcoming = bookingsArray
         .filter(b => new Date(b.date) >= new Date() && !b.checked_in)
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(0, 3); // Show only next 3 bookings

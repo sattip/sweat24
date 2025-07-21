@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Star, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { buildApiUrl } from "@/config/api";
 
 const EvaluationPage = () => {
   const { token } = useParams();
@@ -29,7 +30,7 @@ const EvaluationPage = () => {
 
   const fetchEvaluation = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/evaluations/${token}`);
+      const response = await fetch(buildApiUrl(`/evaluations/${token}`));
       const data = await response.json();
       
       if (!response.ok) {
@@ -58,7 +59,7 @@ const EvaluationPage = () => {
     setSubmitting(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/evaluations/${token}/submit`,
+        buildApiUrl(`/evaluations/${token}/submit`),
         {
           method: 'POST',
           headers: {

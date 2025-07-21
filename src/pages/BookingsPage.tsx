@@ -29,7 +29,7 @@ const BookingsPage = () => {
       setLoading(true);
       const response = await bookingService.getAll();
       // The API returns an array directly, not wrapped in data
-      const allBookings = Array.isArray(response) ? response : (response.data || []);
+      const allBookings = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []);
       console.log('BookingsPage - All bookings received:', allBookings);
       console.log('BookingsPage - Waitlist bookings:', allBookings.filter(b => b.status === 'waitlist' || b.is_waitlist));
       

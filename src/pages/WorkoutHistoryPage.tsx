@@ -75,8 +75,9 @@ const WorkoutHistoryPage = () => {
       console.log('Fetching workout history...');
       const data = await bookingService.getUserPastBookings();
       console.log('Received data:', data);
-      console.log('Data length:', data.length);
-      setWorkouts(data);
+      const workoutsArray = Array.isArray(data) ? data : [];
+      console.log('Data length:', workoutsArray.length);
+      setWorkouts(workoutsArray);
     } catch (error) {
       console.error('Error fetching workout history:', error);
       toast.error('Σφάλμα κατά τη φόρτωση του ιστορικού προπονήσεων');

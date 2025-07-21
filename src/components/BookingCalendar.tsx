@@ -45,8 +45,10 @@ export const BookingCalendar: React.FC = () => {
         bookingService.getUserPastBookings()
       ]);
       
-      // Combine both arrays - future bookings plus past bookings with attendance status
-      const allBookings = [...futureBookings, ...pastBookings];
+      // Ensure we have arrays and combine them
+      const futureArray = Array.isArray(futureBookings) ? futureBookings : [];
+      const pastArray = Array.isArray(pastBookings) ? pastBookings : [];
+      const allBookings = [...futureArray, ...pastArray];
       console.log('BookingCalendar - All bookings received:', allBookings);
       console.log('BookingCalendar - Waitlist bookings:', allBookings.filter(b => b.status === 'waitlist' || b.is_waitlist));
       setBookings(allBookings);

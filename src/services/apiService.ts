@@ -87,8 +87,12 @@ export const bookingService = {
         'Accept': 'application/json',
       },
     });
-    if (!response.ok) throw new Error('Failed to fetch bookings');
-    return response.json();
+    if (!response.ok) {
+      console.log('Failed to fetch user bookings, returning empty array');
+      return [];
+    }
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
   },
 
   async getAll() {
@@ -109,8 +113,12 @@ export const bookingService = {
         'Accept': 'application/json',
       },
     });
-    if (!response.ok) throw new Error('Failed to fetch bookings');
-    return response.json();
+    if (!response.ok) {
+      console.log('Failed to fetch all bookings, returning empty array');
+      return [];
+    }
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
   },
 
   async create(data: any) {
@@ -197,24 +205,31 @@ export const bookingService = {
   },
 
   async getUserPastBookings() {
-    // Get user token from localStorage
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      console.log('No token found in localStorage');
+    // Get user from localStorage (using the same pattern as other methods)
+    const userStr = localStorage.getItem('sweat24_user');
+    if (!userStr) {
+      console.log('No user found in localStorage');
       return [];
     }
     
-    // Use the correct secured endpoint with authorization
-    const response = await fetch('/api/v1/profile/booking-history', {
+    const user = JSON.parse(userStr);
+    
+    // Use the test-history endpoint as requested by backend team
+    const url = buildApiUrl(`/test-history?user_id=${user.id}`);
+    const response = await fetch(url, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+      },
     });
     
-    if (!response.ok) throw new Error('Failed to fetch past bookings');
+    if (!response.ok) {
+      console.log('Failed to fetch past bookings, returning empty array');
+      return [];
+    }
+    
     const data = await response.json();
-    return data;
+    return Array.isArray(data) ? data : [];
   }
 };
 
@@ -281,11 +296,14 @@ export const dashboardService = {
         }
       });
       if (!response.ok) {
+        console.log(`Dashboard stats API returned ${response.status}, returning default stats`);
         // Return empty stats instead of throwing error
         return { bookings_today: 0, total_users: 0, active_classes: 0 };
       }
-      return response.json();
+      const data = await response.json();
+      return data || { bookings_today: 0, total_users: 0, active_classes: 0 };
     } catch (error) {
+      console.log('Dashboard stats network error, returning default stats:', error);
       // Network error - return empty stats
       return { bookings_today: 0, total_users: 0, active_classes: 0 };
     }
