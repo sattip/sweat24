@@ -61,7 +61,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       }
       const user = JSON.parse(userStr);
       
-      const response = await fetch(buildApiUrl(`/test-policy/${booking.id}`), {
+      const response = await fetch(buildApiUrl(`/bookings/${booking.id}/policy-check`), {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -145,8 +145,8 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
 
   const handleSubmit = async () => {
     // Enforce policy restrictions
-    if (action === "cancel" && policy?.hours_until_class < 24) {
-      toast.error("Η ακύρωση δεν επιτρέπεται - απαιτούνται τουλάχιστον 24 ώρες πριν το μάθημα");
+    if (action === "cancel" && policy?.hours_until_class < 6) {
+      toast.error("Η ακύρωση δεν επιτρέπεται - απαιτούνται τουλάχιστον 6 ώρες πριν το μάθημα");
       return;
     }
     

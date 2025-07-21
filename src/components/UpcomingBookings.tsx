@@ -65,11 +65,11 @@ export const UpcomingBookings: React.FC = () => {
     }
   };
 
-  const isWithin24Hours = (date: string) => {
+  const isWithin6Hours = (date: string) => {
     const bookingDate = new Date(date);
     const now = new Date();
     const hoursDiff = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    return hoursDiff <= 24;
+    return hoursDiff <= 6;
   };
 
   return (
@@ -109,7 +109,7 @@ export const UpcomingBookings: React.FC = () => {
         ) : (
           <div className="space-y-3">
             {bookings.map((booking) => {
-              const canCancel = !isWithin24Hours(booking.date);
+              const canCancel = !isWithin6Hours(booking.date);
               
               return (
                 <div key={booking.id} className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
