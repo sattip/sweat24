@@ -73,17 +73,6 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       }
       
       const data = await response.json();
-      console.log('🔍 Policy data from backend:', data);
-      console.log('🔍 Hours until class:', data.hours_until_class);
-      
-      // Frontend calculation for comparison
-      const classDateTime = new Date(booking.date + ' ' + booking.time);
-      const now = new Date();
-      const frontendHours = (classDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-      console.log('🔍 Frontend calculated hours:', frontendHours);
-      console.log('🔍 Class date/time:', booking.date, booking.time);
-      console.log('🔍 Current time:', now.toISOString());
-      
       setPolicy(data);
     } catch (error) {
       console.error("Error checking policy:", error);
@@ -92,8 +81,6 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       const classDateTime = new Date(booking.date + ' ' + booking.time);
       const now = new Date();
       const hoursUntilClass = (classDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-      
-      console.log('🔍 FALLBACK: Calculated hours until class:', hoursUntilClass);
       
       // Fallback to basic policy with correct hours calculation
       setPolicy({

@@ -72,13 +72,7 @@ export const classService = {
       },
     });
     if (!response.ok) throw new Error('Failed to fetch class');
-    
-    const classData = await response.json();
-    console.log('🔍 BACKEND CLASS DATA:', classData);
-    console.log('🔍 current_participants:', classData.current_participants);
-    console.log('🔍 max_participants:', classData.max_participants);
-    
-    return classData;
+    return response.json();
   }
 };
 
