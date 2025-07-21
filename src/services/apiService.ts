@@ -159,19 +159,26 @@ export const bookingService = {
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
+      let errorMessage = 'Failed to create booking';
       
-      // Parse error message if JSON
       try {
+        const errorText = await response.text();
+        console.log('🔍 Raw error response:', errorText);
+        
+        // Try to parse as JSON
         const errorData = JSON.parse(errorText);
+        console.log('🔍 Parsed error data:', errorData);
+        
         if (errorData.message) {
-          throw new Error(errorData.message);
+          errorMessage = errorData.message;
         }
       } catch (parseError) {
-        // Not JSON, use generic message
+        console.log('🔍 Error parsing response:', parseError);
+        // Keep default message if can't parse
       }
       
-      throw new Error('Failed to create booking');
+      console.log('🔍 Final error message:', errorMessage);
+      throw new Error(errorMessage);
     }
     return response.json();
   },
