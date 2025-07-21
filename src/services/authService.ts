@@ -23,6 +23,7 @@ export interface User {
   membership_type: string;
   phone?: string;
   status: string;
+  has_signed_terms?: boolean;
   remaining_sessions?: number;
   total_sessions?: number;
   used_sessions?: number;
@@ -72,7 +73,12 @@ class AuthService {
       throw new Error(data.message || 'Login failed');
     }
     
-    // Store user data and token
+    // Check if user is pending
+    if (data.user && data.user.status === 'pending') {
+      throw new Error('Ο λογαριασμός σας βρίσκεται σε αναμονή έγκρισης. Θα λάβετε email μόλις εγκριθεί από τη γραμματεία.');
+    }
+    
+    // Store user data and token only for approved users
     localStorage.setItem('sweat24_user', JSON.stringify(data.user));
     localStorage.setItem('auth_token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
@@ -108,30 +114,12 @@ class AuthService {
 
     const authData = await registerResponse.json();
     
-    // Store auth data
-    localStorage.setItem('auth_token', authData.token);
-    localStorage.setItem('user', JSON.stringify(authData.user));
+    // Don't store auth data for pending users - they can't login yet
+    // localStorage.setItem('auth_token', authData.token);
+    // localStorage.setItem('user', JSON.stringify(authData.user));
     
-    // Then, save the signature
-    try {
-      const signatureResponse = await fetch('https://sweat93laravel.obs.com.gr/api/v1/signatures', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authData.token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: authData.user.id,
-          signature_data: data.signature,
-          document_type: data.documentType || 'terms_and_conditions',
-          document_version: data.documentVersion || '1.0',
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to save signature:', error);
-      // Don't fail the registration if signature saving fails
-    }
+    // We skip signature saving during registration since user can't login yet
+    // Signature will be collected when user logs in after approval
     
     return authData;
   }

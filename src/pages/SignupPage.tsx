@@ -49,12 +49,13 @@ const SignupPage: React.FC = () => {
       // Register user with basic data first
       await authService.register(registerData);
       
-      toast.success("Επιτυχής εγγραφή! Ο λογαριασμός σας βρίσκεται σε αναμονή έγκρισης.");
+      toast.success("Επιτυχής εγγραφή!");
       
       // TODO: Save additional medical and emergency contact data to backend
       console.log("Additional data to save:", additionalData);
       
-      navigate("/dashboard");
+      // Redirect to success page instead of dashboard
+      navigate("/signup-success");
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(error instanceof Error ? error.message : "Σφάλμα κατά την εγγραφή");

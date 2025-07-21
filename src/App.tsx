@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import SignupSuccessPage from "./pages/SignupSuccessPage";
 import DashboardPage from "./pages/DashboardPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import ClassSchedulePage from "./pages/ClassSchedulePage";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/signup-success" element={<SignupSuccessPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
             <Route path="/class/:classId" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />

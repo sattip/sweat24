@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Clock, FileText, PenTool } from "lucide-react";
+import { Clock, FileText, PenTool, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import SignaturePad, { SignaturePadRef } from "../SignaturePad";
 
@@ -46,22 +46,22 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
       <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-orange-500" />
-            Ολοκλήρωση Εγγραφής - {userName}
+            <FileText className="h-5 w-5 text-primary" />
+            Όροι Χρήσης και Κανονισμοί - {userName}
           </DialogTitle>
           <DialogDescription>
-            Ο λογαριασμός σας είναι σε κατάσταση αναμονής. Για να ολοκληρωθεί η διαδικασία,
+            Καλώς ήρθατε στο Sweat24! Για να ολοκληρωθεί η ενεργοποίηση του λογαριασμού σας,
             παρακαλώ διαβάστε και υπογράψτε τους όρους χρήσης.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Status Alert */}
-          <Alert>
-            <Clock className="h-4 w-4" />
-            <AlertDescription>
-              Ο λογαριασμός σας βρίσκεται σε αναμονή έγκρισης από τη γραμματεία. 
-              Μετά την υπογραφή των όρων, θα ενημερωθείτε μόλις ενεργοποιηθεί ο λογαριασμός σας.
+          {/* Welcome Alert */}
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-900">
+              Ο λογαριασμός σας έχει εγκριθεί! Παρακαλώ διαβάστε και υπογράψτε τους όρους χρήσης 
+              για να ξεκινήσετε να χρησιμοποιείτε την εφαρμογή.
             </AlertDescription>
           </Alert>
 
@@ -172,7 +172,7 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
             <Alert className="border-green-200 bg-green-50">
               <PenTool className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-700">
-                Η υπογραφή σας αποθηκεύτηκε επιτυχώς! Θα ενημερωθείτε μόλις ενεργοποιηθεί ο λογαριασμός σας.
+                Η υπογραφή σας αποθηκεύτηκε επιτυχώς! Μπορείτε τώρα να χρησιμοποιήσετε όλες τις λειτουργίες της εφαρμογής.
               </AlertDescription>
             </Alert>
           )}

@@ -33,8 +33,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Check if user is pending and show modal
-    if (user && user.status === 'pending') {
+    // Show modal only for approved users who haven't signed terms
+    if (user && user.status === 'active' && !user.has_signed_terms) {
       // Check if user has already signed terms during this session
       const hasSignedThisSession = sessionStorage.getItem(`signed_terms_${user.id}`);
       if (!hasSignedThisSession) {
