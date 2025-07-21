@@ -3,7 +3,7 @@ import { apiRequest, API_ENDPOINTS, buildApiUrl } from '@/config/api';
 // Authentication
 export const authService = {
   async login(email: string, password: string) {
-    const response = await fetch(buildApiUrl('/auth/login-simple'), {
+    const response = await fetch(buildApiUrl('/auth/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,8 +18,15 @@ export const authService = {
     
     const data = await response.json();
     if (data.success && data.user) {
-      // Store user in localStorage
+      // Store BOTH user data AND auth token
       localStorage.setItem('sweat24_user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Store auth token if provided
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
+      
       return data.user;
     }
     
@@ -28,6 +35,8 @@ export const authService = {
   
   logout() {
     localStorage.removeItem('sweat24_user');
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth_token');
   },
   
   getCurrentUser() {
@@ -289,13 +298,20 @@ export const packageService = {
 export const dashboardService = {
   async getStats() {
     try {
-      // Use direct fetch to avoid auth redirect
+      // Get auth token for authenticated request
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.log('No auth token found, returning default stats');
+        return { bookings_today: 0, total_users: 0, active_classes: 0 };
+      }
+
       const response = await fetch(buildApiUrl('/dashboard/stats'), {
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
         }
       });
+      
       if (!response.ok) {
         console.log(`Dashboard stats API returned ${response.status}, returning default stats`);
         // Return empty stats instead of throwing error

@@ -34,13 +34,22 @@ export function useNotifications() {
     try {
       const response = await apiRequest('/notifications/user?per_page=20');
       
-      // If unauthorized, just return silently
+      // Handle different HTTP status codes gracefully
       if (response.status === 401) {
+        // Unauthorized - just return silently
+        return;
+      }
+      
+      if (response.status === 404) {
+        // Endpoint not found - backend doesn't have notifications API yet
+        console.log('Notifications endpoint not available (404)');
         return;
       }
       
       if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
+        // Other errors - log but don't crash
+        console.log(`Notifications API returned ${response.status}, notifications disabled`);
+        return;
       }
       
       const result = await response.json();
@@ -66,42 +75,44 @@ export function useNotifications() {
         });
       }
     } catch (error) {
-      // Only log errors that aren't auth-related
-      if (!error.message?.includes('401')) {
-        console.error('Error fetching notifications:', error);
-      }
+      // Network or parsing errors - handle gracefully
+      console.log('Notifications temporarily unavailable:', error.message);
     }
   };
   
   const markAsRead = async (notificationId: number) => {
     try {
-      await apiRequest(`/notifications/${notificationId}/read`, {
+      const response = await apiRequest(`/notifications/${notificationId}/read`, {
         method: 'POST'
       });
       
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      if (response.ok) {
+        setNotifications(prev => 
+          prev.map(n => 
+            n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
+          )
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.log('Mark as read temporarily unavailable:', error.message);
     }
   };
   
   const markAllAsRead = async () => {
     try {
-      await apiRequest('/notifications/read-all', {
+      const response = await apiRequest('/notifications/read-all', {
         method: 'POST'
       });
       
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
-      );
-      setUnreadCount(0);
+      if (response.ok) {
+        setNotifications(prev => 
+          prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
+        );
+        setUnreadCount(0);
+      }
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.log('Mark all as read temporarily unavailable:', error.message);
     }
   };
   
