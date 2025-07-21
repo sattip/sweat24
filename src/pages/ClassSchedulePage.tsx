@@ -82,6 +82,23 @@ const ClassSchedulePage = () => {
         totalSpots: cls.max_participants
       })) || [];
       setClasses(formattedClasses);
+      
+      // Auto-select first day with classes if current day has no classes
+      if (formattedClasses.length > 0) {
+        const today = weekDates[0]?.fullDate;
+        const todayHasClasses = formattedClasses.some(cls => cls.date === today && cls.status !== 'cancelled');
+        
+        if (!todayHasClasses) {
+          // Find first day in the week that has classes
+          const firstDayWithClasses = weekDates.find(day => 
+            formattedClasses.some(cls => cls.date === day.fullDate && cls.status !== 'cancelled')
+          );
+          
+          if (firstDayWithClasses) {
+            setActiveDay(firstDayWithClasses.fullDate);
+          }
+        }
+      }
     } catch (error) {
       toast.error("Σφάλμα κατά τη φόρτωση μαθημάτων");
       console.error(error);
