@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService, User } from '@/services/authService';
+import { PendingUserModal } from '@/components/modals/PendingUserModal';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
@@ -23,11 +25,23 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPendingModal, setShowPendingModal] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in on mount
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    // Check if user is pending and show modal
+    if (user && user.status === 'pending') {
+      // Check if user has already signed terms during this session
+      const hasSignedThisSession = sessionStorage.getItem(`signed_terms_${user.id}`);
+      if (!hasSignedThisSession) {
+        setShowPendingModal(true);
+      }
+    }
+  }, [user]);
 
   const checkAuth = async () => {
     try {
@@ -65,6 +79,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(currentUser);
   };
 
+  const handlePendingUserSignature = async (signatureData: string) => {
+    try {
+      // TODO: Save signature to backend
+      console.log('Saving signature for pending user:', {
+        userId: user?.id,
+        signature: signatureData,
+        signedAt: new Date().toISOString()
+      });
+
+      // Mark as signed for this session
+      if (user) {
+        sessionStorage.setItem(`signed_terms_${user.id}`, 'true');
+      }
+
+      setShowPendingModal(false);
+      toast.success('Η υπογραφή σας καταχωρήθηκε! Θα ενημερωθείτε μόλις ενεργοποιηθεί ο λογαριασμός σας.');
+    } catch (error) {
+      console.error('Error saving signature:', error);
+      toast.error('Σφάλμα κατά την αποθήκευση της υπογραφής');
+    }
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
@@ -74,5 +110,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      
+      {/* Pending User Modal */}
+      {user && showPendingModal && (
+        <PendingUserModal
+          isOpen={showPendingModal}
+          onSignature={handlePendingUserSignature}
+          userName={user.name}
+        />
+      )}
+    </AuthContext.Provider>
+  );
 };
