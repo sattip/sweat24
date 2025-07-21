@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Dumbbell, ShoppingCart, Gift, Loader2, Package } from "lucide-react";
+import { ArrowRight, User, Dumbbell, ShoppingCart, Gift, Loader2, Package, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import PackageAlert from "@/components/notifications/PackageAlert";
@@ -13,6 +13,7 @@ import { dashboardService, bookingService, classService } from "@/services/apiSe
 import { toast } from "sonner";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { UpcomingBookings } from "@/components/UpcomingBookings";
+import { updateLocalStorageUserStatus } from "@/utils/updateUserStatus";
 
 // Function to check if it's the user's birthday week
 const isBirthdayWeek = (birthDate: string | undefined): boolean => {
@@ -28,7 +29,7 @@ const isBirthdayWeek = (birthDate: string | undefined): boolean => {
 };
 
 // Function to determine package status
-const getPackageStatus = (remainingSessions: number | undefined, lastVisit: string | undefined) => {
+const getLocalPackageStatus = (remainingSessions: number | undefined, lastVisit: string | undefined) => {
   if (!remainingSessions || remainingSessions === 0) return "expired";
   if (remainingSessions === 1) return "last-session";
   if (remainingSessions <= 3) return "expiring-soon";
@@ -74,6 +75,17 @@ const DashboardPage = () => {
       setLoading(false);
     }
   };
+
+  // Νέα συνάρτηση για την ενημέρωση του status χρήστη
+  const handleUpdateUserStatus = () => {
+    try {
+      updateLocalStorageUserStatus();
+      toast.success("Το status του χρήστη user@sweat24.gr ενημερώθηκε σε ενεργή συνδρομή! Η σελίδα θα ανανεωθεί αυτόματα.");
+    } catch (error) {
+      toast.error("Σφάλμα κατά την ενημέρωση του status χρήστη");
+      console.error(error);
+    }
+  };
   
   // Get the appropriate user data (simulated for admin, real for others)
   const displayUser = isAdminTester ? getSimulatedUser() : user;
@@ -82,7 +94,7 @@ const DashboardPage = () => {
   const birthdayWeek = isAdminTester ? isSimulatedBirthdayWeek() : (displayUser ? isBirthdayWeek(displayUser.birth_date) : false);
   
   // Determine package status (simulated for admin, real for others)
-  const packageStatus = isAdminTester ? getPackageStatus() : getPackageStatus(displayUser?.remaining_sessions, displayUser?.last_visit);
+  const packageStatus = isAdminTester ? getPackageStatus() : getLocalPackageStatus(displayUser?.remaining_sessions, displayUser?.last_visit);
   
   if (loading) {
     return (
@@ -111,6 +123,40 @@ const DashboardPage = () => {
           <div className="mb-6">
             <SimulationPanel onStateChange={updateSimulationState} />
           </div>
+        )}
+
+        {/* Admin Controls - Only visible to admin users */}
+        {user?.email === 'admin@sweat24.gr' && (
+          <Card className="mb-6 border-l-4 border-l-blue-500 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Admin Controls
+              </CardTitle>
+              <CardDescription>Διαχειριστικές λειτουργίες συστήματος</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  onClick={handleUpdateUserStatus}
+                  className="flex items-center gap-2"
+                  variant="default"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  Ενεργοποίηση Συνδρομής user@sweat24.gr
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => toast.info("Αυτή η λειτουργία θα προστεθεί σύντομα")}
+                >
+                  Διαχείριση Χρηστών
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3">
+                Χρησιμοποιήστε το κουμπί για να ενημερώσετε το status του χρήστη user@sweat24.gr από ληγμένη σε ενεργή συνδρομή.
+              </p>
+            </CardContent>
+          </Card>
         )}
         
         {/* Package alerts based on status */}

@@ -197,31 +197,23 @@ export const bookingService = {
   },
 
   async getUserPastBookings() {
-    // Get user from localStorage
-    const userStr = localStorage.getItem('sweat24_user');
-    console.log('getUserPastBookings - userStr:', userStr);
-    if (!userStr) {
-      console.log('No user found in localStorage');
+    // Get user token from localStorage
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      console.log('No token found in localStorage');
       return [];
     }
     
-    const user = JSON.parse(userStr);
-    console.log('getUserPastBookings - user:', user);
-    
-    // Use test endpoint to bypass auth issues for now
-    const url = buildApiUrl(`/test-history?user_id=${user.id}`);
-    console.log('getUserPastBookings - URL:', url);
-    const response = await fetch(url, {
-      method: 'GET',
+    // Use the correct secured endpoint with authorization
+    const response = await fetch('/api/v1/profile/booking-history', {
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
     });
-    console.log('getUserPastBookings - response.ok:', response.ok);
+    
     if (!response.ok) throw new Error('Failed to fetch past bookings');
     const data = await response.json();
-    console.log('getUserPastBookings - data:', data);
     return data;
   }
 };

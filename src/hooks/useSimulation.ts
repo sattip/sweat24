@@ -25,6 +25,8 @@ interface SimulatedUser {
   last_visit?: string;
   avatar?: string;
   birth_date?: string;
+  package_start_date?: string;
+  package_end_date?: string;
 }
 
 const DEFAULT_SIMULATION_STATE: SimulationState = {
