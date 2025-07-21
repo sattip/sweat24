@@ -214,14 +214,15 @@ export const bookingService = {
     
     const user = JSON.parse(userStr);
     
-    // Use the test-history endpoint as requested by backend team
-    const url = buildApiUrl(`/test-history?user_id=${user.id}`);
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
+    // Use the test-history endpoint without v1 version for this specific endpoint
+    const response = await fetch(
+      `https://sweat93laravel.obs.com.gr/api/test-history?user_id=${user.id}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+        },
+      }
+    );
     
     if (!response.ok) {
       console.log('Failed to fetch past bookings, returning empty array');
