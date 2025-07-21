@@ -135,13 +135,6 @@ export const bookingService = {
     const userStr = localStorage.getItem('sweat24_user');
     const token = localStorage.getItem('auth_token');
     
-    console.log('🔍 BOOKING DEBUG:', {
-      hasUser: !!userStr,
-      hasToken: !!token,
-      tokenStart: token ? token.substring(0, 10) + '...' : 'NO TOKEN',
-      user: userStr ? JSON.parse(userStr) : 'NO USER'
-    });
-    
     if (!userStr || !token) {
       throw new Error('Not authenticated');
     }
@@ -154,35 +147,19 @@ export const bookingService = {
       user_id: user.id
     };
     
-    const url = buildApiUrl('/bookings');
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    
-    console.log('📡 BOOKING REQUEST:', {
-      url,
-      headers,
-      body: bookingData
-    });
-    
     // Use direct fetch with authorization header
-    const response = await fetch(url, {
+    const response = await fetch(buildApiUrl('/bookings'), {
       method: 'POST',
-      headers,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: JSON.stringify(bookingData),
-    });
-    
-    console.log('📨 BOOKING RESPONSE:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
     });
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ BOOKING ERROR RESPONSE:', errorText);
       
       // Parse error message if JSON
       try {
