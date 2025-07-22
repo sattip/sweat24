@@ -34,12 +34,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Show modal only for approved users who haven't signed terms
-    if (user && user.status === 'active' && !user.has_signed_terms) {
-      // Check if user has already signed terms during this session
-      const hasSignedThisSession = sessionStorage.getItem(`signed_terms_${user.id}`);
-      if (!hasSignedThisSession) {
-        setShowPendingModal(true);
-      }
+    console.log('🔍 AUTH DEBUG:', {
+      user: user,
+      status: user?.status,
+      has_signed_terms: user?.has_signed_terms,
+      condition1: user && user.status === 'active',
+      condition2: !user?.has_signed_terms,
+      finalCondition: user && user.status === 'active' && !user?.has_signed_terms
+    });
+
+    if (user && user.status === 'active' && !user?.has_signed_terms) {
+      // Always show modal for users who haven't signed terms in backend
+      // Session storage is unreliable for critical functions
+      console.log('🚀 SHOWING MODAL for user', user.id, '- has_signed_terms:', user.has_signed_terms);
+      setShowPendingModal(true);
     }
   }, [user]);
 
@@ -80,21 +88,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handlePendingUserSignature = async (signatureData: string) => {
+    console.log('🚀 SIGNATURE SAVE CALLED for user:', user?.id);
+    console.log('🚀 Signature data length:', signatureData?.length);
+    
     try {
-      // TODO: Save signature to backend
-      console.log('Saving signature for pending user:', {
-        userId: user?.id,
-        signature: signatureData,
-        signedAt: new Date().toISOString()
-      });
-
-      // Mark as signed for this session
-      if (user) {
-        sessionStorage.setItem(`signed_terms_${user.id}`, 'true');
+      // Save signature to backend
+      const token = localStorage.getItem('auth_token');
+      console.log('🔍 Token exists:', !!token);
+      console.log('🔍 User exists:', !!user);
+      
+      if (!token || !user) {
+        throw new Error('No authentication token or user');
       }
 
+      const requestPayload = {
+        user_id: user.id,
+        signature_data: signatureData,
+        document_type: 'terms_and_conditions',
+        document_version: '1.0',
+      };
+      
+      console.log('🚀 SENDING REQUEST to /api/v1/signatures');
+      console.log('🚀 Request payload:', {
+        user_id: requestPayload.user_id,
+        signature_data_length: signatureData.length,
+        document_type: requestPayload.document_type
+      });
+
+      const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/signatures', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      console.log('🚀 RESPONSE STATUS:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to save signature:', errorText);
+        throw new Error('Failed to save signature');
+      }
+
+      const responseData = await response.json();
+      console.log('✅ Signature saved successfully:', responseData);
+
+      // Close modal and refresh user data to get updated has_signed_terms
       setShowPendingModal(false);
-      toast.success('Η υπογραφή σας καταχωρήθηκε! Θα ενημερωθείτε μόλις ενεργοποιηθεί ο λογαριασμός σας.');
+      await refreshUser(); // Refresh user data from backend
+      toast.success('Η υπογραφή σας καταχωρήθηκε επιτυχώς! Μπορείτε τώρα να χρησιμοποιήσετε την εφαρμογή.');
     } catch (error) {
       console.error('Error saving signature:', error);
       toast.error('Σφάλμα κατά την αποθήκευση της υπογραφής');

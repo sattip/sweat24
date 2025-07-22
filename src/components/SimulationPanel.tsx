@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import PushNotificationSample from './notifications/PushNotificationSample';
 
+
 interface SimulationState {
   packageState: 'normal' | 'expiring-soon' | 'last-session' | 'expired';
   remainingSessions: number;
@@ -217,7 +218,7 @@ const SimulationPanel: React.FC<SimulationPanelProps> = ({ onStateChange }) => {
           <div className="space-y-3">
             <h3 className="font-semibold flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Προσομοίωση Push Notifications
+              Προσομοίωση Push Notifications (Παλιά)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <Button
@@ -249,6 +250,8 @@ const SimulationPanel: React.FC<SimulationPanelProps> = ({ onStateChange }) => {
               </Button>
             </div>
           </div>
+
+
 
           {/* Current State Display */}
           <div className="bg-muted/50 p-4 rounded-lg">

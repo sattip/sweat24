@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package, CreditCard, Euro, Loader2 } from "lucide-react";
+import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package, CreditCard, Euro, Loader2, FileText, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import LoyaltyRewardAlert from "@/components/notifications/LoyaltyRewardAlert";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { packageService } from "@/services/apiService";
+import { BookingRequests } from "@/components/BookingRequests";
 
 const ProfilePage = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const activeTab = queryParams.get('tab');
+  
   const [isRewardAlertOpen, setIsRewardAlertOpen] = useState(false);
   const [packages, setPackages] = useState([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
@@ -148,6 +153,30 @@ const ProfilePage = () => {
       }
     ]
   };
+
+  // Show booking requests if tab parameter is set
+  if (activeTab === 'booking-requests') {
+    return (
+      <>
+        <div className="min-h-screen bg-background">
+          <Header />
+          
+          <main className="container px-4 py-6 max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <Link to="/profile" className="text-muted-foreground hover:text-foreground text-sm mb-2 inline-block">
+                  ← Πίσω στο προφίλ
+                </Link>
+                <h1 className="text-3xl font-bold">Αιτήματα Ραντεβού</h1>
+              </div>
+            </div>
+            
+            <BookingRequests />
+          </main>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -503,6 +532,18 @@ const ProfilePage = () => {
             
             {/* Navigation Links */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/profile?tab=booking-requests" className="block">
+                <Card className="shadow-sm hover:border-primary transition-colors h-full">
+                  <CardContent className="flex items-center p-4">
+                    <FileText className="h-5 w-5 mr-4 text-primary" />
+                    <div>
+                      <h3 className="font-medium">Αιτήματα Ραντεβού</h3>
+                      <p className="text-sm text-muted-foreground">Παρακολουθήστε την κατάσταση των αιτημάτων EMS/Personal Training</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              
               <Link to="/bookings" className="block">
                 <Card className="shadow-sm hover:border-primary transition-colors h-full">
                   <CardContent className="flex items-center p-4">

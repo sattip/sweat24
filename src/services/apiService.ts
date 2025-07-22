@@ -272,6 +272,151 @@ export const bookingService = {
   }
 };
 
+// Booking Requests
+export const bookingRequestService = {
+  async create(data: any) {
+    // Get user from localStorage and auth token
+    const userStr = localStorage.getItem('sweat24_user');
+    const token = localStorage.getItem('auth_token');
+    
+    if (!userStr || !token) {
+      throw new Error('Not authenticated');
+    }
+    
+    const user = JSON.parse(userStr);
+    
+    // Add user_id to booking request data
+    const bookingRequestData = {
+      ...data,
+      user_id: user.id
+    };
+    
+    // Use direct fetch with authorization header
+    const response = await fetch(buildApiUrl('/booking-requests'), {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(bookingRequestData),
+    });
+    
+    if (!response.ok) {
+      let errorMessage = 'Failed to create booking request';
+      
+      try {
+        const errorText = await response.text();
+        console.log('🔍 Raw error response:', errorText);
+        
+        // Try to parse as JSON
+        const errorData = JSON.parse(errorText);
+        console.log('🔍 Parsed error data:', errorData);
+        
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (parseError) {
+        console.log('🔍 Error parsing response:', parseError);
+        // Keep default message if can't parse
+      }
+      
+      console.log('🔍 Final error message:', errorMessage);
+      throw new Error(errorMessage);
+    }
+    return response.json();
+  },
+
+  async getMyRequests() {
+    // Get user from localStorage
+    const userStr = localStorage.getItem('sweat24_user');
+    const token = localStorage.getItem('auth_token');
+    
+    if (!userStr || !token) {
+      console.log('🔍 getMyRequests: No user or token found');
+      console.log('🔍 userStr exists:', !!userStr);
+      console.log('🔍 token exists:', !!token);
+      return [];
+    }
+    
+    const user = JSON.parse(userStr);
+    console.log('🔍 getMyRequests: Making request for user:', user.id);
+    console.log('🔍 getMyRequests: Token:', token?.substring(0, 20) + '...');
+    
+    // Use direct fetch with user authentication
+    const response = await fetch(buildApiUrl('/booking-requests/my-requests'), {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+    
+    console.log('🔍 getMyRequests: Response status:', response.status);
+    console.log('🔍 getMyRequests: Response headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('🔍 getMyRequests: Error response:', errorText);
+      
+      try {
+        const errorData = JSON.parse(errorText);
+        console.log('🔍 getMyRequests: Parsed error data:', errorData);
+      } catch (parseError) {
+        console.log('🔍 getMyRequests: Could not parse error as JSON');
+      }
+      
+      return [];
+    }
+    
+    const data = await response.json();
+    console.log('🔍 getMyRequests: Success response:', data);
+    
+    // Handle paginated response from Laravel
+    if (data && data.data && Array.isArray(data.data)) {
+      console.log('🔍 getMyRequests: Returning paginated data:', data.data);
+      return data.data;
+    }
+    
+    // Fallback for direct array response
+    return Array.isArray(data) ? data : [];
+  },
+
+  async cancel(id: string | number, reason?: string) {
+    // Get user and auth token
+    const userStr = localStorage.getItem('sweat24_user');
+    const token = localStorage.getItem('auth_token');
+    
+    if (!userStr || !token) throw new Error('Not authenticated');
+    
+    const user = JSON.parse(userStr);
+    console.log('🔍 Cancel booking request:', id, 'for user:', user.id);
+    
+    // First try with empty body as per API specification
+    console.log('🔍 Cancel request - trying with empty body');
+    
+    const response = await fetch(buildApiUrl(`/booking-requests/${id}/cancel`), {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+    
+    console.log('🔍 Cancel response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('🔍 Cancel error response:', errorText);
+      throw new Error('Failed to cancel booking request: ' + errorText);
+    }
+    return response.json();
+  }
+};
+
 // Trainers
 export const trainerService = {
   async getAll() {
@@ -499,6 +644,43 @@ export const apiService = {
     });
     
     if (!response.ok) throw new Error('Request failed');
+    return response.json();
+  }
+};
+
+export const notificationService = {
+  async getAll() {
+    const response = await apiRequest('/notifications/user');
+    if (!response.ok) {
+      throw new Error('Failed to fetch notifications');
+    }
+    const data = await response.json();
+    
+    // Handle paginated response
+    if (data && data.data && Array.isArray(data.data)) {
+      return data.data;
+    }
+    
+    return data;
+  },
+
+  async markAsRead(id: number) {
+    const response = await apiRequest(`/notifications/${id}/read`, {
+      method: 'POST'
+    });
+    if (!response.ok) {
+      throw new Error('Failed to mark notification as read');
+    }
+    return response.json();
+  },
+
+  async markAllAsRead() {
+    const response = await apiRequest('/notifications/read-all', {
+      method: 'POST'
+    });
+    if (!response.ok) {
+      throw new Error('Failed to mark all notifications as read');
+    }
     return response.json();
   }
 };

@@ -73,6 +73,27 @@ export function useNotifications() {
             duration: 5000,
           });
         });
+
+        // Show toast for booking request notifications
+        const bookingRequestNotifications = notificationsData.filter((n: any) => 
+          ['booking_request_approved', 'booking_request_scheduled', 'booking_request_cancelled'].includes(n.notification?.type) && !n.read_at
+        );
+        
+        bookingRequestNotifications.forEach((notif: any) => {
+          const isPositive = ['booking_request_approved', 'booking_request_scheduled'].includes(notif.notification?.type);
+          
+          if (isPositive) {
+            toast.success(notif.notification.title, {
+              description: notif.notification.message,
+              duration: 6000,
+            });
+          } else {
+            toast.error(notif.notification.title, {
+              description: notif.notification.message,
+              duration: 5000,
+            });
+          }
+        });
       }
     } catch (error) {
       // Network or parsing errors - handle gracefully

@@ -13,6 +13,7 @@ import { dashboardService, bookingService, classService } from "@/services/apiSe
 import { toast } from "sonner";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { UpcomingBookings } from "@/components/UpcomingBookings";
+import { ApprovedAppointments } from "@/components/ApprovedAppointments";
 import { updateLocalStorageUserStatus } from "@/utils/updateUserStatus";
 
 // Function to check if it's the user's birthday week
@@ -360,6 +361,11 @@ const DashboardPage = () => {
             </Card>
           </div>
           
+          {/* Approved Appointments */}
+          <div className="mt-6">
+            <ApprovedAppointments />
+          </div>
+
           {/* Personal Booking Calendar & Upcoming Bookings */}
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">

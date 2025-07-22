@@ -37,6 +37,7 @@ import EvaluationPage from "./pages/EvaluationPage";
 import { CartProvider } from "./hooks/use-cart";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ChatWidget } from "./components/chat/ChatWidget";
+import { NotificationManager } from "./components/notifications/NotificationManager";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <ChatWidget />
+          <NotificationManager />
         </BrowserRouter>
         </CartProvider>
       </AuthProvider>
