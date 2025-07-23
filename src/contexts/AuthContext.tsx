@@ -48,6 +48,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Session storage is unreliable for critical functions
       console.log('🚀 SHOWING MODAL for user', user.id, '- has_signed_terms:', user.has_signed_terms);
       setShowPendingModal(true);
+    } else if (user && user.status === 'active' && user?.has_signed_terms) {
+      // Hide modal when user has signed terms
+      console.log('✅ HIDING MODAL - user has signed terms:', user.has_signed_terms);
+      setShowPendingModal(false);
     }
   }, [user]);
 
@@ -83,8 +87,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshUser = async () => {
-    const currentUser = await authService.getCurrentUser();
-    setUser(currentUser);
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
+      // Make actual API call to get fresh user data from backend
+      const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Failed to refresh user data');
+        // If refresh fails, keep current user but don't clear auth
+        return;
+      }
+
+      const data = await response.json();
+      console.log('🔄 FRESH USER DATA from backend:', data);
+      
+      if (data.success && data.user) {
+        // Update localStorage with fresh data
+        localStorage.setItem('sweat24_user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        console.log('✅ User refreshed - has_signed_terms:', data.user.has_signed_terms);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+      // Don't clear auth on network error, just keep current user
+    }
   };
 
   const handlePendingUserSignature = async (signatureData: string) => {
@@ -136,9 +175,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const responseData = await response.json();
       console.log('✅ Signature saved successfully:', responseData);
 
-      // Close modal and refresh user data to get updated has_signed_terms
-      setShowPendingModal(false);
-      await refreshUser(); // Refresh user data from backend
+      // Refresh user data to get updated has_signed_terms from backend
+      await refreshUser();
+      
+      // Modal will close automatically when user.has_signed_terms becomes true
+      // No need to manually setShowPendingModal(false) here
       toast.success('Η υπογραφή σας καταχωρήθηκε επιτυχώς! Μπορείτε τώρα να χρησιμοποιήσετε την εφαρμογή.');
     } catch (error) {
       console.error('Error saving signature:', error);

@@ -161,13 +161,13 @@ const ProfilePage = () => {
         <div className="min-h-screen bg-background">
           <Header />
           
-          <main className="container px-4 py-6 max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
+          <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div>
                 <Link to="/profile" className="text-muted-foreground hover:text-foreground text-sm mb-2 inline-block">
                   ← Πίσω στο προφίλ
                 </Link>
-                <h1 className="text-3xl font-bold">Αιτήματα Ραντεβού</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold">Αιτήματα Ραντεβού</h1>
               </div>
             </div>
             
@@ -183,9 +183,9 @@ const ProfilePage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         
-        <main className="container px-4 py-6 max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Το Προφίλ μου</h1>
+        <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold">Το Προφίλ μου</h1>
           </div>
           
           <div className="space-y-6">
@@ -412,7 +412,7 @@ const ProfilePage = () => {
                               )}
                               {reward.type === "referral" && (
                                 <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
-                                  Παραπομπή
+                                  Σύσταση
                                 </div>
                               )}
                             </div>
@@ -556,37 +556,37 @@ const ProfilePage = () => {
                 </Card>
               </Link>
               
-              <Link to="/history" className="block">
+              <Link to="/progress" className="block">
                 <Card className="shadow-sm hover:border-primary transition-colors h-full">
                   <CardContent className="flex items-center p-4">
-                    <History className="h-5 w-5 mr-4 text-primary" />
+                    <Activity className="h-5 w-5 mr-4 text-primary" />
                     <div>
-                      <h3 className="font-medium">Ιστορικό Προπονήσεων</h3>
-                      <p className="text-sm text-muted-foreground">Δείτε τις προηγούμενες προπονήσεις και επιτεύγματά σας</p>
+                      <h3 className="font-medium">Έλεγχος Προόδου</h3>
+                      <p className="text-sm text-muted-foreground">Παρακολουθήστε την πρόοδό σας με φωτογραφίες και μετρήσεις</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               
-              <Link to="/progress-photos" className="block">
+              <Link to="/services" className="block">
                 <Card className="shadow-sm hover:border-primary transition-colors h-full">
                   <CardContent className="flex items-center p-4">
-                    <Image className="h-5 w-5 mr-4 text-primary" />
+                    <User className="h-5 w-5 mr-4 text-primary" />
                     <div>
-                      <h3 className="font-medium">Φωτογραφίες Προόδου</h3>
-                      <p className="text-sm text-muted-foreground">Παρακολουθήστε τη φυσική σας μεταμόρφωση</p>
+                      <h3 className="font-medium">Personal & EMS</h3>
+                      <p className="text-sm text-muted-foreground">Κλείστε ραντεβού για εξειδικευμένες υπηρεσίες</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               
-              <Link to="/body-measurements" className="block">
+              <Link to="/rewards" className="block">
                 <Card className="shadow-sm hover:border-primary transition-colors h-full">
                   <CardContent className="flex items-center p-4">
-                    <Ruler className="h-5 w-5 mr-4 text-primary" />
+                    <Gift className="h-5 w-5 mr-4 text-primary" />
                     <div>
-                      <h3 className="font-medium">Σωματικές Μετρήσεις</h3>
-                      <p className="text-sm text-muted-foreground">Παρακολουθήστε τη φυσική σας πρόοδο</p>
+                      <h3 className="font-medium">Πρόγραμμα Ανταμοιβής</h3>
+                      <p className="text-sm text-muted-foreground">Κερδίστε πόντους και εξαργυρώστε υπέροχα δώρα</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -597,7 +597,7 @@ const ProfilePage = () => {
                   <CardContent className="flex items-center p-4">
                     <Users className="h-5 w-5 mr-4 text-primary" />
                     <div>
-                      <h3 className="font-medium">Πρόγραμμα Παραπομπών</h3>
+                      <h3 className="font-medium">Πρόγραμμα Συστάσεων</h3>
                       <p className="text-sm text-muted-foreground">Προσκαλέστε φίλους και κερδίστε δώρα</p>
                     </div>
                   </CardContent>

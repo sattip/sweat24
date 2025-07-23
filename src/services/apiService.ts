@@ -818,7 +818,8 @@ export const loyaltyService = {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(buildApiUrl('/loyalty/dashboard'), {
+      // ✅ ΣΩΣΤΟ ENDPOINT: https://sweat93laravel.obs.com.gr/api/v1/loyalty/dashboard
+      const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/loyalty/dashboard', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -828,12 +829,28 @@ export const loyaltyService = {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch loyalty dashboard');
+        if (response.status === 401) {
+          throw new Error('Παρακαλώ συνδεθείτε ξανά');
+        }
+        if (response.status === 404) {
+          throw new Error('Δεν βρέθηκαν δεδομένα loyalty');
+        }
+        if (response.status === 500) {
+          throw new Error('Πρόβλημα διακομιστή, προσπαθήστε αργότερα');
+        }
+        throw new Error(`HTTP ${response.status}: Failed to fetch loyalty dashboard`);
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log('✅ Loyalty Dashboard Response:', data);
+      
+      // ✅ ΔΙΟΡΘΩΣΗ: Επιστρέφω τα δεδομένα από το data.data
+      const dashboardData = data.data || data;
+      console.log('✅ Parsed dashboard data:', dashboardData);
+      
+      return dashboardData;
     } catch (error) {
-      console.error('Error fetching loyalty dashboard:', error);
+      console.error('❌ Error fetching loyalty dashboard:', error);
       throw error;
     }
   },
@@ -845,7 +862,8 @@ export const loyaltyService = {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(buildApiUrl('/loyalty/rewards/available'), {
+      // ✅ ΣΩΣΤΟ ENDPOINT: https://sweat93laravel.obs.com.gr/api/v1/loyalty/rewards/available
+      const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/loyalty/rewards/available', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -855,12 +873,41 @@ export const loyaltyService = {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch available rewards');
+        if (response.status === 401) {
+          throw new Error('Παρακαλώ συνδεθείτε ξανά');
+        }
+        if (response.status === 404) {
+          throw new Error('Δεν βρέθηκαν διαθέσιμα rewards');
+        }
+        if (response.status === 500) {
+          throw new Error('Πρόβλημα διακομιστή, προσπαθήστε αργότερα');
+        }
+        throw new Error(`HTTP ${response.status}: Failed to fetch available rewards`);
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log('✅ Available Rewards Response:', data);
+      
+      // ✅ ΔΙΟΡΘΩΣΗ: Τα rewards είναι στο data.rewards, όχι στο root
+      let rewards = [];
+      
+      if (data.data && Array.isArray(data.data.rewards)) {
+        rewards = data.data.rewards;
+        console.log(`✅ Found ${rewards.length} loyalty rewards in data.rewards`);
+      } else if (Array.isArray(data.rewards)) {
+        rewards = data.rewards;
+        console.log(`✅ Found ${rewards.length} loyalty rewards in rewards`);
+      } else if (Array.isArray(data)) {
+        rewards = data;
+        console.log(`✅ Found ${rewards.length} loyalty rewards in root array`);
+      } else {
+        console.log('⚠️ No rewards array found in response structure:', Object.keys(data));
+        rewards = [];
+      }
+      
+      return rewards;
     } catch (error) {
-      console.error('Error fetching available rewards:', error);
+      console.error('❌ Error fetching available rewards:', error);
       throw error;
     }
   },
@@ -872,7 +919,8 @@ export const loyaltyService = {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(buildApiUrl(`/loyalty/rewards/${rewardId}/redeem`), {
+      // ✅ ΣΩΣΤΟ ENDPOINT: https://sweat93laravel.obs.com.gr/api/v1/loyalty/rewards/{id}/redeem
+      const response = await fetch(`https://sweat93laravel.obs.com.gr/api/v1/loyalty/rewards/${rewardId}/redeem`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -882,13 +930,27 @@ export const loyaltyService = {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to redeem reward');
+        const errorData = await response.text();
+        console.error('❌ Redeem error:', errorData);
+        
+        if (response.status === 401) {
+          throw new Error('Παρακαλώ συνδεθείτε ξανά');
+        }
+        if (response.status === 404) {
+          throw new Error('Το reward δεν βρέθηκε');
+        }
+        if (response.status === 400) {
+          throw new Error('Δεν έχετε αρκετούς πόντους για αυτό το reward');
+        }
+        
+        throw new Error('Failed to redeem reward');
       }
 
-      return response.json();
+      const data = await response.json();
+      console.log('✅ Reward redeemed successfully:', data);
+      return data;
     } catch (error) {
-      console.error('Error redeeming reward:', error);
+      console.error('❌ Error redeeming reward:', error);
       throw error;
     }
   }

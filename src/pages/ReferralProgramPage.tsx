@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,74 +44,31 @@ const ReferralProgramPage = () => {
         
         // Map backend data to component format
         setReferralData({
-          code: dashboardData.referral_code || "LOADING",
-          link: dashboardData.referral_link || "Φόρτωση...",
+          code: dashboardData.referral_code || "",
+          link: dashboardData.referral_link || "",
           referrals: dashboardData.total_referrals || 0,
-          nextRewardAt: dashboardData.next_tier?.referrals_required || 1,
-          nextReward: dashboardData.next_tier?.reward_name || "Δωρεάν προσωπική προπόνηση",
+          nextRewardAt: dashboardData.next_tier?.referrals_required || 0,
+          nextReward: dashboardData.next_tier?.reward_name || "",
           rewards: dashboardData.earned_rewards || [],
           friends: dashboardData.referred_friends || [],
           availableTiers: tiersData || []
         });
       } catch (error) {
         console.error('Error fetching referral data:', error);
-        const errorMessage = handleApiError(error as Error, 'Σφάλμα κατά τη φόρτωση των δεδομένων παραπομπών');
+        const errorMessage = handleApiError(error as Error, 'Σφάλμα κατά τη φόρτωση των δεδομένων συστάσεων');
         toast.error(errorMessage);
         
-        // Use mock data when backend is not ready
+        // ❌ ΚΕΝΑ DATA - Θα δείχνουμε κενή κατάσταση όταν το API δεν λειτουργεί
+        // ΔΕΝ εμφανίζουμε πια mock data - μόνο τα πραγματικά δώρα από το admin panel
         setReferralData({
-          code: "SWEAT93-DEMO123",
-          link: "https://sweat93laravel.obs.com.gr/invite/DEMO123",
-          referrals: 2,
-          nextRewardAt: 3,
-          nextReward: "Protein Pack Premium",
-          rewards: [
-            {
-              id: 1,
-              name: "Δωρεάν Προπόνηση",
-              status: "available",
-              expires_at: "2024-09-01T23:59:59Z",
-              redeemed_at: null
-            }
-          ],
-          friends: [
-            { name: "Μαρία Παπαδοπούλου", status: "Ενεργό μέλος" },
-            { name: "Γιάννης Αντωνίου", status: "Ενεργό μέλος" }
-          ],
-          availableTiers: [
-            {
-              id: 1,
-              name: "Starter",
-              referrals_required: 1,
-              reward_name: "Δωρεάν Προπόνηση",
-              reward_description: "Μία δωρεάν ομαδική προπόνηση",
-              expires_at: null
-            },
-            {
-              id: 2,
-              name: "Bronze",
-              referrals_required: 3,
-              reward_name: "Protein Pack",
-              reward_description: "Set με premium supplements",
-              expires_at: "2024-12-31T23:59:59Z"
-            },
-            {
-              id: 3,
-              name: "Silver",
-              referrals_required: 5,
-              reward_name: "Monthly Pass",
-              reward_description: "Ένας μήνας δωρεάν συνδρομή",
-              expires_at: null
-            },
-            {
-              id: 4,
-              name: "Gold",
-              referrals_required: 10,
-              reward_name: "VIP Experience",
-              reward_description: "Πλήρες VIP πακέτο με personal trainer",
-              expires_at: null
-            }
-          ]
+          code: "",
+          link: "",
+          referrals: 0,
+          nextRewardAt: 0,
+          nextReward: "",
+          rewards: [],
+          friends: [],
+          availableTiers: [] // ❌ ΚΕΝΑ TIERS - δεν θα εμφανίζονται fake rewards
         });
       } finally {
         setLoading(false);
@@ -183,130 +139,180 @@ const ReferralProgramPage = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Προσκάλεσε Φίλους & Κέρδισε Δώρα</h1>
           <p className="text-muted-foreground mt-2">
-                            Μοιράσου το Sweat93 με φίλους και κέρδισε αποκλειστικά δώρα!
+            Δείτε τι μπορείτε να κερδίσετε με κάθε σύσταση
           </p>
         </div>
         
         {/* Program Explanation Card */}
-        <Card className="mb-6 border-l-4 border-l-primary shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Πώς Λειτουργεί</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">
-              <span className="font-semibold">Προσκάλεσε φίλους να γίνουν μέλη του Sweat93 και κέρδισε πόντους για αποκλειστικά δώρα:</span>
-            </p>
-            <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-              <li><span className="font-medium">Κάθε πόντος</span> = 1 ευρώ αξία</li>
-              <li><span className="font-medium">Περισσότερες παραπομπές</span> = Περισσότεροι πόντοι και καλύτερα δώρα</li>
-              <li><span className="font-medium">Τα διαθέσιμα δώρα</span> ενημερώνονται τακτικά με νέες επιλογές</li>
-            </ul>
-          </CardContent>
-        </Card>
-        
-        {/* Referral Code & Sharing */}
         <Card className="mb-6 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Ο Σύνδεσμος Παραπομπής σου</CardTitle>
-            <CardDescription>Μοιράσου αυτόν τον μοναδικό κωδικό με φίλους</CardDescription>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Πώς Λειτουργεί το Πρόγραμμα Συστάσεων</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <div className="border rounded-md p-3 bg-muted/50 font-mono text-sm overflow-hidden overflow-ellipsis">
-                  {referralData.link}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="bg-primary/10 rounded-full flex items-center justify-center h-16 w-16 mx-auto mb-3">
+                  <Share2 className="h-8 w-8 text-primary" />
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                  onClick={() => copyToClipboard(referralData.link)}
-                >
-                  <Copy className="h-4 w-4" />
-                  <span className="sr-only">Αντιγραφή συνδέσμου</span>
-                </Button>
+                <h3 className="font-semibold mb-2">1. Μοιράσου</h3>
+                <p className="text-sm text-muted-foreground">
+                  Στείλε τον κωδικό ή το link σύστασης σου σε φίλους
+                </p>
               </div>
-              <div>
-                <Button 
-                  variant="outline" 
-                  className="w-full sm:w-auto" 
-                  onClick={() => copyToClipboard(referralData.code)}
-                >
-                  Αντιγραφή Κωδικού: {referralData.code}
-                </Button>
+              <div className="text-center">
+                <div className="bg-primary/10 rounded-full flex items-center justify-center h-16 w-16 mx-auto mb-3">
+                  <Copy className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2">2. Εγγραφή</h3>
+                <p className="text-sm text-muted-foreground">
+                  Οι φίλοι σου γίνονται μέλη χρησιμοποιώντας τον κωδικό σου
+                </p>
               </div>
-            </div>
-            
-            <Separator className="my-4" />
-            
-            <div>
-              <p className="text-sm font-medium mb-3">Κοινοποίηση μέσω:</p>
-              <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Facebook className="h-4 w-4 text-blue-600" />
-                  <span>Facebook</span>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Twitter className="h-4 w-4 text-blue-400" />
-                  <span>Twitter</span>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Instagram className="h-4 w-4 text-pink-600" />
-                  <span>Instagram</span>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>Email</span>
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Share2 className="h-4 w-4" />
-                  <span>Περισσότερα</span>
-                </Button>
+              <div className="text-center">
+                <div className="bg-primary/10 rounded-full flex items-center justify-center h-16 w-16 mx-auto mb-3">
+                  <div className="text-primary font-bold text-lg">🎁</div>
+                </div>
+                <h3 className="font-semibold mb-2">3. Κέρδισε</h3>
+                <p className="text-sm text-muted-foreground">
+                  Λαμβάνεις δώρα για κάθε επιτυχημένη σύσταση
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Progress Tracker */}
-        <Card className="mb-6 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Η Πρόοδος των Παραπομπών σου</CardTitle>
-            <CardDescription>
-              {referralData.nextRewardAt - referralData.referrals === 1 
-                ? "Μόνο 1 ακόμη παραπομπή για να κερδίσεις το επόμενο δώρο!" 
-                : `${referralData.nextRewardAt - referralData.referrals} ακόμη παραπομπές για το επόμενο δώρο!`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-primary/10 rounded-full flex items-center justify-center h-14 w-14 text-primary font-bold text-xl">
-                {referralData.referrals}
+        {/* Referral Code and Link */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Ο Κωδικός σου</CardTitle>
+              <CardDescription>Μοιράσου αυτόν τον κωδικό με φίλους</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {referralData.code ? (
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted px-4 py-2 rounded-lg font-mono text-lg font-bold flex-1 text-center">
+                    {referralData.code}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(referralData.code)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  Δεν υπάρχει διαθέσιμος κωδικός σύστασης
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Link Σύστασης</CardTitle>
+              <CardDescription>Ή στείλε απευθείας αυτό το link</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {referralData.link ? (
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted px-3 py-2 rounded-lg text-sm flex-1 truncate">
+                    {referralData.link}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(referralData.link)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-4">
+                  Δεν υπάρχει διαθέσιμο link σύστασης
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="pt-2">
+              <div className="flex gap-2 w-full">
+                {referralData.link && (
+                  <>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                      const text = `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
+                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralData.link)}&quote=${encodeURIComponent(text)}`, '_blank');
+                    }}>
+                      <Facebook className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                      const text = `Ελα στο Sweat93! 💪 Κωδικός: ${referralData.code} Link: ${referralData.link}`;
+                      window.open(`https://www.instagram.com/?url=${encodeURIComponent(referralData.link)}`, '_blank');
+                    }}>
+                      <Instagram className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                      const text = `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
+                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+                    }}>
+                      <Twitter className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                      const subject = "Έλα στο Sweat93!";
+                      const body = `Γεια σου!\n\nΘα ήθελα να σε προσκαλέσω στο Sweat93. Χρησιμοποίησε τον κωδικό μου ${referralData.code} κατά την εγγραφή σου.\n\nΕναλλακτικά, μπορείς να κάνεις κλικ εδώ: ${referralData.link}\n\nΤα λέμε στο γυμναστήριο! 💪`;
+                      window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
+                    }}>
+                      <Mail className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">
-                  Πρόοδος για {referralData.nextReward}
-                </p>
-                <div className="space-y-2 w-full">
-                  <Progress 
-                    value={(referralData.referrals / referralData.nextRewardAt) * 100} 
-                    className="h-2" 
-                  />
-                  <div className="flex justify-between text-xs">
-                    <span>0</span>
-                    <span>{referralData.nextRewardAt}</span>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Progress Card */}
+        {referralData.nextRewardAt > 0 && (
+          <Card className="mb-6 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Η Πρόοδος των Συστάσεων σου</CardTitle>
+              <CardDescription>
+                {referralData.nextRewardAt - referralData.referrals === 1 
+                                    ? "Μόνο 1 ακόμη σύσταση για να κερδίσεις το επόμενο δώρο!"
+                  : `${referralData.nextRewardAt - referralData.referrals} ακόμη συστάσεις για το επόμενο δώρο!`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/10 rounded-full flex items-center justify-center h-14 w-14 text-primary font-bold text-xl">
+                  {referralData.referrals}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Πρόοδος για {referralData.nextReward}
+                  </p>
+                  <div className="space-y-2 w-full">
+                    <Progress 
+                      value={(referralData.referrals / referralData.nextRewardAt) * 100} 
+                      className="h-2" 
+                    />
+                    <div className="flex justify-between text-xs">
+                      <span>0</span>
+                      <span>{referralData.nextRewardAt}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Rewards Section */}
           <Card className="shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">Τα Δώρα σου</CardTitle>
-              <CardDescription>Δώρα που έχεις κερδίσει μέσω παραπομπών</CardDescription>
+              <CardDescription>Δώρα που έχεις κερδίσει μέσω συστάσεων</CardDescription>
             </CardHeader>
             <CardContent>
               {referralData.rewards.length > 0 ? (
@@ -321,39 +327,35 @@ const ReferralProgramPage = () => {
                             : `Εξαργυρώθηκε στις: ${reward.redeemed_at ? new Date(reward.redeemed_at).toLocaleDateString() : 'Άγνωστη ημερομηνία'}`}
                         </p>
                       </div>
-                      <div>
-                        {reward.status === "available" ? (
-                          <Button 
-                            size="sm" 
-                            variant="default"
-                            onClick={() => handleRedeemReward(reward.id)}
-                          >
-                            Εξαργύρωση
-                          </Button>
-                        ) : (
-                          <span className="text-xs bg-muted px-2 py-1 rounded-full">
-                            {reward.status === "redeemed" ? "Εξαργυρώθηκε" : "Έληξε"}
-                          </span>
-                        )}
-                      </div>
+                      {reward.status === "available" && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleRedeemReward(reward.id)}
+                        >
+                          Εξαργύρωση
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">
-                    Δεν έχεις κερδίσει ακόμη δώρα. Ξεκίνα να προσκαλείς φίλους!
+                    Δεν έχεις κερδίσει δώρα ακόμη.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Προσκάλεσε φίλους για να κερδίσεις το πρώτο σου δώρο!
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
-          
-          {/* Referred Friends Section */}
+
+          {/* Friends Section */}
           <Card className="shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">Φίλοι που Παρέπεμψες</CardTitle>
-              <CardDescription>Φίλοι που έγιναν μέλη χρησιμοποιώντας την παραπομπή σου</CardDescription>
+              <CardDescription>Φίλοι που έγιναν μέλη χρησιμοποιώντας τη σύσταση σου</CardDescription>
             </CardHeader>
             <CardContent>
               {referralData.friends.length > 0 ? (
@@ -388,12 +390,12 @@ const ReferralProgramPage = () => {
           </Card>
         </div>
 
-        {/* Available Reward Tiers */}
+        {/* Available Reward Tiers - ΜΟΝΟ αν υπάρχουν πραγματικά δώρα από το admin panel */}
         {referralData.availableTiers && referralData.availableTiers.length > 0 && (
           <Card className="mt-6 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">Επίπεδα Ανταμοιβών</CardTitle>
-              <CardDescription>Δείτε τι μπορείτε να κερδίσετε με κάθε παραπομπή</CardDescription>
+              <CardDescription>Δείτε τι μπορείτε να κερδίσετε με κάθε σύσταση</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -438,6 +440,24 @@ const ReferralProgramPage = () => {
           </Card>
         )}
         
+        {/* Αν δεν υπάρχουν δώρα, δείχνουμε ενημερωτικό μήνυμα */}
+        {(!referralData.availableTiers || referralData.availableTiers.length === 0) && (
+          <Card className="mt-6 shadow-sm">
+            <CardContent className="py-8 text-center">
+              <div className="text-muted-foreground">
+                <div className="text-6xl mb-4">🎁</div>
+                <h3 className="text-lg font-semibold mb-2">Σύντομα διαθέσιμα δώρα!</h3>
+                <p className="text-sm">
+                  Η γραμματεία ετοιμάζει ειδικά δώρα για το πρόγραμμα συστάσεων.
+                </p>
+                <p className="text-sm mt-1">
+                  Συνεχίστε να προσκαλείτε φίλους - θα κερδίσετε αναδρομικά!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         {/* Terms & Conditions */}
         <div className="mt-6 text-center">
           <Link to="/terms-referral" className="text-sm text-primary underline">
@@ -449,4 +469,4 @@ const ReferralProgramPage = () => {
   );
 };
 
-export default ReferralProgramPage;
+export default ReferralProgramPage; 

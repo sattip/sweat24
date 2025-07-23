@@ -1,18 +1,20 @@
-import React from "react";
-import { useTheme } from "next-themes";
+import { Link } from "react-router-dom";
 
-const Logo: React.FC = () => {
-  const { theme } = useTheme();
-
+const Logo = () => {
   return (
-    <div className="flex items-center">
-      <img 
-        src={theme === 'dark' ? '/logo-light.png' : '/logo-dark.png'} 
-        alt="Sweat24 Logo" 
-        className="h-14" 
+    <Link to="/" className="flex items-center gap-2">
+      <img
+        src="/logo-dark.png"
+        alt="Sweat24 Logo"
+        className="h-12 w-auto block dark:hidden"
       />
-    </div>
+      <img
+        src="/logo-light.png"
+        alt="Sweat24 Logo"
+        className="h-12 w-auto hidden dark:block"
+      />
+    </Link>
   );
 };
 
-export default Logo;
+export default Logo; 
