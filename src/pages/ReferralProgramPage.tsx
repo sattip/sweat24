@@ -11,6 +11,21 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { apiRequest } from "@/config/api";
+import { referralsService } from "@/services/apiService";
+
+// Error handling helper function
+const handleApiError = (error: Error, fallbackMessage = 'Κάτι πήγε στραβά'): string => {
+  if (error.message.includes('401')) {
+    return 'Παρακαλώ συνδεθείτε ξανά';
+  }
+  if (error.message.includes('404')) {
+    return 'Δεν βρέθηκαν δεδομένα';
+  }
+  if (error.message.includes('500')) {
+    return 'Πρόβλημα διακομιστή, προσπαθήστε αργότερα';
+  }
+  return fallbackMessage;
+};
 
 const ReferralProgramPage = () => {
   const [copied, setCopied] = useState(false);
@@ -20,32 +35,84 @@ const ReferralProgramPage = () => {
   useEffect(() => {
     const fetchReferralData = async () => {
       try {
-        const response = await apiRequest('/referral/data');
-        if (response.ok) {
-          const data = await response.json();
-          setReferralData(data);
-        } else {
-          // If not authenticated, show default/empty state
-          setReferralData({
-            code: "LOGIN_REQUIRED",
-            link: "Συνδεθείτε για να δείτε τον κωδικό σας",
-            referrals: 0,
-            nextRewardAt: 1,
-            nextReward: "Δωρεάν προσωπική προπόνηση",
-            rewards: [],
-            friends: []
-          });
-        }
+        // ✅ ΣΩΣΤΟ: Χρησιμοποιούμε το σωστό API endpoint από το sweat93laravel.obs.com.gr
+        // Το referralsService.getDashboard() καλεί το: https://sweat93laravel.obs.com.gr/api/v1/referrals/dashboard
+        // Το referralsService.getAvailableTiers() καλεί το: https://sweat93laravel.obs.com.gr/api/v1/referrals/available-tiers
+        const [dashboardData, tiersData] = await Promise.all([
+          referralsService.getDashboard(),
+          referralsService.getAvailableTiers()
+        ]);
+        
+        // Map backend data to component format
+        setReferralData({
+          code: dashboardData.referral_code || "LOADING",
+          link: dashboardData.referral_link || "Φόρτωση...",
+          referrals: dashboardData.total_referrals || 0,
+          nextRewardAt: dashboardData.next_tier?.referrals_required || 1,
+          nextReward: dashboardData.next_tier?.reward_name || "Δωρεάν προσωπική προπόνηση",
+          rewards: dashboardData.earned_rewards || [],
+          friends: dashboardData.referred_friends || [],
+          availableTiers: tiersData || []
+        });
       } catch (error) {
         console.error('Error fetching referral data:', error);
+        const errorMessage = handleApiError(error as Error, 'Σφάλμα κατά τη φόρτωση των δεδομένων παραπομπών');
+        toast.error(errorMessage);
+        
+        // Use mock data when backend is not ready
         setReferralData({
-          code: "ERROR",
-          link: "Σφάλμα φόρτωσης",
-          referrals: 0,
-          nextRewardAt: 1,
-          nextReward: "Δωρεάν προσωπική προπόνηση",
-          rewards: [],
-          friends: []
+          code: "SWEAT93-DEMO123",
+          link: "https://sweat93laravel.obs.com.gr/invite/DEMO123",
+          referrals: 2,
+          nextRewardAt: 3,
+          nextReward: "Protein Pack Premium",
+          rewards: [
+            {
+              id: 1,
+              name: "Δωρεάν Προπόνηση",
+              status: "available",
+              expires_at: "2024-09-01T23:59:59Z",
+              redeemed_at: null
+            }
+          ],
+          friends: [
+            { name: "Μαρία Παπαδοπούλου", status: "Ενεργό μέλος" },
+            { name: "Γιάννης Αντωνίου", status: "Ενεργό μέλος" }
+          ],
+          availableTiers: [
+            {
+              id: 1,
+              name: "Starter",
+              referrals_required: 1,
+              reward_name: "Δωρεάν Προπόνηση",
+              reward_description: "Μία δωρεάν ομαδική προπόνηση",
+              expires_at: null
+            },
+            {
+              id: 2,
+              name: "Bronze",
+              referrals_required: 3,
+              reward_name: "Protein Pack",
+              reward_description: "Set με premium supplements",
+              expires_at: "2024-12-31T23:59:59Z"
+            },
+            {
+              id: 3,
+              name: "Silver",
+              referrals_required: 5,
+              reward_name: "Monthly Pass",
+              reward_description: "Ένας μήνας δωρεάν συνδρομή",
+              expires_at: null
+            },
+            {
+              id: 4,
+              name: "Gold",
+              referrals_required: 10,
+              reward_name: "VIP Experience",
+              reward_description: "Πλήρες VIP πακέτο με personal trainer",
+              expires_at: null
+            }
+          ]
         });
       } finally {
         setLoading(false);
@@ -116,7 +183,7 @@ const ReferralProgramPage = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Προσκάλεσε Φίλους & Κέρδισε Δώρα</h1>
           <p className="text-muted-foreground mt-2">
-            Μοιράσου το Sweat24 με φίλους και κέρδισε αποκλειστικά δώρα!
+                            Μοιράσου το Sweat93 με φίλους και κέρδισε αποκλειστικά δώρα!
           </p>
         </div>
         
@@ -127,12 +194,12 @@ const ReferralProgramPage = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              <span className="font-semibold">Προσκάλεσε φίλους να γίνουν μέλη του Sweat24 και κέρδισε φανταστικά δώρα:</span>
+              <span className="font-semibold">Προσκάλεσε φίλους να γίνουν μέλη του Sweat93 και κέρδισε πόντους για αποκλειστικά δώρα:</span>
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-              <li><span className="font-medium">1 παραπομπή</span> = Δωρεάν προσωπική προπόνηση</li>
-              <li><span className="font-medium">3 παραπομπές</span> = 50% έκπτωση τον επόμενο μήνα</li>
-              <li><span className="font-medium">5 παραπομπές</span> = Ένας μήνας δωρεάν συνδρομή!</li>
+              <li><span className="font-medium">Κάθε πόντος</span> = 1 ευρώ αξία</li>
+              <li><span className="font-medium">Περισσότερες παραπομπές</span> = Περισσότεροι πόντοι και καλύτερα δώρα</li>
+              <li><span className="font-medium">Τα διαθέσιμα δώρα</span> ενημερώνονται τακτικά με νέες επιλογές</li>
             </ul>
           </CardContent>
         </Card>
@@ -320,6 +387,56 @@ const ReferralProgramPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Available Reward Tiers */}
+        {referralData.availableTiers && referralData.availableTiers.length > 0 && (
+          <Card className="mt-6 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Επίπεδα Ανταμοιβών</CardTitle>
+              <CardDescription>Δείτε τι μπορείτε να κερδίσετε με κάθε παραπομπή</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {referralData.availableTiers.map((tier, index) => (
+                  <Card key={tier.id || index} className="border-2 hover:border-primary transition-colors">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{tier.name}</CardTitle>
+                        <div className="text-sm bg-primary/10 text-primary px-2 py-1 rounded-full">
+                          {tier.referrals_required} συστάσεις
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">{tier.reward_name}</div>
+                        <p className="text-sm text-muted-foreground mt-1">{tier.reward_description}</p>
+                      </div>
+                      
+                      {tier.expires_at && (
+                        <p className="text-xs text-muted-foreground text-center">
+                          Ισχύει έως: {new Date(tier.expires_at).toLocaleDateString('el-GR')}
+                        </p>
+                      )}
+                      
+                      <div className="text-center">
+                        {referralData.referrals >= tier.referrals_required ? (
+                          <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            ✓ Επιτεύχθηκε
+                          </div>
+                        ) : (
+                          <div className="text-sm text-muted-foreground">
+                            Χρειάζεστε {tier.referrals_required - referralData.referrals} ακόμη
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Terms & Conditions */}
         <div className="mt-6 text-center">

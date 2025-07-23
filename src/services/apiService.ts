@@ -1,5 +1,19 @@
 import { apiRequest, API_ENDPOINTS, buildApiUrl } from '@/config/api';
 
+// Error handling helper function
+const handleApiError = (error: Error, fallbackMessage = 'Κάτι πήγε στραβά'): string => {
+  if (error.message.includes('401')) {
+    return 'Παρακαλώ συνδεθείτε ξανά';
+  }
+  if (error.message.includes('404')) {
+    return 'Δεν βρέθηκαν δεδομένα';
+  }
+  if (error.message.includes('500')) {
+    return 'Πρόβλημα διακομιστή, προσπαθήστε αργότερα';
+  }
+  return fallbackMessage;
+};
+
 // Authentication
 export const authService = {
   async login(email: string, password: string) {
@@ -650,37 +664,324 @@ export const apiService = {
 
 export const notificationService = {
   async getAll() {
-    const response = await apiRequest('/notifications/user');
-    if (!response.ok) {
-      throw new Error('Failed to fetch notifications');
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.log('No auth token for notifications');
+        return [];
+      }
+
+      const response = await fetch(buildApiUrl('/notifications/user'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('Notifications endpoint not found');
+          return [];
+        }
+        throw new Error('Failed to fetch notifications');
+      }
+      
+      const data = await response.json();
+      
+      // Handle Laravel paginated response
+      if (data && data.data && Array.isArray(data.data)) {
+        return data.data;
+      }
+      
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return [];
     }
-    const data = await response.json();
-    
-    // Handle paginated response
-    if (data && data.data && Array.isArray(data.data)) {
-      return data.data;
-    }
-    
-    return data;
   },
 
   async markAsRead(id: number) {
-    const response = await apiRequest(`/notifications/${id}/read`, {
-      method: 'POST'
-    });
-    if (!response.ok) {
-      throw new Error('Failed to mark notification as read');
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl(`/notifications/${id}/read`), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
     }
-    return response.json();
   },
 
   async markAllAsRead() {
-    const response = await apiRequest('/notifications/read-all', {
-      method: 'POST'
-    });
-    if (!response.ok) {
-      throw new Error('Failed to mark all notifications as read');
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl('/notifications/mark-all-read'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to mark all notifications as read');
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
     }
-    return response.json();
+  }
+};
+
+// Order History Service
+export const orderHistoryService = {
+  async getOrderHistory(userId?: number) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const userStr = localStorage.getItem('sweat24_user');
+      
+      if (!token && !userId) {
+        throw new Error('Not authenticated');
+      }
+
+      // Build URL - use user_id parameter if provided, otherwise use Bearer token
+      let url = buildApiUrl('/orders/history');
+      if (userId) {
+        url += `?user_id=${userId}`;
+      }
+
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      };
+
+      // Add auth token if available
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Order history API error:', errorData);
+        throw new Error('Failed to fetch order history');
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.data || [];
+      } else {
+        throw new Error(data.error || 'Failed to fetch order history');
+      }
+    } catch (error) {
+      console.error('Error fetching order history:', error);
+      throw error;
+    }
+  }
+};
+
+// Loyalty Service
+export const loyaltyService = {
+  async getDashboard() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl('/loyalty/dashboard'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch loyalty dashboard');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching loyalty dashboard:', error);
+      throw error;
+    }
+  },
+
+  async getAvailableRewards() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl('/loyalty/rewards/available'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch available rewards');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching available rewards:', error);
+      throw error;
+    }
+  },
+
+  async redeemReward(rewardId: number) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl(`/loyalty/rewards/${rewardId}/redeem`), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to redeem reward');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error redeeming reward:', error);
+      throw error;
+    }
+  }
+};
+
+// Referrals Service
+export const referralsService = {
+  async getDashboard() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl('/referrals/dashboard'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Παρακαλώ συνδεθείτε ξανά');
+        }
+        if (response.status === 404) {
+          throw new Error('Δεν βρέθηκαν δεδομένα');
+        }
+        if (response.status === 500) {
+          throw new Error('Πρόβλημα διακομιστή, προσπαθήστε αργότερα');
+        }
+        throw new Error('Failed to fetch referrals dashboard');
+      }
+
+      const data = await response.json();
+      return data.data || data; // Handle both formats
+    } catch (error) {
+      console.error('Error fetching referrals dashboard:', error);
+      throw error;
+    }
+  },
+
+  async getAvailableTiers() {
+    try {
+      // This endpoint doesn't require authentication according to the guide
+      const response = await fetch(buildApiUrl('/referrals/available-tiers'), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Δεν βρέθηκαν δεδομένα');
+        }
+        if (response.status === 500) {
+          throw new Error('Πρόβλημα διακομιστή, προσπαθήστε αργότερα');
+        }
+        throw new Error('Failed to fetch available tiers');
+      }
+
+      const data = await response.json();
+      return data.data || data; // Handle both formats
+    } catch (error) {
+      console.error('Error fetching available tiers:', error);
+      throw error;
+    }
+  },
+
+  // Testing endpoint for development
+  async getTestDashboard(userId: number) {
+    try {
+      const response = await fetch(buildApiUrl(`/referrals/test-dashboard/${userId}`), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch test dashboard');
+      }
+
+      const data = await response.json();
+      return data.data || data;
+    } catch (error) {
+      console.error('Error fetching test dashboard:', error);
+      throw error;
+    }
   }
 };
