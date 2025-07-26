@@ -196,7 +196,7 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="border-t pt-4 flex justify-end">
-                <Link to="/services/request/personal-training">
+                <Link to="/services">
                   <Button>
                     Εξαργύρωση Τώρα
                   </Button>
@@ -269,7 +269,7 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/schedule" className="w-full">
+                <Link to="/classes" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2">
                     Προβολή Προγράμματος
                     <ArrowRight className="h-4 w-4" />
@@ -292,7 +292,7 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/referrals" className="w-full">
+                <Link to="/referral-program" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
                     Μάθετε Περισσότερα
                     <ArrowRight className="h-4 w-4" />

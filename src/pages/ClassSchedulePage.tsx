@@ -146,7 +146,7 @@ const ClassSchedulePage = () => {
   }
 
   const handleClassClick = (classId: number) => {
-    navigate(`/class/${classId}`);
+    navigate(`/classes/${classId}`);
   };
 
   return (

@@ -10,7 +10,7 @@ const PageTitle: React.FC = () => {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === "/dashboard") return "Αρχική";
-    if (path.includes("/schedule") || path.includes("/class")) return "Πρόγραμμα";
+    if (path.includes("/classes") || path.includes("/class")) return "Πρόγραμμα";
     if (path === "/bookings" || path === "/history") return "Οι Κρατήσεις μου";
     if (path === "/progress" || path === "/progress-photos" || path === "/body-measurements") return "Έλεγχος Προόδου";
     if (path === "/services") return "Personal & EMS";

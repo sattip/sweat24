@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import SignupSuccessPage from "./pages/SignupSuccessPage";
@@ -41,79 +41,75 @@ import { CartProvider } from "./hooks/use-cart";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ChatWidget } from "./components/chat/ChatWidget";
 import { NotificationManager } from "./components/notifications/NotificationManager";
+import { useAndroidBackButton } from "./hooks/use-android-back-button";
+import { Capacitor } from "@capacitor/core";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/signup-success" element={<SignupSuccessPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/schedule" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
-            <Route path="/class/:classId" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            
-            {/* Updated bookings route - now includes history */}
-            <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
-            
-            {/* Legacy routes for backward compatibility */}
-            <Route path="/history" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
-            <Route path="/workout/:workoutId" element={<ProtectedRoute><WorkoutDetailsPage /></ProtectedRoute>} />
-            
-            {/* New unified progress route */}
-            <Route path="/progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
-            
-            {/* Legacy routes for backward compatibility */}
-            <Route path="/progress-photos" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
-            <Route path="/body-measurements" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
-            
-            {/* Renamed from Specialized Services to Personal & EMS */}
-            <Route path="/services" element={<ProtectedRoute><SpecializedServicesPage /></ProtectedRoute>} />
-            <Route path="/services/request/:serviceId" element={<ProtectedRoute><AppointmentRequestPage /></ProtectedRoute>} />
-            <Route path="/services/confirmation" element={<ProtectedRoute><AppointmentConfirmationPage /></ProtectedRoute>} />
-            
-            {/* New rewards program */}
-            <Route path="/rewards" element={<ProtectedRoute><RewardsPage /></ProtectedRoute>} />
-            
-            {/* Store routes */}
-            <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
-            <Route path="/product/:productId" element={<ProtectedRoute><ProductDetailsPage /></ProtectedRoute>} />
-            <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-            <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-            <Route path="/order-confirmation" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
-            <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-            <Route path="/order-history" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
-            
-            {/* Renamed from Referral Program to Suggestion Program */}
-            <Route path="/referrals" element={<ProtectedRoute><ReferralProgramPage /></ProtectedRoute>} />
-            
-            {/* Removed trainers routes as requested */}
-            {/* <Route path="/trainers" element={<ProtectedRoute><TrainersListPage /></ProtectedRoute>} />
-            <Route path="/trainers/:trainerId" element={<ProtectedRoute><TrainerDetailsPage /></ProtectedRoute>} /> */}
-            
-            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="/contact" element={<ProtectedRoute><ContactPage /></ProtectedRoute>} />
-            <Route path="/partners" element={<ProtectedRoute><PartnersPage /></ProtectedRoute>} />
-            <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
-            <Route path="/evaluation/:token" element={<EvaluationPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <ChatWidget />
-          <NotificationManager />
-        </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const AppContent = () => {
+  useAndroidBackButton();
+  
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/signup-success" element={<SignupSuccessPage />} />
+      <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/classes" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
+      <Route path="/classes/:id" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+      <Route path="/workout-history" element={<ProtectedRoute><WorkoutHistoryPage /></ProtectedRoute>} />
+      <Route path="/workout/:id" element={<ProtectedRoute><WorkoutDetailsPage /></ProtectedRoute>} />
+      <Route path="/progress/photos" element={<ProtectedRoute><ProgressPhotosPage /></ProtectedRoute>} />
+      <Route path="/progress/measurements" element={<ProtectedRoute><BodyMeasurementsPage /></ProtectedRoute>} />
+      <Route path="/progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
+      <Route path="/rewards" element={<ProtectedRoute><RewardsPage /></ProtectedRoute>} />
+      <Route path="/services" element={<ProtectedRoute><SpecializedServicesPage /></ProtectedRoute>} />
+      <Route path="/appointment-request" element={<ProtectedRoute><AppointmentRequestPage /></ProtectedRoute>} />
+      <Route path="/appointment-confirmation" element={<ProtectedRoute><AppointmentConfirmationPage /></ProtectedRoute>} />
+      <Route path="/trainers" element={<ProtectedRoute><TrainersListPage /></ProtectedRoute>} />
+      <Route path="/trainers/:id" element={<ProtectedRoute><TrainerDetailsPage /></ProtectedRoute>} />
+      <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
+      <Route path="/products/:id" element={<ProtectedRoute><ProductDetailsPage /></ProtectedRoute>} />
+      <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+      <Route path="/order-confirmation" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
+      <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+      <Route path="/order-history" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
+      <Route path="/referral-program" element={<ProtectedRoute><ReferralProgramPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/contact" element={<ProtectedRoute><ContactPage /></ProtectedRoute>} />
+      <Route path="/partners" element={<ProtectedRoute><PartnersPage /></ProtectedRoute>} />
+      <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
+      <Route path="/evaluation" element={<ProtectedRoute><EvaluationPage /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  // Use HashRouter for native apps, BrowserRouter for web
+  const Router = Capacitor.isNativePlatform() ? HashRouter : BrowserRouter;
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <Router>
+              <AppContent />
+              <ChatWidget />
+              <NotificationManager />
+            </Router>
+          </CartProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

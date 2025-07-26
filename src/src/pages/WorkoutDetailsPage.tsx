@@ -202,7 +202,7 @@ const WorkoutDetailsPage = () => {
           <Button 
             className="flex-1" 
             variant="outline"
-            onClick={() => navigate("/schedule")}
+            onClick={() => navigate("/classes")}
           >
             Book Similar Workout
           </Button>

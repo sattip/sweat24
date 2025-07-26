@@ -147,7 +147,7 @@ const ClassDetailsPage = () => {
         <Header />
         <div className="container px-4 py-6 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Το μάθημα δεν βρέθηκε</h1>
-          <Button onClick={() => navigate("/schedule")}>
+          <Button onClick={() => navigate("/classes")}>
             Επιστροφή στο Πρόγραμμα
           </Button>
         </div>
@@ -196,7 +196,7 @@ const ClassDetailsPage = () => {
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={() => navigate("/schedule")}
+          onClick={() => navigate("/classes")}
           className="mb-4"
         >
           &larr; Πίσω στο Πρόγραμμα

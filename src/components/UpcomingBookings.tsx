@@ -111,7 +111,7 @@ export const UpcomingBookings: React.FC = () => {
         ) : bookings.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">Δεν έχεις προγραμματισμένες κρατήσεις</p>
-            <Link to="/schedule">
+            <Link to="/classes">
               <Button>
                 <Calendar className="h-4 w-4 mr-2" />
                 Κλείσε Μάθημα

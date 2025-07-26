@@ -362,7 +362,7 @@ const BookingsPage = () => {
                 <p className="text-muted-foreground mb-4">
                   Εξερευνήστε το πρόγραμμα μαθημάτων και κάντε την πρώτη σας κράτηση.
                 </p>
-                <Link to="/schedule">
+                <Link to="/classes">
                   <Button>Δείτε το Πρόγραμμα</Button>
                 </Link>
               </div>
@@ -484,7 +484,7 @@ const BookingsPage = () => {
                 <p className="text-muted-foreground max-w-md mb-6">
                   Το ιστορικό προπονήσεών σας είναι άδειο. Ώρα να ξεκινήσετε!
                 </p>
-                <Link to="/schedule">
+                <Link to="/classes">
                   <Button>Κλείστε ένα Μάθημα</Button>
                 </Link>
               </div>
