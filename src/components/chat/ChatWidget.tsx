@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { el } from 'date-fns/locale';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { echo } from '@/lib/echo';
 
 interface Message {
   id: number;
@@ -40,13 +41,42 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   // Fetch or create conversation on mount
   useEffect(() => {
-    if (isOpen && !conversation) {
+    if (isOpen) {
       fetchOrCreateConversation();
     }
   }, [isOpen]);
+
+  // Setup WebSocket connection for real-time messages
+  useEffect(() => {
+    if (!conversation || !user) return;
+
+    const channel = echo.private(`chat.${conversation.id}`);
+    
+    channel.listen('MessageSent', (e: any) => {
+      console.log('New message received:', e);
+      setConversation(prev => prev ? {
+        ...prev,
+        messages: [...prev.messages, e.message],
+        unread_count: e.message.sender_type === 'admin' ? prev.unread_count + 1 : prev.unread_count
+      } : null);
+    });
+
+    // Also set up a polling interval as fallback for mobile apps
+    const pollInterval = setInterval(() => {
+      if (isOpen) {
+        fetchOrCreateConversation();
+      }
+    }, 5000); // Poll every 5 seconds
+
+    return () => {
+      echo.leave(`chat.${conversation.id}`);
+      clearInterval(pollInterval);
+    };
+  }, [conversation?.id, user, isOpen]);
 
   const fetchOrCreateConversation = async () => {
     try {
@@ -71,11 +101,35 @@ export function ChatWidget() {
     try {
       const response = await chatService.sendMessage(conversation.id, userMessage);
       
-      // Update conversation with new messages
+      // Create a temporary user message object to show immediately
+      const tempUserMessage: Message = {
+        id: Date.now(), // Temporary ID
+        content: userMessage,
+        sender_type: 'user',
+        sender: {
+          id: user?.id || 0,
+          name: user?.name || 'User',
+          avatar: user?.avatar
+        },
+        created_at: new Date().toISOString(),
+        is_read: false
+      };
+      
+      // Update conversation with the user message immediately
       setConversation(prev => prev ? {
         ...prev,
-        messages: [...prev.messages, response.user_message, response.admin_message]
+        messages: [...prev.messages, tempUserMessage]
       } : null);
+
+      // If response contains the message, update it
+      if (response) {
+        setConversation(prev => prev ? {
+          ...prev,
+          messages: prev.messages.map(msg => 
+            msg.id === tempUserMessage.id ? response : msg
+          )
+        } : null);
+      }
 
       toast.success('Μήνυμα στάλθηκε!');
     } catch (error) {
@@ -102,6 +156,11 @@ export function ChatWidget() {
       }
     }
   }, [conversation?.messages]);
+
+  // Don't render chat widget if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <>

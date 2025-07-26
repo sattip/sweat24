@@ -92,10 +92,10 @@ const MobileNavigation = () => {
         </Link>
         
         <Link 
-          to="/referrals" 
+          to="/referral-program" 
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/referrals") 
+            isActive("/referral-program") 
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}

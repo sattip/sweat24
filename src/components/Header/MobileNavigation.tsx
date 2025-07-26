@@ -5,7 +5,11 @@ import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
-const MobileNavigation = () => {
+interface MobileNavigationProps {
+  onNavigate?: () => void;
+}
+
+const MobileNavigation = ({ onNavigate }: MobileNavigationProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -17,13 +21,22 @@ const MobileNavigation = () => {
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+    onNavigate?.();
+  };
+  
+  const handleNavClick = () => {
+    onNavigate?.();
   };
 
   return (
     <div className="flex flex-col h-full bg-background">
       {/* User Profile Section */}
       <div className="p-3 sm:p-4 border-b bg-muted/20">
-        <Link to="/profile" className="flex items-center gap-3 p-3 sm:p-3 rounded-lg hover:bg-background transition-colors touch-manipulation">
+        <Link 
+          to="/profile" 
+          className="flex items-center gap-3 p-3 sm:p-3 rounded-lg hover:bg-background transition-colors touch-manipulation"
+          onClick={handleNavClick}
+        >
           <Avatar className="h-10 w-10 sm:h-10 sm:w-10">
             <AvatarFallback className="text-sm font-medium">
               {user?.name?.substring(0, 2).toUpperCase() || 'ΧΡ'}
@@ -46,6 +59,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Αρχική
         </Link>
@@ -54,10 +68,11 @@ const MobileNavigation = () => {
           to="/bookings" 
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/bookings") || isActive("/history") 
+            isActive("/bookings") || isActive("/workout-history") 
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Οι Κρατήσεις μου
         </Link>
@@ -70,6 +85,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Personal & EMS
         </Link>
@@ -82,6 +98,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           <div className="flex items-center justify-between w-full">
             <span>Πρόγραμμα Ανταμοιβής</span>
@@ -92,13 +109,14 @@ const MobileNavigation = () => {
         </Link>
         
         <Link 
-          to="/referrals" 
+          to="/referral-program" 
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/referrals") 
+            isActive("/referral-program") 
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Πρόγραμμα Συστάσεων
         </Link>
@@ -107,10 +125,11 @@ const MobileNavigation = () => {
           to="/progress" 
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/progress") || isActive("/progress-photos") || isActive("/body-measurements") 
+            isActive("/progress") || isActive("/progress/photos") || isActive("/progress/measurements") 
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Έλεγχος Προόδου
         </Link>
@@ -125,6 +144,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Συνεργαζόμενες Επιχειρήσεις
         </Link>
@@ -137,6 +157,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Εκδηλώσεις
         </Link>
@@ -149,6 +170,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Κατάστημα
         </Link>
@@ -161,6 +183,7 @@ const MobileNavigation = () => {
               ? "bg-primary text-primary-foreground shadow-sm" 
               : "hover:bg-muted/50 text-foreground"
           )}
+          onClick={handleNavClick}
         >
           Επικοινωνία
         </Link>

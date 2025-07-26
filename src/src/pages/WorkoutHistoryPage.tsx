@@ -225,7 +225,7 @@ const WorkoutHistoryPage = () => {
             <p className="text-muted-foreground max-w-md mb-6">
               Το ιστορικό προπονήσεών σου είναι άδειο. Ώρα να ξεκινήσεις!
             </p>
-            <Link to="/schedule">
+            <Link to="/classes">
               <Button>Κλείσε ένα Μάθημα</Button>
             </Link>
           </div>

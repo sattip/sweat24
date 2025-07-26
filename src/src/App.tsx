@@ -58,8 +58,8 @@ const App = () => (
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/signup-success" element={<SignupSuccessPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/schedule" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
-            <Route path="/class/:classId" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />
+            <Route path="/classes" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
+            <Route path="/classes/:id" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             
             {/* Updated bookings route - now includes history */}
@@ -94,7 +94,7 @@ const App = () => (
             <Route path="/order-history" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
             
             {/* Renamed from Referral Program to Suggestion Program */}
-            <Route path="/referrals" element={<ProtectedRoute><ReferralProgramPage /></ProtectedRoute>} />
+            <Route path="/referral-program" element={<ProtectedRoute><ReferralProgramPage /></ProtectedRoute>} />
             
             {/* Removed trainers routes as requested */}
             {/* <Route path="/trainers" element={<ProtectedRoute><TrainersListPage /></ProtectedRoute>} />

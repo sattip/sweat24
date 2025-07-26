@@ -1,49 +1,38 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "../Logo";
 import { Button } from "../ui/button";
-import { Menu, User, Contact, ShoppingCart } from "lucide-react";
+import { Menu, X, User, Contact, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
 import PageTitle from "./PageTitle";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { useCart } from "@/hooks/use-cart";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetClose,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription
-} from "../ui/sheet";
 
 const Header: React.FC = () => {
   const [open, setOpen] = useState(false);
   const { itemCount } = useCart();
   
+  useEffect(() => {
+    const handleCloseSheet = () => setOpen(false);
+    document.addEventListener('close-sheet', handleCloseSheet);
+    return () => document.removeEventListener('close-sheet', handleCloseSheet);
+  }, []);
+  
   return (
-    <header className="bg-white border-b sticky top-0 z-10">
-      <div className="container flex h-16 md:h-16 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10 md:h-10 md:w-10 shrink-0 touch-manipulation">
-                <Menu className="h-5 w-5 md:h-5 md:w-5" />
-                <span className="sr-only">Εναλλαγή μενού</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[280px] sm:w-[300px] p-0">
-              <SheetHeader className="sr-only">
-                <SheetTitle>Μενού Πλοήγησης</SheetTitle>
-                <SheetDescription>
-                  Επιλέξτε μια σελίδα για να μεταβείτε
-                </SheetDescription>
-              </SheetHeader>
-              <MobileNavigation />
-              <SheetClose className="absolute right-4 top-4" />
-            </SheetContent>
-          </Sheet>
+    <>
+      <header className="bg-white border-b sticky top-0 z-10 pt-safe">
+        <div className="container flex h-16 md:h-16 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10 md:h-10 md:w-10 shrink-0 touch-manipulation"
+              onClick={() => setOpen(!open)}
+            >
+              <Menu className="h-5 w-5 md:h-5 md:w-5" />
+              <span className="sr-only">Εναλλαγή μενού</span>
+            </Button>
           <Link to="/dashboard" className="flex items-center shrink-0">
             <Logo />
           </Link>
@@ -83,6 +72,30 @@ const Header: React.FC = () => {
         </div>
       </div>
     </header>
+    
+    {/* Mobile Menu Overlay */}
+    {open && (
+      <div className="fixed inset-0 z-[100] bg-black/50" onClick={() => setOpen(false)}>
+        <div 
+          className="absolute left-0 top-0 h-full w-[280px] sm:w-[300px] bg-background shadow-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-lg font-semibold">Μενού</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(false)}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <MobileNavigation onNavigate={() => setOpen(false)} />
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

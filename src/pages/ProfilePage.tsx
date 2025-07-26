@@ -451,7 +451,7 @@ const ProfilePage = () => {
                 >
                   Προσομοίωση Ειδοποίησης Δώρου
                 </Button>
-                <Link to="/referrals" className="w-full sm:w-auto">
+                <Link to="/referral-program" className="w-full sm:w-auto">
                   <Button variant="outline" className="w-full">
                     Παράπεμψε Φίλους & Κέρδισε Περισσότερα Δώρα
                   </Button>
