@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import Logo from "@/components/Logo";
 import { SignupSteps, SignupData } from "@/components/SignupSteps";
 import { authService } from "@/services/authService";
+import medicalHistoryService from "@/services/medicalHistoryService";
 
 const SignupPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -27,32 +28,24 @@ const SignupPage: React.FC = () => {
         documentVersion: '1.0'
       };
 
-      // Additional data to save separately
-      const additionalData = {
-        phone: data.phone,
-        birthDate: data.birthDate,
-        gender: data.gender,
-        medicalHistory: {
-          hasConditions: data.hasConditions,
-          conditions: data.conditions,
-          otherCondition: data.otherCondition,
-          medications: data.medications,
-          injuries: data.injuries,
-          doctorClearance: data.doctorClearance,
-        },
-        emergencyContact: {
-          name: data.emergencyContactName,
-          phone: data.emergencyContactPhone,
-        }
-      };
-
       // Register user with basic data first
       await authService.register(registerData);
       
       toast.success("Επιτυχής εγγραφή!");
       
-      // TODO: Save additional medical and emergency contact data to backend
-      console.log("Additional data to save:", additionalData);
+      // Υποβολή ιατρικού ιστορικού στο backend
+      try {
+        const medicalHistoryResponse = await medicalHistoryService.submitMedicalHistory(data);
+        
+        if (medicalHistoryResponse.success) {
+          toast.success("Το ιατρικό ιστορικό σας αποθηκεύτηκε επιτυχώς!");
+          console.log("Medical history saved:", medicalHistoryResponse.data);
+        }
+      } catch (medicalError) {
+        console.error("Error saving medical history:", medicalError);
+        // Δεν εμφανίζουμε error toast εδώ γιατί η εγγραφή έχει ήδη γίνει επιτυχώς
+        // Απλά καταγράφουμε το σφάλμα στο console
+      }
       
       // Redirect to success page instead of dashboard
       navigate("/signup-success");

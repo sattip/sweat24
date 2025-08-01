@@ -49,6 +49,11 @@ export const API_ENDPOINTS = {
   // Signatures
   signatures: '/signatures',
   userSignatures: (userId: string | number) => `/users/${userId}/signatures`,
+  // Medical History
+  medicalHistory: {
+    submit: '/medical-history',
+    get: '/medical-history',
+  },
 };
 
 // Helper function to build full URL

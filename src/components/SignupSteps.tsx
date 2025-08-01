@@ -18,7 +18,7 @@ export interface SignupData {
   birthDate: string;
   gender: string;
   
-  // Medical History
+  // Medical History - Basic (Legacy)
   hasConditions: boolean;
   conditions: string[];
   otherCondition: string;
@@ -27,6 +27,54 @@ export interface SignupData {
   doctorClearance: boolean;
   emergencyContactName: string;
   emergencyContactPhone: string;
+
+  // Extended Medical History - New Detailed Fields
+  
+  // Section 1: Medical Conditions with Year of Onset
+  medicalConditions: {
+    [key: string]: {
+      hasCondition: boolean;
+      yearOfOnset?: string;
+      details?: string;
+    };
+  };
+
+  // Section 2: Current Health Problems
+  currentHealthProblems: {
+    hasProblems: boolean;
+    details?: string;
+  };
+
+  // Section 3: Prescribed Medications (3+ pairs)
+  prescribedMedications: Array<{
+    medication: string;
+    reason: string;
+  }>;
+
+  // Section 4: Smoking Details
+  smoking: {
+    currentlySmoking: boolean; // true = Ναι, false = Όχι
+    dailyCigarettes?: string; // if currentlySmoking = true
+    everSmoked?: boolean; // if currentlySmoking = false
+    smokingYears?: string; // if everSmoked = true
+    quitYearsAgo?: string; // if everSmoked = true
+  };
+
+  // Section 5: Physical Activity
+  physicalActivity: {
+    description: string;
+    frequency: string;
+    duration: string;
+  };
+
+  // Section 6: Additional Medical Information
+  familyHistory: string;
+  allergies: string;
+  surgeries: string;
+  recentIllness: string;
+
+  // Section 7: Liability Declaration
+  liabilityDeclarationAccepted: boolean;
 }
 
 interface Step {
@@ -60,6 +108,20 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     doctorClearance: false,
     emergencyContactName: "",
     emergencyContactPhone: "",
+    medicalConditions: {},
+    currentHealthProblems: { hasProblems: false },
+    prescribedMedications: [
+      { medication: "", reason: "" },
+      { medication: "", reason: "" },
+      { medication: "", reason: "" }
+    ],
+    smoking: { currentlySmoking: false },
+    physicalActivity: { description: "", frequency: "", duration: "" },
+    familyHistory: "",
+    allergies: "",
+    surgeries: "",
+    recentIllness: "",
+    liabilityDeclarationAccepted: false,
   });
 
   const steps: Step[] = [
