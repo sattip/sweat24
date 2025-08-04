@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import Logo from "@/components/Logo";
 import { SignupSteps, SignupData } from "@/components/SignupSteps";
 import { authService } from "@/services/authService";
-import medicalHistoryService from "@/services/medicalHistoryService";
 
 const SignupPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -16,7 +15,42 @@ const SignupPage: React.FC = () => {
     setLoading(true);
     
     try {
-      // Map SignupData to RegisterData format
+      // Transform medical history data to API format
+      const transformedConditions: { [key: string]: { has_condition: boolean; year_of_onset?: string | null; details?: string | null } } = {};
+      if (data.medicalConditions) {
+        Object.entries(data.medicalConditions).forEach(([condition, conditionData]) => {
+          transformedConditions[condition] = {
+            has_condition: conditionData.hasCondition,
+            year_of_onset: conditionData.yearOfOnset || null,
+            details: conditionData.details || null
+          };
+        });
+      }
+
+      const medicalHistoryData = {
+        medical_conditions: transformedConditions,
+        current_health_problems: {
+          has_problems: data.currentHealthProblems?.hasProblems || false,
+          details: data.currentHealthProblems?.details || ''
+        },
+        prescribed_medications: data.prescribedMedications || [],
+        smoking: {
+          currently_smoking: data.smoking?.currentlySmoking || false,
+          daily_cigarettes: data.smoking?.dailyCigarettes || null,
+          ever_smoked: data.smoking?.everSmoked || false,
+          smoking_years: data.smoking?.smokingYears || null,
+          quit_years_ago: data.smoking?.quitYearsAgo || null
+        },
+        physical_activity: data.physicalActivity || { description: '', frequency: '', duration: '' },
+        emergency_contact: {
+          name: data.emergencyContactName || '',
+          phone: data.emergencyContactPhone || ''
+        },
+        liability_declaration_accepted: data.liabilityDeclarationAccepted || false,
+        submitted_at: new Date().toISOString()
+      };
+
+      // Map SignupData to RegisterData format with medical history
       const registerData = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -25,29 +59,16 @@ const SignupPage: React.FC = () => {
         signature: "placeholder", // We'll set this after completion
         signedAt: new Date().toISOString(),
         documentType: 'terms_and_conditions',
-        documentVersion: '1.0'
+        documentVersion: '1.0',
+        medicalHistory: medicalHistoryData
       };
 
-      // Register user with basic data first
+      // Register user with basic data and medical history together
       await authService.register(registerData);
       
-      toast.success("Επιτυχής εγγραφή!");
+      toast.success("Επιτυχής εγγραφή! Το ιατρικό ιστορικό σας αποθηκεύτηκε.");
       
-      // Υποβολή ιατρικού ιστορικού στο backend
-      try {
-        const medicalHistoryResponse = await medicalHistoryService.submitMedicalHistory(data);
-        
-        if (medicalHistoryResponse.success) {
-          toast.success("Το ιατρικό ιστορικό σας αποθηκεύτηκε επιτυχώς!");
-          console.log("Medical history saved:", medicalHistoryResponse.data);
-        }
-      } catch (medicalError) {
-        console.error("Error saving medical history:", medicalError);
-        // Δεν εμφανίζουμε error toast εδώ γιατί η εγγραφή έχει ήδη γίνει επιτυχώς
-        // Απλά καταγράφουμε το σφάλμα στο console
-      }
-      
-      // Redirect to success page instead of dashboard
+      // Redirect to success page
       navigate("/signup-success");
     } catch (error) {
       console.error("Registration error:", error);
