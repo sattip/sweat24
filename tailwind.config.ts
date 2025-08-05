@@ -104,6 +104,12 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
+			},
+			padding: {
+				'safe': 'env(safe-area-inset-top, 0px)',
+				'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
+				'safe-left': 'env(safe-area-inset-left, 0px)',
+				'safe-right': 'env(safe-area-inset-right, 0px)',
 			}
 		}
 	},

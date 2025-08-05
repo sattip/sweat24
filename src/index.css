@@ -92,4 +92,13 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+  
+  /* iOS Safe Area Support - Only on actual iOS devices */
+  .ios-device #root > div:first-child > header {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  .ios-device .pt-safe-ios {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
 }
