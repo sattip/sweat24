@@ -14,7 +14,10 @@ export interface MedicalHistoryPayload {
   };
   physical_activity: { description: string; frequency: string; duration: string };
   emergency_contact: { name: string; phone: string };
-  liability_declaration_accepted: boolean;
+  ems_interest: boolean;
+  ems_contraindications?: { [key: string]: { has_condition: boolean; year_of_onset?: string | null } };
+  ems_liability_accepted?: boolean;
+
   submitted_at: string;
 }
 
@@ -47,6 +50,17 @@ class MedicalHistoryService {
       });
     }
 
+    // Μετατροπή EMS contraindications από camelCase σε snake_case
+    const transformedEmsContraindications: { [key: string]: { has_condition: boolean; year_of_onset?: string | null } } = {};
+    if (signupData.emsInterest && signupData.emsContraindications) {
+      Object.entries(signupData.emsContraindications).forEach(([condition, data]) => {
+        transformedEmsContraindications[condition] = {
+          has_condition: data.hasCondition,
+          year_of_onset: data.yearOfOnset || null
+        };
+      });
+    }
+
     return {
       medical_conditions: transformedConditions,
       current_health_problems: {
@@ -66,7 +80,10 @@ class MedicalHistoryService {
         name: signupData.emergencyContactName || '',
         phone: signupData.emergencyContactPhone || ''
       },
-      liability_declaration_accepted: signupData.liabilityDeclarationAccepted || false,
+      ems_interest: signupData.emsInterest || false,
+      ems_contraindications: signupData.emsInterest ? transformedEmsContraindications : undefined,
+      ems_liability_accepted: signupData.emsInterest ? signupData.emsLiabilityAccepted || false : undefined,
+
       submitted_at: new Date().toISOString()
     };
   }
