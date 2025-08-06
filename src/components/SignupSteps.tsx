@@ -7,7 +7,7 @@ import { BasicInfoStep } from "./signup-steps/BasicInfoStep";
 import { HowFoundUsStep } from "./signup-steps/HowFoundUsStep";
 import { MedicalHistoryStep } from "./signup-steps/MedicalHistoryStep";
 import { ReviewStep } from "./signup-steps/ReviewStep";
-import { ParentConsentStep } from "./signup-steps/ParentConsentStep";
+import { ParentConsentStep, ParentConsentData } from "./signup-steps/ParentConsentStep";
 
 export interface SignupData {
   // Basic Info
@@ -89,7 +89,8 @@ export interface SignupData {
   // Section 8.1: EMS Liability Declaration (only if emsInterest is true)
   emsLiabilityAccepted?: boolean;
 
-
+  // General Liability Declaration
+  liabilityDeclarationAccepted: boolean;
 
   // How found us data
   howFoundUs?: string;
@@ -166,6 +167,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     recentIllness: "",
     emsInterest: false,
     emsContraindications: {},
+    liabilityDeclarationAccepted: false,
 
     isMinor: false,
   });
@@ -227,8 +229,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   };
 
   const nextStep = () => {
-    const maxSteps = signupData.isMinor ? 4 : 3;
-    if (currentStep < maxSteps) {
+    if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -239,7 +240,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     }
   };
 
-  const handleParentConsentComplete = (parentData: any) => {
+  const handleParentConsentComplete = (parentData: ParentConsentData) => {
     updateSignupData({ 
       parentConsent: parentData 
     });

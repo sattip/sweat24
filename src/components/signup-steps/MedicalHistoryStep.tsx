@@ -197,6 +197,11 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
       return;
     }
 
+    // Check if general liability declaration is accepted
+    if (!data.liabilityDeclarationAccepted) {
+      toast.error("Παρακαλώ αποδεχτείτε την υπεύθυνη δήλωση για να συνεχίσετε");
+      return;
+    }
 
 
     // Validate year fields for medical conditions
@@ -747,6 +752,57 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
               </Card>
             </>
           )}
+
+          {/* General Liability Declaration */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-indigo-500" />
+                ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ (άρθρο 8 Ν.1599/1986)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm font-medium mb-3">
+                  Με ατομική μου ευθύνη και γνωρίζοντας τις κυρώσεις (που προβλέπονται από τις διατάξεις 
+                  της παρ. 6 του άρθρου 22 του Ν.1599/1986), δηλώνω ότι:
+                </p>
+                <ul className="list-disc pl-5 space-y-2 text-sm">
+                  <li>
+                    Κατανόησα τις ερωτήσεις που προηγήθηκαν και οι απαντήσεις μου είναι ειλικρινείς και πλήρεις.
+                  </li>
+                  <li>
+                    Αντιλαμβάνομαι ότι πρέπει να ελέγχομαι από το γιατρό μου περιοδικά και να προσκομίσω 
+                    την ιατρική βεβαίωση, στην οποία θα δηλώνεται η ικανότητά μου για άσκηση.
+                  </li>
+                  <li>
+                    Κατανοώ ότι ασκούμαι με δική μου ευθύνη και σε περίπτωση που κατά τη διάρκεια της 
+                    άσκησης εμφανισθούν συμπτώματα, θα πρέπει αμέσως να διακόψω τη προσπάθεια και να 
+                    τα αναφέρω στο γυμναστή και το γιατρό μου.
+                  </li>
+                </ul>
+                <p className="text-sm mt-4">
+                  Τα συμπτώματα αυτά περιλαμβάνουν: ελαφρύ πονοκέφαλο ή ζάλη, βάρος ή πόνο στο 
+                  στήθος, αρρυθμίες, αιφνίδια δυσκολία στην αναπνοή, ή πρόβλημα στους μυς και στις 
+                  αρθρώσεις, τα οποία επιμένουν για αρκετές ημέρες μετά την άσκηση. Θα ενημερώσω άμεσα 
+                  για οποιαδήποτε πιθανή μεταβολή στην κατάσταση της υγείας μου.
+                </p>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="liabilityDeclaration"
+                  checked={data.liabilityDeclarationAccepted || false}
+                  onCheckedChange={(checked) => 
+                    updateData({ liabilityDeclarationAccepted: checked === true })
+                  }
+                />
+                <Label htmlFor="liabilityDeclaration" className="text-sm font-medium leading-5">
+                  <strong>Κατανόησα και αποδέχομαι τους όρους της υπεύθυνης δήλωσης.</strong>
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Emergency Contact - Kept from original */}
           <Card>

@@ -10,7 +10,7 @@ import { SignaturePad, SignaturePadRef } from "@/components/SignaturePad";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface ParentConsentData {
+export interface ParentConsentData {
   parentFullName: string;
   fatherFirstName: string;
   fatherLastName: string;

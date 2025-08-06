@@ -303,6 +303,11 @@ class ReferralValidationService {
         
         // If not found, try by name
         if (!$user) {
+            // NOTE: This query uses leading wildcards which can be inefficient on large tables
+            // For production environments with many users, consider:
+            // 1. Using a full-text search index (MySQL FULLTEXT or PostgreSQL GIN)
+            // 2. Implementing Elasticsearch for better search performance
+            // 3. Adding a database index on a computed column with concatenated names
             $user = User::where(function($q) use ($input) {
                 $q->whereRaw("LOWER(CONCAT(first_name, ' ', last_name)) LIKE ?", 
                     ['%' . strtolower($input) . '%']);
