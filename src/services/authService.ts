@@ -14,6 +14,8 @@ export interface RegisterData {
   signedAt: string;
   documentType?: string;
   documentVersion?: string;
+  // Medical history data
+  medicalHistory?: any;
 }
 
 export interface User {
@@ -104,6 +106,7 @@ class AuthService {
         email: data.email,
         password: data.password,
         password_confirmation: data.password,
+        ...(data.medicalHistory && { medical_history: data.medicalHistory })
       }),
     });
 

@@ -15,46 +15,89 @@ const SignupPage: React.FC = () => {
     setLoading(true);
     
     try {
-      // Map SignupData to RegisterData format
-      const registerData = {
+      // Transform medical history data to API format
+      const transformedConditions: { [key: string]: { has_condition: boolean; year_of_onset?: string | null; details?: string | null } } = {};
+      if (data.medicalConditions) {
+        Object.entries(data.medicalConditions).forEach(([condition, conditionData]) => {
+          transformedConditions[condition] = {
+            has_condition: conditionData.hasCondition,
+            year_of_onset: conditionData.yearOfOnset || null,
+            details: conditionData.details || null
+          };
+        });
+      }
+
+      // Transform EMS contraindications
+      const transformedEmsContraindications: { [key: string]: { has_condition: boolean; year_of_onset?: string | null } } = {};
+      if (data.emsInterest && data.emsContraindications) {
+        Object.entries(data.emsContraindications).forEach(([condition, conditionData]) => {
+          transformedEmsContraindications[condition] = {
+            has_condition: conditionData.hasCondition,
+            year_of_onset: conditionData.yearOfOnset || null
+          };
+        });
+      }
+
+      const medicalHistoryData = {
+        medical_conditions: transformedConditions,
+        current_health_problems: {
+          has_problems: data.currentHealthProblems?.hasProblems || false,
+          details: data.currentHealthProblems?.details || ''
+        },
+        prescribed_medications: data.prescribedMedications || [],
+        smoking: {
+          currently_smoking: data.smoking?.currentlySmoking || false,
+          daily_cigarettes: data.smoking?.dailyCigarettes || null,
+          ever_smoked: data.smoking?.everSmoked || false,
+          smoking_years: data.smoking?.smokingYears || null,
+          quit_years_ago: data.smoking?.quitYearsAgo || null
+        },
+        physical_activity: data.physicalActivity || { description: '', frequency: '', duration: '' },
+        emergency_contact: {
+          name: data.emergencyContactName || '',
+          phone: data.emergencyContactPhone || ''
+        },
+        ems_interest: data.emsInterest || false,
+        ems_contraindications: data.emsInterest ? transformedEmsContraindications : undefined,
+        ems_liability_accepted: data.emsInterest ? data.emsLiabilityAccepted || false : undefined,
+  
+        submitted_at: new Date().toISOString()
+      };
+
+      // Map SignupData to RegisterData format with medical history
+      const registerData: any = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         password: data.password,
+        birthDate: data.birthDate,
+        gender: data.gender,
+        phone: data.phone,
         signature: "placeholder", // We'll set this after completion
         signedAt: new Date().toISOString(),
         documentType: 'terms_and_conditions',
-        documentVersion: '1.0'
-      };
-
-      // Additional data to save separately
-      const additionalData = {
-        phone: data.phone,
-        birthDate: data.birthDate,
-        gender: data.gender,
-        medicalHistory: {
-          hasConditions: data.hasConditions,
-          conditions: data.conditions,
-          otherCondition: data.otherCondition,
-          medications: data.medications,
-          injuries: data.injuries,
-          doctorClearance: data.doctorClearance,
-        },
-        emergencyContact: {
-          name: data.emergencyContactName,
-          phone: data.emergencyContactPhone,
+        documentVersion: '1.0',
+        medicalHistory: medicalHistoryData,
+        // How found us data
+        howFoundUs: {
+          source: data.howFoundUs,
+          referralCodeOrName: data.referralCodeOrName,
+          referrerId: data.referrerId,
+          socialPlatform: data.socialPlatform
         }
       };
 
-      // Register user with basic data first
+      // Add parent consent data if user is minor
+      if (data.isMinor && data.parentConsent) {
+        registerData.parentConsent = data.parentConsent;
+      }
+
+      // Register user with basic data and medical history together
       await authService.register(registerData);
       
-      toast.success("Επιτυχής εγγραφή!");
+      toast.success("Επιτυχής εγγραφή! Το ιατρικό ιστορικό σας αποθηκεύτηκε.");
       
-      // TODO: Save additional medical and emergency contact data to backend
-      console.log("Additional data to save:", additionalData);
-      
-      // Redirect to success page instead of dashboard
+      // Redirect to success page
       navigate("/signup-success");
     } catch (error) {
       console.error("Registration error:", error);

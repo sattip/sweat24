@@ -169,11 +169,11 @@ export const NotificationBell: React.FC = () => {
       {/* Bell Button */}
       <Button
         variant="ghost"
-        size="sm"
-        className="relative p-2 hover:bg-gray-100"
+        size="icon"
+        className="relative h-12 w-12 md:h-10 md:w-10 touch-manipulation"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-6 w-6 md:h-5 md:w-5" />
         {unreadCount > 0 && (
           <Badge 
             variant="destructive" 

@@ -10,6 +10,15 @@ export const API_ENDPOINTS = {
     register: '/auth/register', 
     logout: '/auth/logout',
     me: '/auth/me',
+    checkAge: '/auth/check-age',
+  },
+  // Referrals
+  referrals: {
+    validate: '/referrals/validate',
+  },
+  // User profile data
+  user: {
+    howFoundUs: '/user/how-found-us',
   },
   // Users
   users: {
@@ -49,6 +58,11 @@ export const API_ENDPOINTS = {
   // Signatures
   signatures: '/signatures',
   userSignatures: (userId: string | number) => `/users/${userId}/signatures`,
+  // Medical History
+  medicalHistory: {
+    submit: '/medical-history',
+    get: '/medical-history',
+  },
 };
 
 // Helper function to build full URL

@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "../ui/button";
 
 const MobileNavigation = () => {
   const location = useLocation();
@@ -19,8 +21,25 @@ const MobileNavigation = () => {
     navigate('/login');
   };
 
+  const showBackButton = location.pathname !== '/dashboard' && location.pathname !== '/';
+
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background pt-safe-ios">
+      {/* iOS-style Back Navigation */}
+      {showBackButton && (
+        <div className="flex items-center px-4 py-2 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-0 h-auto font-normal text-primary hover:bg-transparent"
+            onClick={() => navigate(-1)}
+          >
+            <ChevronLeft className="h-5 w-5 mr-1" />
+            <span className="text-base">Πίσω</span>
+          </Button>
+        </div>
+      )}
+      
       {/* User Profile Section */}
       <div className="p-3 sm:p-4 border-b bg-muted/20">
         <Link to="/profile" className="flex items-center gap-3 p-3 sm:p-3 rounded-lg hover:bg-background transition-colors touch-manipulation">

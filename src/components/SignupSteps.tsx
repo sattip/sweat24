@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, User, Heart, FileText } from "lucide-react";
+import { CheckCircle, User, Heart, FileText, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BasicInfoStep } from "./signup-steps/BasicInfoStep";
+import { HowFoundUsStep } from "./signup-steps/HowFoundUsStep";
 import { MedicalHistoryStep } from "./signup-steps/MedicalHistoryStep";
 import { ReviewStep } from "./signup-steps/ReviewStep";
+import { ParentConsentStep } from "./signup-steps/ParentConsentStep";
 
 export interface SignupData {
   // Basic Info
@@ -18,7 +20,7 @@ export interface SignupData {
   birthDate: string;
   gender: string;
   
-  // Medical History
+  // Medical History - Basic (Legacy)
   hasConditions: boolean;
   conditions: string[];
   otherCondition: string;
@@ -27,6 +29,95 @@ export interface SignupData {
   doctorClearance: boolean;
   emergencyContactName: string;
   emergencyContactPhone: string;
+
+  // Extended Medical History - New Detailed Fields
+  
+  // Section 1: Medical Conditions with Year of Onset
+  medicalConditions: {
+    [key: string]: {
+      hasCondition: boolean;
+      yearOfOnset?: string;
+      details?: string;
+    };
+  };
+
+  // Section 2: Current Health Problems
+  currentHealthProblems: {
+    hasProblems: boolean;
+    details?: string;
+  };
+
+  // Section 3: Prescribed Medications (3+ pairs)
+  prescribedMedications: Array<{
+    medication: string;
+    reason: string;
+  }>;
+
+  // Section 4: Smoking Details
+  smoking: {
+    currentlySmoking: boolean; // true = Ναι, false = Όχι
+    dailyCigarettes?: string; // if currentlySmoking = true
+    everSmoked?: boolean; // if currentlySmoking = false
+    smokingYears?: string; // if everSmoked = true
+    quitYearsAgo?: string; // if everSmoked = true
+  };
+
+  // Section 5: Physical Activity
+  physicalActivity: {
+    description: string;
+    frequency: string;
+    duration: string;
+  };
+
+  // Section 6: Additional Medical Information
+  familyHistory: string;
+  allergies: string;
+  surgeries: string;
+  recentIllness: string;
+
+  // Section 7: EMS Interest
+  emsInterest: boolean;
+  
+  // Section 8: EMS Contraindications (only if emsInterest is true)
+  emsContraindications: {
+    [key: string]: {
+      hasCondition: boolean;
+      yearOfOnset?: string;
+    };
+  };
+  
+  // Section 8.1: EMS Liability Declaration (only if emsInterest is true)
+  emsLiabilityAccepted?: boolean;
+
+
+
+  // How found us data
+  howFoundUs?: string;
+  referralCodeOrName?: string;
+  referralValidated?: boolean;
+  referrerId?: number;
+  socialPlatform?: string;
+
+  // Minor status and parent consent data
+  isMinor?: boolean;
+  serverVerifiedAge?: number;
+  parentConsent?: {
+    parentFullName: string;
+    fatherFirstName: string;
+    fatherLastName: string;
+    motherFirstName: string;
+    motherLastName: string;
+    parentBirthDate: string;
+    parentIdNumber: string;
+    parentPhone: string;
+    parentLocation: string;
+    parentStreet: string;
+    parentStreetNumber: string;
+    parentPostalCode: string;
+    parentEmail: string;
+    consentAccepted: boolean;
+    signature: string;
+  };
 }
 
 interface Step {
@@ -60,35 +151,84 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     doctorClearance: false,
     emergencyContactName: "",
     emergencyContactPhone: "",
+    medicalConditions: {},
+    currentHealthProblems: { hasProblems: false },
+    prescribedMedications: [
+      { medication: "", reason: "" },
+      { medication: "", reason: "" },
+      { medication: "", reason: "" }
+    ],
+    smoking: { currentlySmoking: false },
+    physicalActivity: { description: "", frequency: "", duration: "" },
+    familyHistory: "",
+    allergies: "",
+    surgeries: "",
+    recentIllness: "",
+    emsInterest: false,
+    emsContraindications: {},
+
+    isMinor: false,
   });
 
-  const steps: Step[] = [
-    {
-      id: 1,
-      title: "Βασικά Στοιχεία",
-      icon: <User className="h-4 w-4" />,
-      completed: currentStep > 1,
-    },
-    {
-      id: 2,
+  // Dynamic steps based on whether user is minor
+  const getSteps = (): Step[] => {
+    const baseSteps: Step[] = [
+      {
+        id: 1,
+        title: "Βασικά Στοιχεία",
+        icon: <User className="h-4 w-4" />,
+        completed: currentStep > 1,
+      },
+      {
+        id: 2,
+        title: "Πώς μας βρήκατε",
+        icon: <Search className="h-4 w-4" />,
+        completed: currentStep > 2,
+      },
+    ];
+
+    let nextStepId = 3;
+
+    // Add parent consent step for minors
+    if (signupData.isMinor) {
+      baseSteps.push({
+        id: nextStepId,
+        title: "Συγκατάθεση Γονέα",
+        icon: <User className="h-4 w-4" />,
+        completed: currentStep > nextStepId,
+      });
+      nextStepId++;
+    }
+
+    // Medical history
+    baseSteps.push({
+      id: nextStepId,
       title: "Ιατρικό Ιστορικό",
       icon: <Heart className="h-4 w-4" />,
-      completed: currentStep > 2,
-    },
-    {
-      id: 3,
+      completed: currentStep > nextStepId,
+    });
+    nextStepId++;
+
+    // Review
+    baseSteps.push({
+      id: nextStepId,
       title: "Επισκόπηση",
       icon: <FileText className="h-4 w-4" />,
       completed: false,
-    },
-  ];
+    });
+
+    return baseSteps;
+  };
+
+  const steps = getSteps();
 
   const updateSignupData = (updates: Partial<SignupData>) => {
     setSignupData(prev => ({ ...prev, ...updates }));
   };
 
   const nextStep = () => {
-    if (currentStep < 3) {
+    const maxSteps = signupData.isMinor ? 4 : 3;
+    if (currentStep < maxSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -97,6 +237,13 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleParentConsentComplete = (parentData: any) => {
+    updateSignupData({ 
+      parentConsent: parentData 
+    });
+    nextStep();
   };
 
   const handleComplete = () => {
@@ -156,6 +303,22 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
             />
           )}
           {currentStep === 2 && (
+            <HowFoundUsStep
+              data={signupData}
+              updateData={updateSignupData}
+              onNext={nextStep}
+              onPrev={prevStep}
+            />
+          )}
+          {currentStep === 3 && signupData.isMinor && (
+            <ParentConsentStep
+              childFirstName={signupData.firstName}
+              childLastName={signupData.lastName}
+              onComplete={handleParentConsentComplete}
+              onBack={prevStep}
+            />
+          )}
+          {currentStep === 3 && !signupData.isMinor && (
             <MedicalHistoryStep
               data={signupData}
               updateData={updateSignupData}
@@ -163,7 +326,23 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
               onPrev={prevStep}
             />
           )}
-          {currentStep === 3 && (
+          {currentStep === 4 && signupData.isMinor && (
+            <MedicalHistoryStep
+              data={signupData}
+              updateData={updateSignupData}
+              onNext={nextStep}
+              onPrev={prevStep}
+            />
+          )}
+          {currentStep === 4 && !signupData.isMinor && (
+            <ReviewStep
+              data={signupData}
+              onComplete={handleComplete}
+              onPrev={prevStep}
+              loading={loading}
+            />
+          )}
+          {currentStep === 5 && signupData.isMinor && (
             <ReviewStep
               data={signupData}
               onComplete={handleComplete}
