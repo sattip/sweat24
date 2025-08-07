@@ -70,7 +70,7 @@ const SignupPage: React.FC = () => {
         lastName: data.lastName,
         email: data.email,
         password: data.password,
-        birthDate: data.birthDate,
+        birth_date: data.birthDate,  // Changed from birthDate to birth_date for backend
         gender: data.gender,
         phone: data.phone,
         signature: "placeholder", // We'll set this after completion

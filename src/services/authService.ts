@@ -106,7 +106,12 @@ class AuthService {
         email: data.email,
         password: data.password,
         password_confirmation: data.password,
-        ...(data.medicalHistory && { medical_history: data.medicalHistory })
+        birth_date: (data as any).birth_date,  // Pass birth_date to backend
+        gender: (data as any).gender,
+        phone: (data as any).phone,
+        ...(data.medicalHistory && { medical_history: data.medicalHistory }),
+        ...((data as any).howFoundUs && { how_found_us: (data as any).howFoundUs }),
+        ...((data as any).parentConsent && { parent_consent: (data as any).parentConsent })
       }),
     });
 
