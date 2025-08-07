@@ -106,7 +106,7 @@ class AuthService {
         email: data.email,
         password: data.password,
         password_confirmation: data.password,
-        birth_date: (data as any).birth_date,  // Pass birth_date to backend
+        date_of_birth: (data as any).birth_date,  // Changed to date_of_birth as backend expects
         gender: (data as any).gender,
         phone: (data as any).phone,
         ...(data.medicalHistory && { medical_history: data.medicalHistory }),
