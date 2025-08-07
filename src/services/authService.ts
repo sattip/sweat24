@@ -123,8 +123,8 @@ class AuthService {
       ...((data as any).parentConsent && { parentConsent: (data as any).parentConsent }),
       
       // Additional data
-      ...(data.medicalHistory && { medical_history: data.medicalHistory }),
-      ...((data as any).howFoundUs && { how_found_us: (data as any).howFoundUs })
+      ...(data.medicalHistory && { medicalHistory: data.medicalHistory }),
+      ...((data as any).howFoundUs && { howFoundUs: (data as any).howFoundUs })
     };
 
     // Debug log to see what we're sending
