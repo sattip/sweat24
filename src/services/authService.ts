@@ -94,8 +94,14 @@ class AuthService {
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
+    // Determine the correct endpoint based on whether parent consent is present
+    const hasParentConsent = !!(data as any).parentConsent;
+    const endpoint = hasParentConsent 
+      ? 'https://sweat93laravel.obs.com.gr/api/v1/auth/register-with-consent'
+      : 'https://sweat93laravel.obs.com.gr/api/v1/auth/register';
+    
     // First, create the user - use direct fetch to correct backend domain
-    const registerResponse = await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/register', {
+    const registerResponse = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

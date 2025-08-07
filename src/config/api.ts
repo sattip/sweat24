@@ -7,7 +7,8 @@ export const API_ENDPOINTS = {
   // Authentication
   auth: {
     login: '/auth/login',
-    register: '/auth/register', 
+    register: '/auth/register',
+    registerWithConsent: '/auth/register-with-consent',
     logout: '/auth/logout',
     me: '/auth/me',
     checkAge: '/auth/check-age',
