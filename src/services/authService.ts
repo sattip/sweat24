@@ -94,11 +94,8 @@ class AuthService {
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    // Determine the correct endpoint based on whether parent consent is present
-    const hasParentConsent = !!(data as any).parentConsent;
-    const endpoint = hasParentConsent 
-      ? 'https://sweat93laravel.obs.com.gr/api/v1/auth/register-with-consent'
-      : 'https://sweat93laravel.obs.com.gr/api/v1/auth/register';
+    // Always use register-with-consent endpoint for all registrations
+    const endpoint = 'https://sweat93laravel.obs.com.gr/api/v1/auth/register-with-consent';
     
     // Build the request payload
     const payload = {
