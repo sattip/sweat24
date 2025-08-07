@@ -87,9 +87,25 @@ const SignupPage: React.FC = () => {
         }
       };
 
-      // Add parent consent data if user is minor
+      // Add parent consent data if user is minor - transform to snake_case for backend
       if (data.isMinor && data.parentConsent) {
-        registerData.parentConsent = data.parentConsent;
+        registerData.parentConsent = {
+          parent_full_name: data.parentConsent.parentFullName,
+          father_first_name: data.parentConsent.fatherFirstName,
+          father_last_name: data.parentConsent.fatherLastName,
+          mother_first_name: data.parentConsent.motherFirstName,
+          mother_last_name: data.parentConsent.motherLastName,
+          parent_birth_date: data.parentConsent.parentBirthDate,
+          parent_id_number: data.parentConsent.parentIdNumber,
+          parent_phone: data.parentConsent.parentPhone,
+          parent_location: data.parentConsent.parentLocation,
+          parent_street: data.parentConsent.parentStreet,
+          parent_street_number: data.parentConsent.parentStreetNumber,
+          parent_postal_code: data.parentConsent.parentPostalCode,
+          parent_email: data.parentConsent.parentEmail,
+          consent_accepted: data.parentConsent.consentAccepted,
+          signature: data.parentConsent.signature
+        };
       }
 
       // Register user with basic data and medical history together
