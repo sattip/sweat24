@@ -100,6 +100,37 @@ class AuthService {
       ? 'https://sweat93laravel.obs.com.gr/api/v1/auth/register-with-consent'
       : 'https://sweat93laravel.obs.com.gr/api/v1/auth/register';
     
+    // Build the request payload
+    const payload = {
+      // Basic user fields (camelCase as backend expects)
+      name: `${data.firstName} ${data.lastName}`,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      password: data.password,
+      password_confirmation: data.password,
+      birthDate: (data as any).birthDate,  // Backend expects camelCase
+      gender: (data as any).gender,
+      phone: (data as any).phone,
+      
+      // Document signing fields (camelCase)
+      signature: (data as any).signature,
+      signedAt: (data as any).signedAt,
+      documentType: (data as any).documentType,
+      documentVersion: (data as any).documentVersion,
+      
+      // Parent consent (camelCase fields nested)
+      ...((data as any).parentConsent && { parentConsent: (data as any).parentConsent }),
+      
+      // Additional data
+      ...(data.medicalHistory && { medical_history: data.medicalHistory }),
+      ...((data as any).howFoundUs && { how_found_us: (data as any).howFoundUs })
+    };
+
+    // Debug log to see what we're sending
+    console.log('Registration endpoint:', endpoint);
+    console.log('Registration payload:', JSON.stringify(payload, null, 2));
+    
     // First, create the user - use direct fetch to correct backend domain
     const registerResponse = await fetch(endpoint, {
       method: 'POST',
@@ -107,31 +138,7 @@ class AuthService {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        // Basic user fields (camelCase as backend expects)
-        name: `${data.firstName} ${data.lastName}`,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-        password_confirmation: data.password,
-        birthDate: (data as any).birthDate,  // Backend expects camelCase
-        gender: (data as any).gender,
-        phone: (data as any).phone,
-        
-        // Document signing fields (camelCase)
-        signature: (data as any).signature,
-        signedAt: (data as any).signedAt,
-        documentType: (data as any).documentType,
-        documentVersion: (data as any).documentVersion,
-        
-        // Parent consent (camelCase fields nested)
-        ...((data as any).parentConsent && { parentConsent: (data as any).parentConsent }),
-        
-        // Additional data
-        ...(data.medicalHistory && { medical_history: data.medicalHistory }),
-        ...((data as any).howFoundUs && { how_found_us: (data as any).howFoundUs })
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!registerResponse.ok) {
