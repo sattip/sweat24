@@ -90,6 +90,34 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
   onNext, 
   onPrev 
 }) => {
+  // Quick fill function for testing
+  const fillTestData = () => {
+    updateData({
+      medicalConditions: {
+        "Διαβήτης τύπου 1 ή 2": { hasCondition: true, yearOfOnset: "2020", details: "" }
+      },
+      currentHealthProblems: { hasProblems: false },
+      prescribedMedications: [
+        { medication: "", reason: "" },
+        { medication: "", reason: "" },
+        { medication: "", reason: "" }
+      ],
+      smoking: { currentlySmoking: false, everSmoked: false },
+      physicalActivity: { 
+        description: "Περπάτημα", 
+        frequency: "3 φορές την εβδομάδα", 
+        duration: "30 λεπτά" 
+      },
+      emergencyContactName: "Γιάννης Παπαδόπουλος",
+      emergencyContactPhone: "6901234567",
+      emsInterest: true,
+      emsContraindications: {
+        "Βηματοδότης": { hasCondition: true, yearOfOnset: "2019" }
+      },
+      emsLiabilityAccepted: true
+    });
+    toast.success("Συμπληρώθηκαν ιατρικά στοιχεία για δοκιμή");
+  };
   
 
   const handleEmsContraindicationChange = (condition: string, hasCondition: boolean) => {
@@ -238,6 +266,22 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Test button for quick fill - only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
+          <Button 
+            type="button"
+            variant="outline" 
+            size="sm"
+            onClick={fillTestData}
+            className="text-xs"
+          >
+            Συμπλήρωση Ιατρικών Στοιχείων
+          </Button>
+        </div>
+      )}
+      
       <ScrollArea className="h-[70vh] pr-4">
         <div className="space-y-6">
           {/* Section 1: Medical Conditions */}
