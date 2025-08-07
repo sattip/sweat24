@@ -109,7 +109,7 @@ class AuthService {
       email: data.email,
       password: data.password,
       password_confirmation: data.password,
-      birthDate: (data as any).birthDate,  // Backend expects camelCase
+      date_of_birth: (data as any).birthDate,  // Backend expects snake_case for this field
       gender: (data as any).gender,
       phone: (data as any).phone,
       
