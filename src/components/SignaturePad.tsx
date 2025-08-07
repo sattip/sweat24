@@ -95,3 +95,4 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
 SignaturePad.displayName = 'SignaturePad';
 
 export default SignaturePad;
+export { SignaturePad, type SignaturePadRef };

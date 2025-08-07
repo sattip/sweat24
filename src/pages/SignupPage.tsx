@@ -27,6 +27,17 @@ const SignupPage: React.FC = () => {
         });
       }
 
+      // Transform EMS contraindications
+      const transformedEmsContraindications: { [key: string]: { has_condition: boolean; year_of_onset?: string | null } } = {};
+      if (data.emsInterest && data.emsContraindications) {
+        Object.entries(data.emsContraindications).forEach(([condition, conditionData]) => {
+          transformedEmsContraindications[condition] = {
+            has_condition: conditionData.hasCondition,
+            year_of_onset: conditionData.yearOfOnset || null
+          };
+        });
+      }
+
       const medicalHistoryData = {
         medical_conditions: transformedConditions,
         current_health_problems: {
@@ -46,22 +57,40 @@ const SignupPage: React.FC = () => {
           name: data.emergencyContactName || '',
           phone: data.emergencyContactPhone || ''
         },
-        liability_declaration_accepted: data.liabilityDeclarationAccepted || false,
+        ems_interest: data.emsInterest || false,
+        ems_contraindications: data.emsInterest ? transformedEmsContraindications : undefined,
+        ems_liability_accepted: data.emsInterest ? data.emsLiabilityAccepted || false : undefined,
+  
         submitted_at: new Date().toISOString()
       };
 
       // Map SignupData to RegisterData format with medical history
-      const registerData = {
+      const registerData: any = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         password: data.password,
+        birthDate: data.birthDate,
+        gender: data.gender,
+        phone: data.phone,
         signature: "placeholder", // We'll set this after completion
         signedAt: new Date().toISOString(),
         documentType: 'terms_and_conditions',
         documentVersion: '1.0',
-        medicalHistory: medicalHistoryData
+        medicalHistory: medicalHistoryData,
+        // How found us data
+        howFoundUs: {
+          source: data.howFoundUs,
+          referralCodeOrName: data.referralCodeOrName,
+          referrerId: data.referrerId,
+          socialPlatform: data.socialPlatform
+        }
       };
+
+      // Add parent consent data if user is minor
+      if (data.isMinor && data.parentConsent) {
+        registerData.parentConsent = data.parentConsent;
+      }
 
       // Register user with basic data and medical history together
       await authService.register(registerData);

@@ -48,13 +48,77 @@ const MEDICAL_CONDITIONS = [
   "Άλλη πάθηση"
 ];
 
+// EMS Contraindications - Absolute
+const EMS_ABSOLUTE_CONTRAINDICATIONS = [
+  "Βηματοδότης",
+  "Εγκυμοσύνη",
+  "Πυρετός, οξείες βακτηριακές ή ιογενείς λοιμώξεις",
+  "Θρόμβωση / Θρομβοφλεβίτιδα",
+  "Stent ή Bypass (εντός τελευταίων 6 μηνών)",
+  "Αρτηριοσκλήρωση σε προχωρημένο στάδιο",
+  "Υψηλή αρτηριακή πίεση (χωρίς ιατρικό έλεγχο)",
+  "Αιμορραγικές διαταραχές",
+  "Νεοπλασματικές ασθένειες (όγκοι – καρκίνος)",
+  "Οξεία αρθρίτιδα",
+  "Νευρολογικές ασθένειες",
+  "Προοδευτική μυϊκή δυστροφία",
+  "Κήλες κοιλιακού τοιχώματος ή βουβωνοκήλες",
+  "Λεμφοίδημα"
+];
+
+// EMS Contraindications - Relative (with medical advice)
+const EMS_RELATIVE_CONTRAINDICATIONS = [
+  "Καρδιολογικές παθήσεις",
+  "Καρδιακές αρρυθμίες",
+  "Σακχαρώδης διαβήτης τύπου I",
+  "Επιληψία (κατά περίπτωση)",
+  "Πρόσφατες επεμβάσεις (6–8 μήνες)",
+  "Ασκίτης, πνευμονικά ή πλευρικά υγρά",
+  "Δερματοπάθειες",
+  "Οξύς μη διαγνωσμένος πόνος στη μέση",
+  "Οξεία νευραλγία / οξεία κήλη δίσκου",
+  "Κήροι (αποφυγή περιοχής)",
+  "Εσωτερικές παθήσεις οργάνων (π.χ. νεφρά)",
+  "Φαρμακευτική αγωγή",
+  "Πρόσφατες φλεγμονές ή τραυματισμοί",
+  "Έγκαυμα από τον ήλιο"
+];
+
 export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({ 
   data, 
   updateData, 
   onNext, 
   onPrev 
 }) => {
-  const [showLiabilityText, setShowLiabilityText] = useState(false);
+  
+
+  const handleEmsContraindicationChange = (condition: string, hasCondition: boolean) => {
+    const updatedConditions = {
+      ...data.emsContraindications,
+      [condition]: {
+        hasCondition,
+        yearOfOnset: hasCondition ? data.emsContraindications[condition]?.yearOfOnset || "" : undefined,
+      }
+    };
+    
+    if (!hasCondition) {
+      delete updatedConditions[condition];
+    }
+    
+    updateData({ emsContraindications: updatedConditions });
+  };
+
+  const handleEmsContraindicationDetails = (condition: string, field: 'yearOfOnset', value: string) => {
+    const updatedConditions = {
+      ...data.emsContraindications,
+      [condition]: {
+        ...data.emsContraindications[condition],
+        [field]: value
+      }
+    };
+    
+    updateData({ emsContraindications: updatedConditions });
+  };
 
   const handleConditionChange = (condition: string, hasCondition: boolean) => {
     const updatedConditions = {
@@ -133,11 +197,7 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
       return;
     }
 
-    // Check if liability declaration is accepted
-    if (!data.liabilityDeclarationAccepted) {
-      toast.error("Παρακαλώ αποδεχτείτε την υπεύθυνη δήλωση για να συνεχίσετε");
-      return;
-    }
+
 
     // Validate year fields for medical conditions
     const conditionsWithYears = Object.values(data.medicalConditions).filter(
@@ -148,6 +208,26 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
       if (condition.yearOfOnset && (isNaN(Number(condition.yearOfOnset)) || Number(condition.yearOfOnset) < 1900 || Number(condition.yearOfOnset) > new Date().getFullYear())) {
         toast.error("Παρακαλώ εισάγετε έγκυρο έτος έναρξης για τις ιατρικές καταστάσεις");
         return;
+      }
+    }
+
+    // If EMS interest is selected, validate EMS contraindications years and liability acceptance
+    if (data.emsInterest) {
+      // Check if EMS liability declaration is accepted
+      if (!data.emsLiabilityAccepted) {
+        toast.error("Παρακαλώ αποδεχτείτε την υπεύθυνη δήλωση για προπόνηση με EMS για να συνεχίσετε");
+        return;
+      }
+
+      const emsConditionsWithYears = Object.values(data.emsContraindications).filter(
+        condition => condition.hasCondition && condition.yearOfOnset
+      );
+      
+      for (const condition of emsConditionsWithYears) {
+        if (condition.yearOfOnset && (isNaN(Number(condition.yearOfOnset)) || Number(condition.yearOfOnset) < 1900 || Number(condition.yearOfOnset) > new Date().getFullYear())) {
+          toast.error("Παρακαλώ εισάγετε έγκυρο έτος έναρξης για τις αντενδείξεις EMS");
+          return;
+        }
       }
     }
 
@@ -468,6 +548,206 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
             </CardContent>
           </Card>
 
+          {/* Section 6: EMS Interest */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-orange-500" />
+                6. Ενδιαφέρεστε να κάνετε EMS;
+              </CardTitle>
+              <CardDescription>
+                Ηλεκτρομυϊκή διέγερση (Electrical Muscle Stimulation)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="emsInterest"
+                  checked={data.emsInterest}
+                  onCheckedChange={(checked) => 
+                    updateData({ emsInterest: checked === true })
+                  }
+                />
+                <Label htmlFor="emsInterest" className="text-sm leading-5">
+                  Ναι, ενδιαφέρομαι να κάνω προπόνηση με EMS
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section 7: EMS Contraindications - Only show if interested in EMS */}
+          {data.emsInterest && (
+            <>
+              {/* Absolute Contraindications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    7. Αντενδείξεις για προπόνηση με EMS – Απόλυτες
+                  </CardTitle>
+                  <CardDescription>
+                    Παρακαλώ δηλώστε αν έχετε κάποια από τις παρακάτω καταστάσεις
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-red-900">
+                      Είναι σημαντικό να δηλώσετε όλες τις παρακάτω καταστάσεις για την ασφάλειά σας κατά την προπόνηση με EMS.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="grid gap-4">
+                    {EMS_ABSOLUTE_CONTRAINDICATIONS.map((condition) => (
+                      <div key={condition} className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`ems-absolute-${condition}`}
+                            checked={data.emsContraindications[condition]?.hasCondition || false}
+                            onCheckedChange={(checked) => 
+                              handleEmsContraindicationChange(condition, checked === true)
+                            }
+                          />
+                          <Label htmlFor={`ems-absolute-${condition}`} className="text-sm flex-1">
+                            {condition}
+                          </Label>
+                        </div>
+                        {data.emsContraindications[condition]?.hasCondition && (
+                          <div className="pl-6 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm">Έτος έναρξης:</Label>
+                              <Input
+                                type="text"
+                                placeholder="π.χ. 2020"
+                                value={data.emsContraindications[condition]?.yearOfOnset || ""}
+                                onChange={(e) => 
+                                  handleEmsContraindicationDetails(condition, 'yearOfOnset', e.target.value)
+                                }
+                                className="w-24"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Relative Contraindications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    8. Αντενδείξεις για προπόνηση με EMS – Σχετικές (με ιατρική συμβουλή)
+                  </CardTitle>
+                  <CardDescription>
+                    Παρακαλώ δηλώστε αν έχετε κάποια από τις παρακάτω καταστάσεις
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert className="border-yellow-200 bg-yellow-50">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    <AlertDescription className="text-yellow-900">
+                      Για αυτές τις καταστάσεις απαιτείται ιατρική συμβουλή πριν την έναρξη προπόνησης με EMS.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="grid gap-4">
+                    {EMS_RELATIVE_CONTRAINDICATIONS.map((condition) => (
+                      <div key={condition} className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`ems-relative-${condition}`}
+                            checked={data.emsContraindications[condition]?.hasCondition || false}
+                            onCheckedChange={(checked) => 
+                              handleEmsContraindicationChange(condition, checked === true)
+                            }
+                          />
+                          <Label htmlFor={`ems-relative-${condition}`} className="text-sm flex-1">
+                            {condition}
+                          </Label>
+                        </div>
+                        {data.emsContraindications[condition]?.hasCondition && (
+                          <div className="pl-6 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm">Έτος έναρξης:</Label>
+                              <Input
+                                type="text"
+                                placeholder="π.χ. 2020"
+                                value={data.emsContraindications[condition]?.yearOfOnset || ""}
+                                onChange={(e) => 
+                                  handleEmsContraindicationDetails(condition, 'yearOfOnset', e.target.value)
+                                }
+                                className="w-24"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* EMS Liability Declaration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-purple-500" />
+                    ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ (άρθρο 8 Ν.1599/1986) - EMS
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm font-medium mb-3">
+                      Με ατομική μου ευθύνη και γνωρίζοντας τις κυρώσεις (που προβλέπονται από τις διατάξεις 
+                      της παρ. 6 του άρθρου 22 του Ν.1599/1986), δηλώνω ότι:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-2 text-sm">
+                      <li>
+                        Κατανόησα τις ερωτήσεις που προηγήθηκαν και οι απαντήσεις μου είναι ειλικρινείς και πλήρεις.
+                      </li>
+                      <li>
+                        Αντιλαμβάνομαι ότι πρέπει να ελέγχομαι από το γιατρό μου περιοδικά και να προσκομίσω 
+                        την ιατρική βεβαίωση, στην οποία θα δηλώνεται η ικανότητά μου για άσκηση.
+                      </li>
+                      <li>
+                        Κατανοώ ότι ασκούμαι με δική μου ευθύνη και σε περίπτωση που κατά τη διάρκεια της 
+                        άσκησης εμφανισθούν συμπτώματα, θα πρέπει αμέσως να διακόψω τη προσπάθεια και να 
+                        τα αναφέρω στο γυμναστή και το γιατρό μου.
+                      </li>
+                      <li>
+                        <strong>Ειδικά για την προπόνηση με EMS, δηλώνω ότι γνωρίζω τη φύση της 
+                        ηλεκτρομυοδιέγερσης και τις πιθανές αντενδείξεις, και φέρω την ευθύνη για τυχόν 
+                        συμπτώματα ή αντιδράσεις που θα παρουσιαστούν κατά τη διάρκεια ή μετά την άσκηση.</strong>
+                      </li>
+                    </ul>
+                    <p className="text-sm mt-4">
+                      Τα συμπτώματα αυτά περιλαμβάνουν: ελαφρύ πονοκέφαλο ή ζάλη, βάρος ή πόνο στο 
+                      στήθος, αρρυθμίες, αιφνίδια δυσκολία στην αναπνοή, ή πρόβλημα στους μυς και στις 
+                      αρθρώσεις, τα οποία επιμένουν για αρκετές ημέρες μετά την άσκηση. Θα ενημερώσω άμεσα 
+                      για οποιαδήποτε πιθανή μεταβολή στην κατάσταση της υγείας μου.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="emsLiabilityDeclaration"
+                      checked={data.emsLiabilityAccepted || false}
+                      onCheckedChange={(checked) => 
+                        updateData({ emsLiabilityAccepted: checked === true })
+                      }
+                    />
+                    <Label htmlFor="emsLiabilityDeclaration" className="text-sm font-medium leading-5">
+                      <strong>Κατανόησα και αποδέχομαι τους όρους της υπεύθυνης δήλωσης για προπόνηση με EMS.</strong>
+                    </Label>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
           {/* Emergency Contact - Kept from original */}
           <Card>
             <CardHeader>
@@ -501,86 +781,6 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
                   required
                 />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Section 6: Liability Declaration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-purple-500" />
-                ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ (άρθρο 8 Ν.1599/1986)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Κάνοντας κλικ παρακάτω μπορείτε να δείτε το πλήρες κείμενο της υπεύθυνης δήλωσης:
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowLiabilityText(!showLiabilityText)}
-                >
-                  {showLiabilityText ? "Απόκρυψη" : "Εμφάνιση"} κειμένου υπεύθυνης δήλωσης
-                </Button>
-              </div>
-
-              {showLiabilityText && (
-                <div className="border rounded-lg p-4 bg-muted/20">
-                  <ScrollArea className="h-[200px]">
-                    <div className="text-sm space-y-3">
-                      <p>
-                        <strong>ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ</strong><br/>
-                        (άρθρο 8 παρ. 4 Ν. 1599/1986)
-                      </p>
-                      <p>
-                        Δηλώνω υπεύθυνα ότι όλες οι απαντήσεις που έδωσα στις παραπάνω ερωτήσεις είναι 
-                        αληθείς και ακριβείς. Κατανοώ ότι η απόκρυψη πληροφοριών ή η παροχή ψευδών 
-                        στοιχείων μπορεί να θέσει σε κίνδυνο την υγεία μου.
-                      </p>
-                      <p>
-                        Κατανοώ ότι η συμμετοχή μου σε προγράμματα άσκησης περιλαμβάνει κινδύνους και 
-                        αναλαμβάνω την πλήρη ευθύνη για τυχόν τραυματισμούς ή προβλήματα υγείας που 
-                        μπορεί να προκύψουν.
-                      </p>
-                      <p>
-                        Δεσμεύομαι να ενημερώσω άμεσα το προσωπικό του γυμναστηρίου για οποιαδήποτε 
-                        αλλαγή στην κατάσταση της υγείας μου ή για οποιαδήποτε συμπτώματα που μπορεί 
-                        να εμφανιστούν κατά τη διάρκεια ή μετά την άσκηση.
-                      </p>
-                      <p>
-                        Η παρούσα δήλωση συντάχθηκε για να χρησιμοποιηθεί για την εγγραφή μου στο 
-                        γυμναστήριο SWEAT 93 και τα στοιχεία που δηλώνω είναι αληθή.
-                      </p>
-                    </div>
-                  </ScrollArea>
-                </div>
-              )}
-
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="liabilityDeclaration"
-                  checked={data.liabilityDeclarationAccepted}
-                  onCheckedChange={(checked) => 
-                    updateData({ liabilityDeclarationAccepted: checked === true })
-                  }
-                />
-                <Label htmlFor="liabilityDeclaration" className="text-sm font-medium leading-5">
-                  <strong>Κατανόησα τις ερωτήσεις που προηγήθηκαν και οι απαντήσεις μου είναι ειλικρινείς και πλήρεις. 
-                  Αποδέχομαι τους όρους της υπεύθυνης δήλωσης.</strong>
-                </Label>
-              </div>
-
-              {hasAnyMedicalConditions && (
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    Έχετε δηλώσει ιατρικές καταστάσεις. Συνιστούμε ανεπιφύλακτα να συμβουλευτείτε 
-                    τον γιατρό σας πριν την έναρξη οποιουδήποτε προγράμματος άσκησης.
-                  </AlertDescription>
-                </Alert>
-              )}
             </CardContent>
           </Card>
         </div>

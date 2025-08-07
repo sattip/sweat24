@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Lock, Phone, User } from "lucide-react";
+import { Mail, Lock, Phone, User, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SignupData } from "../SignupSteps";
+import { ageVerificationService } from "@/services/ageVerificationService";
 
 interface BasicInfoStepProps {
   data: SignupData;
@@ -14,10 +15,20 @@ interface BasicInfoStepProps {
 }
 
 export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, onNext }) => {
-  const handleNext = () => {
+  const [loading, setLoading] = useState(false);
+  
+  // Production ready - χρησιμοποιεί πραγματικό API για έλεγχο ηλικίας
+  const USE_MOCK_AGE_CHECK = false;
+
+  const handleNext = async () => {
     // Validation
     if (!data.firstName || !data.lastName || !data.email || !data.password || !data.confirmPassword) {
       toast.error("Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία");
+      return;
+    }
+
+    if (!data.birthDate) {
+      toast.error("Παρακαλώ συμπληρώστε την ημερομηνία γέννησης");
       return;
     }
 
@@ -31,7 +42,53 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       return;
     }
 
-    onNext();
+    // Check age via backend API for security and legal validity
+    setLoading(true);
+    try {
+      if (USE_MOCK_AGE_CHECK) {
+        // ΠΡΟΣΩΡΙΝΗ ΛΟΓΙΚΗ ΓΙΑ TESTING
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+        
+        // Mock age calculation
+        const birthDate = new Date(data.birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        
+        // Mock response
+        const mockResponse = {
+          is_minor: age < 18,
+          age: age,
+          server_date: today.toISOString().split('T')[0]
+        };
+        
+        console.log("🔧 MOCK AGE CHECK:", mockResponse);
+        
+        updateData({ 
+          isMinor: mockResponse.is_minor,
+          serverVerifiedAge: mockResponse.age 
+        });
+      } else {
+        // ΚΑΝΟΝΙΚΗ ΛΕΙΤΟΥΡΓΙΑ ΜΕ BACKEND
+        const ageVerification = await ageVerificationService.checkAge(data.birthDate);
+        
+        updateData({ 
+          isMinor: ageVerification.is_minor,
+          serverVerifiedAge: ageVerification.age 
+        });
+      }
+
+      onNext();
+    } catch (error) {
+      console.error('Age verification failed:', error);
+      toast.error("Αποτυχία ελέγχου ηλικίας. Παρακαλώ δοκιμάστε ξανά.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,8 +207,15 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleNext}>
-          Συνέχεια
+        <Button onClick={handleNext} disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Έλεγχος ηλικίας...
+            </>
+          ) : (
+            'Συνέχεια'
+          )}
         </Button>
       </div>
     </div>
