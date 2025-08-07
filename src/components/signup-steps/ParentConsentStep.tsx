@@ -124,21 +124,19 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
         </AlertDescription>
       </Alert>
 
-      {/* Test button for quick fill - only show in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-          <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
-          <Button 
-            type="button"
-            variant="outline" 
-            size="sm"
-            onClick={fillTestData}
-            className="text-xs"
-          >
-            Συμπλήρωση Στοιχείων Γονέα
-          </Button>
-        </div>
-      )}
+      {/* Test button for quick fill */}
+      <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
+        <Button 
+          type="button"
+          variant="outline" 
+          size="sm"
+          onClick={fillTestData}
+          className="text-xs"
+        >
+          Συμπλήρωση Στοιχείων Γονέα
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>

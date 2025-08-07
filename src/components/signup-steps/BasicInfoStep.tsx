@@ -237,30 +237,28 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
         </div>
       </div>
 
-      {/* Test buttons for quick fill - only show in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-          <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
-          <Button 
-            type="button"
-            variant="outline" 
-            size="sm"
-            onClick={fillAdultData}
-            className="text-xs"
-          >
-            Συμπλήρωση Ενήλικα
-          </Button>
-          <Button 
-            type="button"
-            variant="outline" 
-            size="sm"
-            onClick={fillMinorData}
-            className="text-xs"
-          >
-            Συμπλήρωση Ανηλίκου
-          </Button>
-        </div>
-      )}
+      {/* Test buttons for quick fill */}
+      <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
+        <Button 
+          type="button"
+          variant="outline" 
+          size="sm"
+          onClick={fillAdultData}
+          className="text-xs"
+        >
+          Συμπλήρωση Ενήλικα
+        </Button>
+        <Button 
+          type="button"
+          variant="outline" 
+          size="sm"
+          onClick={fillMinorData}
+          className="text-xs"
+        >
+          Συμπλήρωση Ανηλίκου
+        </Button>
+      </div>
 
       <div className="flex justify-end">
         <Button onClick={handleNext} disabled={loading}>
