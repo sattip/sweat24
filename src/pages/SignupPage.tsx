@@ -70,10 +70,10 @@ const SignupPage: React.FC = () => {
         lastName: data.lastName,
         email: data.email,
         password: data.password,
-        birth_date: data.birthDate,  // Changed from birthDate to birth_date for backend
+        birthDate: data.birthDate,  // Keep camelCase as backend expects
         gender: data.gender,
         phone: data.phone,
-        signature: "placeholder", // We'll set this after completion
+        signature: data.parentConsent?.signature || "placeholder", // Use parent signature if available
         signedAt: new Date().toISOString(),
         documentType: 'terms_and_conditions',
         documentVersion: '1.0',
@@ -87,25 +87,9 @@ const SignupPage: React.FC = () => {
         }
       };
 
-      // Add parent consent data if user is minor - transform to snake_case for backend
+      // Add parent consent data if user is minor - keep camelCase as backend expects
       if (data.isMinor && data.parentConsent) {
-        registerData.parentConsent = {
-          parent_full_name: data.parentConsent.parentFullName,
-          father_first_name: data.parentConsent.fatherFirstName,
-          father_last_name: data.parentConsent.fatherLastName,
-          mother_first_name: data.parentConsent.motherFirstName,
-          mother_last_name: data.parentConsent.motherLastName,
-          parent_birth_date: data.parentConsent.parentBirthDate,
-          parent_id_number: data.parentConsent.parentIdNumber,
-          parent_phone: data.parentConsent.parentPhone,
-          parent_location: data.parentConsent.parentLocation,
-          parent_street: data.parentConsent.parentStreet,
-          parent_street_number: data.parentConsent.parentStreetNumber,
-          parent_postal_code: data.parentConsent.parentPostalCode,
-          parent_email: data.parentConsent.parentEmail,
-          consent_accepted: data.parentConsent.consentAccepted,
-          signature: data.parentConsent.signature
-        };
+        registerData.parentConsent = data.parentConsent;
       }
 
       // Register user with basic data and medical history together

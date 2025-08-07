@@ -108,16 +108,29 @@ class AuthService {
         'Accept': 'application/json',
       },
       body: JSON.stringify({
+        // Basic user fields (camelCase as backend expects)
         name: `${data.firstName} ${data.lastName}`,
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email,
         password: data.password,
         password_confirmation: data.password,
-        date_of_birth: (data as any).birth_date,  // Changed to date_of_birth as backend expects
+        birthDate: (data as any).birthDate,  // Backend expects camelCase
         gender: (data as any).gender,
         phone: (data as any).phone,
+        
+        // Document signing fields (camelCase)
+        signature: (data as any).signature,
+        signedAt: (data as any).signedAt,
+        documentType: (data as any).documentType,
+        documentVersion: (data as any).documentVersion,
+        
+        // Parent consent (camelCase fields nested)
+        ...((data as any).parentConsent && { parentConsent: (data as any).parentConsent }),
+        
+        // Additional data
         ...(data.medicalHistory && { medical_history: data.medicalHistory }),
-        ...((data as any).howFoundUs && { how_found_us: (data as any).howFoundUs }),
-        ...((data as any).parentConsent && { parent_consent: (data as any).parentConsent })
+        ...((data as any).howFoundUs && { how_found_us: (data as any).howFoundUs })
       }),
     });
 
