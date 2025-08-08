@@ -227,7 +227,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   };
 
   const nextStep = () => {
-    const maxSteps = signupData.isMinor ? 5 : 4;
+    const maxSteps = steps.length;
     if (currentStep < maxSteps) {
       setCurrentStep(currentStep + 1);
     }
