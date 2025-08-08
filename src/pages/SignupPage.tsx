@@ -70,10 +70,10 @@ const SignupPage: React.FC = () => {
         lastName: data.lastName,
         email: data.email,
         password: data.password,
-        birthDate: data.birthDate,
+        birthDate: data.birthDate,  // Keep camelCase as backend expects
         gender: data.gender,
         phone: data.phone,
-        signature: "placeholder", // We'll set this after completion
+        signature: data.parentConsent?.signature || "placeholder", // Use parent signature if available
         signedAt: new Date().toISOString(),
         documentType: 'terms_and_conditions',
         documentVersion: '1.0',
@@ -87,7 +87,7 @@ const SignupPage: React.FC = () => {
         }
       };
 
-      // Add parent consent data if user is minor
+      // Add parent consent data if user is minor - keep camelCase as backend expects
       if (data.isMinor && data.parentConsent) {
         registerData.parentConsent = data.parentConsent;
       }

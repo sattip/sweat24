@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService, User } from '@/services/authService';
+import { pusherService } from '@/services/pusherService';
 import { PendingUserModal } from '@/components/modals/PendingUserModal';
 import { toast } from 'sonner';
 
@@ -84,6 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     await authService.logout();
     setUser(null);
+    // Disconnect Pusher when logging out
+    pusherService.disconnect();
   };
 
   const refreshUser = async () => {

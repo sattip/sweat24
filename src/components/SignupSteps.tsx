@@ -227,7 +227,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   };
 
   const nextStep = () => {
-    const maxSteps = signupData.isMinor ? 4 : 3;
+    const maxSteps = signupData.isMinor ? 5 : 4;
     if (currentStep < maxSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -252,14 +252,14 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      {/* Stepper Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
+      {/* Stepper Header - Responsive Mobile-First Design */}
+      <div className="mb-8 overflow-x-auto">
+        <div className="flex items-center justify-between min-w-max md:min-w-0">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
+            <div key={step.id} className="flex items-center flex-shrink-0">
               <div
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors",
+                  "flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-colors",
                   step.completed
                     ? "bg-primary border-primary text-primary-foreground"
                     : step.id === currentStep
@@ -268,18 +268,20 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
                 )}
               >
                 {step.completed ? (
-                  <CheckCircle className="h-5 w-5" />
+                  <CheckCircle className="h-4 w-4 md:h-5 md:w-5" />
                 ) : (
-                  step.icon
+                  <div className="h-4 w-4 md:h-5 md:w-5">
+                    {step.icon}
+                  </div>
                 )}
               </div>
-              <div className="ml-3">
-                <div className="text-sm font-medium">{step.title}</div>
+              <div className="ml-2 md:ml-3">
+                <div className="text-xs md:text-sm font-medium whitespace-nowrap">{step.title}</div>
               </div>
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    "ml-6 h-px w-16 transition-colors",
+                    "ml-3 md:ml-6 h-px w-8 md:w-16 transition-colors",
                     step.completed ? "bg-primary" : "bg-muted-foreground/30"
                   )}
                 />

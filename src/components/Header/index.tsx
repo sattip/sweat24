@@ -27,13 +27,7 @@ const Header: React.FC = () => {
   const showBackButton = location.pathname !== '/dashboard' && location.pathname !== '/';
   
   return (
-    <header
-      className="bg-white border-b sticky top-0 z-10"
-      style={{
-        paddingTop: 'max(20px, env(safe-area-inset-top))',
-        minHeight: 'calc(64px + max(20px, env(safe-area-inset-top)))'
-      }}
-    >
+    <header className="bg-white border-b sticky top-0 z-10 pt-safe-ios">
       <div className="container flex h-16 md:h-16 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
           {/* Back button for mobile */}
@@ -70,7 +64,6 @@ const Header: React.FC = () => {
           <Link to="/dashboard" className="flex items-center shrink-0">
             <Logo />
           </Link>
-          {/* Αφαιρέθηκε ο τίτλος σελίδας από το Header για να μην επικαλύπτει εικονίδια */}
         </div>
         
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
