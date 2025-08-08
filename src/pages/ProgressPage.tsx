@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -49,6 +49,8 @@ import {
   ChevronRight,
   Info 
 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Camera as DeviceCamera } from "@capacitor/camera";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { 
@@ -222,6 +224,15 @@ const ProgressPage = () => {
 
   // Photos logic
   const hasPhotos = !showPhotosEmptyState && mockProgressPhotos.length > 0;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    toast.success(`Επιλέχθηκαν ${files.length} φωτογραφίες`);
+    // TODO: Θα σταλούν στο backend αποθήκευσης όταν υλοποιηθεί το API
+    e.currentTarget.value = ""; // reset για επόμενη επιλογή
+  };
   
   const sortedPhotos = [...mockProgressPhotos].sort((a, b) => {
     return photoSortOrder === "newest" ? b.id - a.id : a.id - b.id;
@@ -254,8 +265,20 @@ const ProgressPage = () => {
     setSelectedPhoto(null);
   };
   
-  const handleUploadPhoto = () => {
-    toast.success("Η φωτογραφία μεταφορτώθηκε επιτυχώς");
+  const handleUploadPhoto = async () => {
+    try {
+      if (Capacitor.getPlatform() !== "web") {
+        const result = await DeviceCamera.pickImages({ quality: 85, limit: 10 });
+        const count = result.photos?.length || 0;
+        if (count > 0) {
+          toast.success(`Επιλέχθηκαν ${count} φωτογραφίες`);
+        }
+      } else {
+        fileInputRef.current?.click();
+      }
+    } catch (err) {
+      // συνήθως ακύρωση επιλογής
+    }
   };
 
   // Measurements logic
@@ -347,10 +370,10 @@ const ProgressPage = () => {
           </TabsList>
           
           <TabsContent value="photos" className="mt-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
               <h2 className="text-2xl font-bold">Φωτογραφίες Προόδου</h2>
               
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                 <Button
                   variant="outline"
                   size="icon"
@@ -368,7 +391,7 @@ const ProgressPage = () => {
                     setPhotoSortOrder(value as "newest" | "oldest");
                   }
                 }}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[140px] sm:w-[180px]">
                     <SelectValue placeholder="Σειρά ταξινόμησης" />
                   </SelectTrigger>
                   <SelectContent>
@@ -382,6 +405,14 @@ const ProgressPage = () => {
                   <Camera className="h-4 w-4 mr-2" />
                   Προσθήκη Φωτογραφίας
                 </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFilesSelected}
+                />
               </div>
             </div>
 

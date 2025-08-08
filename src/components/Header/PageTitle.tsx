@@ -9,6 +9,12 @@ const PageTitle: React.FC = () => {
   
   const getPageTitle = () => {
     const path = location.pathname;
+    
+    // Don't show title on login/signup pages
+    if (path === "/" || path === "/login" || path === "/signup" || path === "/signup-success") {
+      return "";
+    }
+    
     if (path === "/dashboard") return "Αρχική";
     if (path.includes("/schedule") || path.includes("/class")) return "Πρόγραμμα";
     if (path === "/bookings" || path === "/history") return "Οι Κρατήσεις μου";
@@ -25,7 +31,7 @@ const PageTitle: React.FC = () => {
     if (path === "/contact") return "Επικοινωνία";
     if (path === "/profile") return "Προφίλ";
     if (path === "/settings") return "Ρυθμίσεις";
-    return "Sweat93";
+    return "";
   };
 
   return (

@@ -10,7 +10,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Heart, AlertTriangle, Users, Cigarette, Activity, FileText, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SignupData } from "../SignupSteps";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MedicalHistoryStepProps {
   data: SignupData;
@@ -280,7 +279,7 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
         </Button>
       </div>
       
-      <ScrollArea className="h-[70vh] pr-4">
+      <div className="space-y-6 max-h-[60vh] md:max-h-[70vh] overflow-y-auto pr-2 md:pr-4 -webkit-overflow-scrolling-touch">
         <div className="space-y-6">
           {/* Section 1: Medical Conditions */}
           <Card>
@@ -826,7 +825,7 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
             </CardContent>
           </Card>
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Navigation Buttons */}
       <div className="flex justify-between border-t pt-4">

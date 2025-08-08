@@ -39,7 +39,8 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
       return;
     }
 
-    const signature = signaturePadRef.current?.toDataURL();
+    const sigRef = signaturePadRef.current;
+    const signature = sigRef?.toDataURLJpeg ? sigRef.toDataURLJpeg() : sigRef?.toDataURL();
     if (signature) {
       setIsProcessing(true);
       setSignatureData(signature);

@@ -16,6 +16,10 @@ export interface RegisterData {
   documentVersion?: string;
   // Medical history data
   medicalHistory?: any;
+  // How found us (optional)
+  howFoundUs?: any;
+  // Parent/guardian consent for minors (optional)
+  parentConsent?: any;
 }
 
 export interface User {
