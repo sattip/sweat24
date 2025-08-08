@@ -52,32 +52,47 @@ export function ChatWidget() {
     try {
       setLoading(true);
       const response = await chatService.getConversation();
-      setConversation(response);
-    } catch (error) {
+      if (response) {
+        setConversation(response);
+      } else {
+        // Initialize an empty conversation if none exists
+        setConversation({
+          id: 0,
+          messages: [],
+          unread_count: 0
+        });
+      }
+    } catch (error: any) {
       console.error('Error fetching conversation:', error);
-      toast.error('Σφάλμα κατά τη φόρτωση της συνομιλίας');
+      // Initialize an empty conversation on error
+      setConversation({
+        id: 0,
+        messages: [],
+        unread_count: 0
+      });
+      // Only show error if it's not a 404 (conversation not found)
+      if (error?.message && !error.message.includes('404')) {
+        toast.error('Σφάλμα κατά τη φόρτωση της συνομιλίας');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const sendMessage = async () => {
-    if (!message.trim() || sending || !conversation) return;
+    if (!message.trim() || sending) return;
 
     const userMessage = message.trim();
     setSending(true);
     setMessage("");
 
     try {
-      const response = await chatService.sendMessage(conversation.id, userMessage);
+      // If no conversation exists, the backend will create one
+      const conversationId = conversation?.id || 0;
+      const response = await chatService.sendMessage(conversationId, userMessage);
       
-      // Update conversation with new messages
-      setConversation(prev => prev ? {
-        ...prev,
-        messages: [...prev.messages, response.user_message, response.admin_message]
-      } : null);
-
-      toast.success('Μήνυμα στάλθηκε!');
+      // Refresh conversation to get latest messages and proper conversation ID
+      await fetchOrCreateConversation();
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Σφάλμα κατά την αποστολή μηνύματος');
