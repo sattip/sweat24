@@ -33,6 +33,7 @@ interface Conversation {
 }
 
 export function ChatWidget() {
+  const { isAuthenticated, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -43,10 +44,10 @@ export function ChatWidget() {
 
   // Fetch or create conversation on mount
   useEffect(() => {
-    if (isOpen && !conversation) {
+    if (isOpen && !conversation && isAuthenticated) {
       fetchOrCreateConversation();
     }
-  }, [isOpen]);
+  }, [isOpen, isAuthenticated]);
 
   const fetchOrCreateConversation = async () => {
     try {
@@ -117,6 +118,11 @@ export function ChatWidget() {
       }
     }
   }, [conversation?.messages]);
+
+  // Don't render chat widget if user is not authenticated
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   return (
     <>
