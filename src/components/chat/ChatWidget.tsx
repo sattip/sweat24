@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { chatService } from '@/services/chatService';
+import { pusherService } from '@/services/pusherService';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { el } from 'date-fns/locale';
@@ -41,13 +42,73 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<any>(null);
 
-  // Fetch or create conversation on mount
+  // Initialize Pusher when authenticated
   useEffect(() => {
-    if (isOpen && !conversation && isAuthenticated) {
-      fetchOrCreateConversation();
+    if (isAuthenticated && user?.id) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        pusherService.initialize(user.id, token);
+        
+        // Subscribe to chat channel
+        channelRef.current = pusherService.subscribeToChat(user.id, (payload: any) => {
+          // Handle incoming message
+          if (payload.message) {
+            setConversation(prev => {
+              if (!prev) return null;
+              
+              // Add the new message to the conversation
+              const newMessage = payload.message;
+              
+              // Check if message already exists to avoid duplicates
+              const messageExists = prev.messages.some(m => m.id === newMessage.id);
+              if (messageExists) {
+                return prev;
+              }
+              
+              return {
+                ...prev,
+                messages: [...prev.messages, newMessage],
+                unread_count: newMessage.sender_type === 'admin' ? prev.unread_count + 1 : prev.unread_count
+              };
+            });
+          }
+        });
+      }
     }
-  }, [isOpen, isAuthenticated]);
+
+    return () => {
+      // Cleanup on unmount
+      if (channelRef.current) {
+        channelRef.current = null;
+      }
+    };
+  }, [isAuthenticated, user?.id]);
+
+  // Fetch or create conversation on mount and mark as read
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      if (!conversation) {
+        fetchOrCreateConversation();
+      } else if (conversation.id > 0 && conversation.unread_count > 0) {
+        // Mark messages as read when chat is opened
+        markMessagesAsRead();
+      }
+    }
+  }, [isOpen, isAuthenticated, conversation?.id, conversation?.unread_count]);
+
+  const markMessagesAsRead = async () => {
+    if (!conversation || conversation.id <= 0) return;
+    
+    try {
+      await chatService.markAsRead(conversation.id);
+      // Update local state to reset unread count
+      setConversation(prev => prev ? { ...prev, unread_count: 0 } : null);
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
 
   const fetchOrCreateConversation = async () => {
     try {
@@ -118,6 +179,15 @@ export function ChatWidget() {
       }
     }
   }, [conversation?.messages]);
+
+  // Cleanup Pusher connection on unmount
+  useEffect(() => {
+    return () => {
+      if (!isAuthenticated) {
+        pusherService.disconnect();
+      }
+    };
+  }, [isAuthenticated]);
 
   // Don't render chat widget if user is not authenticated
   if (!isAuthenticated || !user) {
