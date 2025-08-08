@@ -16,6 +16,10 @@ export interface RegisterData {
   documentVersion?: string;
   // Medical history data
   medicalHistory?: any;
+  // How found us (optional)
+  howFoundUs?: any;
+  // Parent/guardian consent for minors (optional)
+  parentConsent?: any;
 }
 
 export interface User {
@@ -106,7 +110,17 @@ class AuthService {
         email: data.email,
         password: data.password,
         password_confirmation: data.password,
-        ...(data.medicalHistory && { medical_history: data.medicalHistory })
+        ...(data.medicalHistory && { medical_history: data.medicalHistory }),
+        ...(data.howFoundUs && { how_found_us: data.howFoundUs }),
+        ...(data.parentConsent && {
+          parent_consent: {
+            ...data.parentConsent,
+            // Normalize signature payload like other signatures in the app
+            signature_data: data.parentConsent.signature,
+            document_type: 'parent_consent',
+            document_version: '1.0',
+          },
+        }),
       }),
     });
 

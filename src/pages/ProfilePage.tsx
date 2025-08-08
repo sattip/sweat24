@@ -10,8 +10,11 @@ import LoyaltyRewardAlert from "@/components/notifications/LoyaltyRewardAlert";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
-import { packageService } from "@/services/apiService";
+import { packageService, userService } from "@/services/apiService";
 import { BookingRequests } from "@/components/BookingRequests";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -22,7 +25,14 @@ const ProfilePage = () => {
   const [packages, setPackages] = useState([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  
+  // Edit profile modal state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -72,6 +82,15 @@ const ProfilePage = () => {
 
     fetchPackages();
   }, []);
+
+  // Prefill edit form when user changes
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditEmail(user.email || "");
+      setEditPhone((user as any).phone || "");
+    }
+  }, [user]);
   
   const handleRedeemReward = (reward) => {
     if (reward.status === "Διαθέσιμο") {
@@ -198,7 +217,12 @@ const ProfilePage = () => {
                     <AvatarFallback className="text-2xl">{userData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                 </div>
-                <Button variant="ghost" size="icon" className="absolute top-4 right-4 bg-background/20 hover:bg-background/40 text-white">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 bg-background/20 hover:bg-background/40 text-white"
+                  onClick={() => setIsEditOpen(true)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>
@@ -206,6 +230,59 @@ const ProfilePage = () => {
                 <h2 className="text-2xl font-bold">{userData.name}</h2>
               </CardContent>
             </Card>
+
+            {/* Edit Profile Dialog */}
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Επεξεργασία Προσωπικών Στοιχείων</DialogTitle>
+                  <DialogDescription>
+                    Ενημερώστε το ονοματεπώνυμο, το email και το τηλέφωνο σας.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Ονοματεπώνυμο</Label>
+                    <Input id="name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Τηλέφωνο</Label>
+                    <Input id="phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+                  </div>
+                </div>
+                <DialogFooter className="gap-2 sm:gap-2">
+                  <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={savingProfile}>Ακύρωση</Button>
+                  <Button
+                    onClick={async () => {
+                      if (!user) return;
+                      try {
+                        setSavingProfile(true);
+                        await userService.updateProfile(user.id, {
+                          name: editName,
+                          email: editEmail,
+                          phone: editPhone,
+                        });
+                        toast({ title: "Το προφίλ ενημερώθηκε επιτυχώς" });
+                        await refreshUser();
+                        setIsEditOpen(false);
+                      } catch (error) {
+                        console.error(error);
+                        toast({ title: "Σφάλμα ενημέρωσης προφίλ", description: "Παρακαλώ δοκιμάστε ξανά", variant: "destructive" });
+                      } finally {
+                        setSavingProfile(false);
+                      }
+                    }}
+                    disabled={savingProfile}
+                  >
+                    {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : "Αποθήκευση"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             
             {/* My Packages Section */}
             <Card className="shadow-sm">
@@ -467,9 +544,6 @@ const ProfilePage = () => {
                     <CardTitle className="text-xl">Προσωπικές Λεπτομέρειες</CardTitle>
                     <CardDescription>Οι στοιχεία επικοινωνίας και προσωπικές πληροφορίες σας</CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                    <Edit className="h-4 w-4" /> Επεξεργασία
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
