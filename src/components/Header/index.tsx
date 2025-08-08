@@ -5,7 +5,6 @@ import { Button } from "../ui/button";
 import { Menu, User, Contact, ShoppingCart, ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
-import PageTitle from "./PageTitle";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { useCart } from "@/hooks/use-cart";
 import {
@@ -65,9 +64,6 @@ const Header: React.FC = () => {
           <Link to="/dashboard" className="flex items-center shrink-0">
             <Logo />
           </Link>
-          <div className="min-w-0 flex-1">
-            <PageTitle />
-          </div>
         </div>
         
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
