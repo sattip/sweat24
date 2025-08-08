@@ -17,6 +17,10 @@ const config: CapacitorConfig = {
     StatusBar: {
       style: "DARK",
       backgroundColor: "#FFFFFF"
+    },
+    Keyboard: {
+      resize: "body",
+      resizeOnFullScreen: true
     }
   }
 };

@@ -28,7 +28,7 @@ const Header: React.FC = () => {
   const showBackButton = location.pathname !== '/dashboard' && location.pathname !== '/';
   
   return (
-    <header className="bg-white border-b sticky top-0 z-10">
+    <header className="bg-white border-b sticky top-0 z-10 pt-safe-ios">
       <div className="container flex h-16 md:h-16 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
           {/* Back button for mobile */}
