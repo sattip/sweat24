@@ -1,10 +1,10 @@
 // Chat service for client app with token authentication
-import { apiRequest } from '@/config/api';
+import * as API from '@/config/api';
 
 export const chatService = {
   async getConversation() {
     try {
-      const response = await apiRequest('/chat/conversation');
+      const response = await API.apiRequest('/chat/conversation');
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -33,7 +33,7 @@ export const chatService = {
         body.conversation_id = conversationId;
       }
       
-      const response = await apiRequest('/chat/messages', {
+      const response = await API.apiRequest('/chat/messages', {
         method: 'POST',
         body: JSON.stringify(body)
       });
@@ -52,7 +52,7 @@ export const chatService = {
   },
   
   async markAsRead(conversationId: number) {
-    const response = await apiRequest(`/chat/conversations/${conversationId}/read`, {
+    const response = await API.apiRequest(`/chat/conversations/${conversationId}/read`, {
       method: 'PUT'
     });
     

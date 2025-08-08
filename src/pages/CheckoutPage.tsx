@@ -21,7 +21,7 @@ import { ChevronLeft } from "lucide-react";
 import Header from "@/components/Header";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 import { toast } from "sonner";
 
 const CheckoutPage = () => {
@@ -75,7 +75,7 @@ const CheckoutPage = () => {
       };
 
       // Submit order
-      const response = await apiRequest('/orders', {
+      const response = await API.apiRequest('/orders', {
         method: 'POST',
         body: JSON.stringify(orderData),
       });

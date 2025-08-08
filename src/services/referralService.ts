@@ -1,4 +1,4 @@
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import * as API from '@/config/api';
 
 export interface ReferralValidationRequest {
   code_or_name: string;
@@ -36,7 +36,7 @@ class ReferralService {
    */
   async validateReferral(codeOrName: string): Promise<ReferralValidationResponse> {
     try {
-      const response = await apiRequest(API_ENDPOINTS.referrals.validate, {
+      const response = await API.apiRequest(API.API_ENDPOINTS.referrals.validate, {
         method: 'POST',
         body: JSON.stringify({
           code_or_name: codeOrName.trim()
@@ -61,7 +61,7 @@ class ReferralService {
    */
   async saveHowFoundUs(howFoundUsData: HowFoundUsRequest): Promise<HowFoundUsResponse> {
     try {
-      const response = await apiRequest(API_ENDPOINTS.user.howFoundUs, {
+      const response = await API.apiRequest(API.API_ENDPOINTS.user.howFoundUs, {
         method: 'POST',
         body: JSON.stringify(howFoundUsData),
       });

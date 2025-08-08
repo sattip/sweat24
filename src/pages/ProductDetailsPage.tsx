@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 
 interface Product {
   id: number;
@@ -47,7 +47,7 @@ const ProductDetailsPage = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await apiRequest(`/store/products/id/${productId}`);
+      const response = await API.apiRequest(`/store/products/id/${productId}`);
       const data = await response.json();
       setProduct(data);
     } catch (error) {

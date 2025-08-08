@@ -515,6 +515,28 @@ export const dashboardService = {
   }
 };
 
+// Profile (active packages)
+export const profileService = {
+  async getActivePackages() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return [];
+
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.profile), {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) return [];
+    const data = await response.json();
+    const packages = (data?.user?.packages ?? data?.packages ?? []);
+    return Array.isArray(packages) ? packages : [];
+  }
+};
+
 // User Profile
 export const userService = {
   async getCurrentUser() {

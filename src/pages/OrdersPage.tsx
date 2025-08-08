@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Clock, CheckCircle, XCircle } from "lucide-react";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 import { format } from "date-fns";
 import { el } from "date-fns/locale";
 
@@ -47,7 +47,7 @@ const OrdersPage = () => {
     if (!user) return;
     
     try {
-      const response = await apiRequest(`/orders?user_id=${user.id}`);
+      const response = await API.apiRequest(`/orders?user_id=${user.id}`);
       const data = await response.json();
       setOrders(data);
     } catch (error) {

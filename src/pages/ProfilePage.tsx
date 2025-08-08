@@ -4,13 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, History, Users, Image, Ruler, Settings, User, Activity, Gift, Package, CreditCard, Euro, Loader2, FileText, Clock } from "lucide-react";
+import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { profileService } from "@/services/apiService";
 import { Badge } from "@/components/ui/badge";
-import LoyaltyRewardAlert from "@/components/notifications/LoyaltyRewardAlert";
-import { useToast } from "@/components/ui/use-toast";
-import { Progress } from "@/components/ui/progress";
+// Αφαιρέθηκαν mock ειδοποιήσεις/loyalty
 import { useAuth } from "@/contexts/AuthContext";
-import { packageService, userService } from "@/services/apiService";
+import { userService } from "@/services/apiService";
 import { BookingRequests } from "@/components/BookingRequests";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -21,11 +21,13 @@ const ProfilePage = () => {
   const queryParams = new URLSearchParams(location.search);
   const activeTab = queryParams.get('tab');
   
-  const [isRewardAlertOpen, setIsRewardAlertOpen] = useState(false);
-  const [packages, setPackages] = useState([]);
-  const [loadingPackages, setLoadingPackages] = useState(true);
-  const { toast } = useToast();
+  const [loadingPackages, setLoadingPackages] = useState(false);
+  const [activePackages, setActivePackages] = useState<any[]>([]);
   const { user, refreshUser } = useAuth();
+  // Αν δεν υπάρχει χρήστης, μην αποδίδεις τίποτα (το ProtectedRoute θα χειριστεί redirect)
+  if (!user) {
+    return null;
+  }
   
   // Edit profile modal state
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -34,54 +36,7 @@ const ProfilePage = () => {
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        setLoadingPackages(true);
-        const data = await packageService.getAll();
-        // For demo purposes, show first 3 packages as user's active packages
-        // In a real app, you'd fetch user's actual purchased packages
-        const userPackages = data.slice(0, 3).map((pkg, index) => ({
-          id: pkg.id,
-          name: pkg.name,
-          remaining: [7, 15, 1][index], // Mock remaining sessions
-          expiresAt: ['2024-09-15', '2024-08-30', '2024-07-25'][index], // Mock expiry dates
-          type: pkg.type
-        }));
-        setPackages(userPackages);
-      } catch (err) {
-        console.error('Failed to fetch packages:', err);
-        // Fallback to mock data if API fails
-        setPackages([
-          {
-            id: "pkg_1",
-            name: "Πακέτο 10 EMS",
-            remaining: 7,
-            expiresAt: "2024-09-15",
-            type: "EMS"
-          },
-          {
-            id: "pkg_2",
-            name: "Πακέτο 20 Ομαδικών",
-            remaining: 15,
-            expiresAt: "2024-08-30",
-            type: "Ομαδικά"
-          },
-          {
-            id: "pkg_3",
-            name: "Πακέτο 5 Yoga",
-            remaining: 1,
-            expiresAt: "2024-07-25",
-            type: "Yoga"
-          }
-        ]);
-      } finally {
-        setLoadingPackages(false);
-      }
-    };
-
-    fetchPackages();
-  }, []);
+  // Δεν φορτώνουμε πλέον mock πακέτα. Θα βασιστούμε μόνο στα πραγματικά πεδία του χρήστη από το auth context.
 
   // Prefill edit form when user changes
   useEffect(() => {
@@ -91,87 +46,45 @@ const ProfilePage = () => {
       setEditPhone((user as any).phone || "");
     }
   }, [user]);
+
+  // Fetch active packages from profile API
+  useEffect(() => {
+    const loadPackages = async () => {
+      try {
+        setLoadingPackages(true);
+        const pkgs = await profileService.getActivePackages();
+        setActivePackages(Array.isArray(pkgs) ? pkgs : []);
+      } catch (e) {
+        setActivePackages([]);
+      } finally {
+        setLoadingPackages(false);
+      }
+    };
+    loadPackages();
+  }, []);
   
-  const handleRedeemReward = (reward) => {
-    if (reward.status === "Διαθέσιμο") {
-      toast({
-        title: "Δώρο Εξαργυρώθηκε!",
-        description: `Το δώρο "${reward.name}" εξαργυρώθηκε επιτυχώς. Κωδικός: ${reward.code}`,
-        duration: 5000,
-      });
-    }
-  };
-  
-  // Use actual user data from auth context
+  // Πραγματικά δεδομένα χρήστη από το auth context (χωρίς mock sections)
+  const activePkg = (Array.isArray(activePackages) && activePackages.length > 0)
+    ? activePackages.find((p: any) => p?.status === 'active')
+    : ((user as any)?.active_package || (Array.isArray((user as any)?.user_packages) ? (user as any).user_packages.find((p: any) => p?.status === 'active') : null));
+
   const userData = {
     name: user?.name || "Χρήστης",
     email: user?.email || "",
-    phone: user?.phone || "+30 6944 123456",
-    dateOfBirth: "1990-05-15",
-    fitnessGoals: ["Απώλεια Βάρους", "Αύξηση Μυϊκής Μάζας", "Καρδιοαναπνευστική Φυσική Κατάσταση"],
-    activePackages: packages,
-    financialInfo: {
-      packages: [
-        {
-          id: 1,
-          packageName: "Πακέτο 20 Ομαδικών",
-          totalAmount: 200,
-          paidAmount: 80,
-          remainingAmount: 120,
-          nextInstallment: {
-            amount: 40,
-            dueDate: "2024-08-15"
-          },
-          installments: [
-            { amount: 80, date: "2024-07-01", status: "Πληρώθηκε" },
-            { amount: 40, date: "2024-08-15", status: "Εκκρεμεί" },
-            { amount: 40, date: "2024-09-15", status: "Εκκρεμεί" },
-            { amount: 40, date: "2024-10-15", status: "Εκκρεμεί" }
-          ]
-        },
-        {
-          id: 2,
-          packageName: "Πακέτο 10 EMS",
-          totalAmount: 350,
-          paidAmount: 150,
-          remainingAmount: 200,
-          nextInstallment: {
-            amount: 100,
-            dueDate: "2024-08-20"
-          },
-          installments: [
-            { amount: 150, date: "2024-07-10", status: "Πληρώθηκε" },
-            { amount: 100, date: "2024-08-20", status: "Εκκρεμεί" },
-            { amount: 100, date: "2024-09-20", status: "Εκκρεμεί" }
-          ]
-        }
-      ]
+    phone: (user as any)?.phone || "",
+    dateOfBirth: user?.birth_date || "",
+    activePackage: {
+      exists: Boolean(activePkg) || (user?.remaining_sessions === null) || ((user?.remaining_sessions ?? 0) > 0),
+      name: "Συνδρομή",
+      type: activePkg?.package?.name || activePkg?.package_name || user?.membership_type || "",
+      remaining: (activePkg?.remaining_sessions !== undefined ? activePkg.remaining_sessions : (user as any)?.remaining_sessions) ?? null,
+      expiresAt: activePkg?.expires_at || user?.package_end_date || null,
     },
-    activity: {
-      totalWorkouts: 52,
-      totalMinutes: 2500,
-      caloriesBurned: 32500,
-    },
-    loyaltyPoints: 1250,
-    rewards: [
-      {
-        id: 1,
-        type: "birthday",
-        name: "Δωρεάν Προσωπική Προπόνηση",
-        code: "BDAYPT2023",
-        status: "Διαθέσιμο",
-        expiresAt: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
-      },
-      {
-        id: 2,
-        type: "referral",
-        name: "Δωρεάν Προπόνηση",
-        code: "REF123456",
-        status: "Διαθέσιμο",
-        expiresAt: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
-      }
-    ]
-  };
+  } as const;
+
+  const fitnessGoals: string[] = Array.isArray((user as any)?.fitness_goals)
+    ? (user as any).fitness_goals
+    : [];
 
   // Show booking requests if tab parameter is set
   if (activeTab === 'booking-requests') {
@@ -284,7 +197,7 @@ const ProfilePage = () => {
               </DialogContent>
             </Dialog>
             
-            {/* My Packages Section */}
+            {/* My Packages Section - χωρίς mock */}
             <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
@@ -293,32 +206,41 @@ const ProfilePage = () => {
                 </CardTitle>
                 <CardDescription>Τα ενεργά πακέτα προπονήσεων και το υπόλοιπό τους.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+            <CardContent className="space-y-4">
                 {loadingPackages ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
-                ) : userData.activePackages.length > 0 ? (
-                  <div className="space-y-4">
-                    {userData.activePackages.map((pkg) => (
-                      <div key={pkg.id} className="p-4 rounded-lg border bg-muted/20">
-                        <div className="flex flex-col md:flex-row justify-between md:items-center">
-                          <div>
-                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-lg">{pkg.name}</h3>
-                              <Badge variant="outline">{pkg.type}</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Λήγει στις: {new Date(pkg.expiresAt).toLocaleDateString('el-GR')}
-                            </p>
-                          </div>
-                          <div className="mt-2 md:mt-0 text-right">
-                            <p className="text-2xl font-bold text-primary">{pkg.remaining}</p>
-                            <p className="text-sm text-muted-foreground">συνεδρίες</p>
-                          </div>
+                ) : userData.activePackage.exists ? (
+                  <div className="p-4 rounded-lg border bg-muted/20">
+                    <div className="flex flex-col md:flex-row justify-between md:items-center">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-lg">{userData.activePackage.name}</h3>
+                          {userData.activePackage.type && (
+                            <Badge variant="outline">{userData.activePackage.type}</Badge>
+                          )}
                         </div>
+                        {userData.activePackage.expiresAt && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Λήγει στις: {new Date(userData.activePackage.expiresAt).toLocaleDateString('el-GR')}
+                          </p>
+                        )}
                       </div>
-                    ))}
+                      <div className="mt-2 md:mt-0 text-right">
+                        {userData.activePackage.remaining === null || userData.activePackage.remaining === undefined ? (
+                          <>
+                            <p className="text-2xl font-bold text-primary">Απεριόριστο</p>
+                            <p className="text-sm text-muted-foreground">πακέτο</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-2xl font-bold text-primary">{userData.activePackage.remaining}</p>
+                            <p className="text-sm text-muted-foreground">συνεδρίες</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
@@ -332,15 +254,14 @@ const ProfilePage = () => {
             <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-primary" />
                   Οικονομικά Στοιχεία
                 </CardTitle>
                 <CardDescription>Η κατάσταση των πληρωμών και των δόσεων σας.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {userData.financialInfo.packages.length > 0 ? (
+                {Array.isArray((user as any)?.financialInfo?.packages) && (user as any).financialInfo.packages.length > 0 ? (
                   <div className="space-y-6">
-                    {userData.financialInfo.packages.map((pkg) => {
+                    {(user as any).financialInfo.packages.map((pkg: any) => {
                       const paymentProgress = (pkg.paidAmount / pkg.totalAmount) * 100;
                       const isNextDueSoon = new Date(pkg.nextInstallment.dueDate) <= new Date(new Date().setDate(new Date().getDate() + 7));
                       
@@ -356,22 +277,19 @@ const ProfilePage = () => {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div className="text-center p-3 bg-background rounded-md">
                               <div className="flex items-center justify-center gap-1 text-lg font-bold">
-                                <Euro className="h-4 w-4" />
-                                {pkg.totalAmount}
+                                €{pkg.totalAmount}
                               </div>
                               <p className="text-sm text-muted-foreground">Συνολικό Ποσό</p>
                             </div>
                             <div className="text-center p-3 bg-green-50 rounded-md">
                               <div className="flex items-center justify-center gap-1 text-lg font-bold text-green-700">
-                                <Euro className="h-4 w-4" />
-                                {pkg.paidAmount}
+                                €{pkg.paidAmount}
                               </div>
                               <p className="text-sm text-green-600">Πληρωμένο</p>
                             </div>
                             <div className="text-center p-3 bg-red-50 rounded-md">
                               <div className="flex items-center justify-center gap-1 text-lg font-bold text-red-700">
-                                <Euro className="h-4 w-4" />
-                                {pkg.remainingAmount}
+                                €{pkg.remainingAmount}
                               </div>
                               <p className="text-sm text-red-600">Υπόλοιπο</p>
                             </div>
@@ -401,8 +319,7 @@ const ProfilePage = () => {
                                 </div>
                                 <div className="text-right">
                                   <div className="flex items-center gap-1 text-xl font-bold">
-                                    <Euro className="h-5 w-5" />
-                                    {pkg.nextInstallment.amount}
+                                    €{pkg.nextInstallment.amount}
                                   </div>
                                 </div>
                               </div>
@@ -437,9 +354,9 @@ const ProfilePage = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Δεν υπάρχουν οικονομικά στοιχεία προς εμφάνιση.
-                  </div>
+                    <div className="text-center py-8 text-muted-foreground">
+                      Δεν υπάρχουν οικονομικά στοιχεία προς εμφάνιση.
+                    </div>
                 )}
               </CardContent>
               <CardFooter className="border-t pt-4">
@@ -455,22 +372,17 @@ const ProfilePage = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-xl flex items-center gap-2">
-                      <Gift className="h-5 w-5 text-primary" />
                       Πρόγραμμα Πιστότητας
                     </CardTitle>
                     <CardDescription>Οι πόντοι και τα διαθέσιμα δώρα σας</CardDescription>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{userData.loyaltyPoints}</p>
-                    <p className="text-sm text-muted-foreground">πόντοι</p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <h4 className="font-medium text-md text-foreground">Τα Δώρα μου</h4>
-                {userData.rewards.length > 0 ? (
+                {Array.isArray((user as any)?.rewards) && (user as any).rewards.length > 0 ? (
                   <div className="divide-y">
-                    {userData.rewards.map((reward) => (
+                    {(user as any).rewards.map((reward: any) => (
                       <div 
                         key={reward.id} 
                         className={`py-3 first:pt-0 last:pb-0 ${
@@ -567,42 +479,22 @@ const ProfilePage = () => {
                     </p>
                   </div>
                 </div>
-                <div className="space-y-1 pt-2">
-                  <p className="text-sm text-muted-foreground">Στόχοι Φυσικής Κατάστασης</p>
-                  <div className="flex flex-wrap gap-2">
-                    {userData.fitnessGoals.map((goal, index) => (
-                      <div key={index} className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium">
-                        {goal}
-                      </div>
-                    ))}
+                {fitnessGoals.length > 0 && (
+                  <div className="space-y-1 pt-2">
+                    <p className="text-sm text-muted-foreground">Στόχοι Φυσικής Κατάστασης</p>
+                    <div className="flex flex-wrap gap-2">
+                      {fitnessGoals.map((goal, index) => (
+                        <div key={index} className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium">
+                          {goal}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
             
-            {/* Activity Summary */}
-            <Card className="shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Σύνοψη Δραστηριότητας</CardTitle>
-                <CardDescription>Τα επιτεύγματά σας στη φυσική κατάσταση μέχρι τώρα</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-primary">{userData.activity.totalWorkouts}</div>
-                    <p className="text-sm text-muted-foreground">Συνολικές Προπονήσεις</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-primary">{userData.activity.totalMinutes}</div>
-                    <p className="text-sm text-muted-foreground">Συνολικά Λεπτά</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold text-primary">{userData.activity.caloriesBurned.toLocaleString()}</div>
-                    <p className="text-sm text-muted-foreground">Καμένες Θερμίδες</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Activity Summary - αφαιρέθηκε (mock data) */}
             
             {/* Navigation Links */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -657,7 +549,7 @@ const ProfilePage = () => {
               <Link to="/rewards" className="block">
                 <Card className="shadow-sm hover:border-primary transition-colors h-full">
                   <CardContent className="flex items-center p-4">
-                    <Gift className="h-5 w-5 mr-4 text-primary" />
+                    <span className="h-5 w-5 mr-4 text-primary">🎁</span>
                     <div>
                       <h3 className="font-medium">Πρόγραμμα Ανταμοιβής</h3>
                       <p className="text-sm text-muted-foreground">Κερδίστε πόντους και εξαργυρώστε υπέροχα δώρα</p>
@@ -693,14 +585,7 @@ const ProfilePage = () => {
           </div>
         </main>
       </div>
-
-      <LoyaltyRewardAlert 
-        open={isRewardAlertOpen}
-        onOpenChange={setIsRewardAlertOpen}
-        pointsEarned={150}
-        rewardName="Έκπτωση 20% σε αξεσουάρ"
-        rewardExpiresInDays={15}
-      />
+      {/* LoyaltyRewardAlert αφαιρέθηκε */}
     </>
   );
 };

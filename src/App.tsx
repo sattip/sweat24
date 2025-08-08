@@ -53,18 +53,26 @@ function BackButtonHandler() {
 
   useEffect(() => {
     // Android back gesture / hardware back button
-    const remove = CapacitorApp.addListener("backButton", () => {
-      if (location.pathname === "/dashboard") {
-        // Exit app ONLY from dashboard
-        CapacitorApp.exitApp();
-      } else {
-        // Go one step back in navigation
-        navigate(-1);
+    let handle: any = null;
+    const setup = async () => {
+      try {
+        handle = await CapacitorApp.addListener("backButton", () => {
+          if (location.pathname === "/dashboard") {
+            CapacitorApp.exitApp();
+          } else {
+            navigate(-1);
+          }
+        });
+      } catch (err) {
+        // noop
       }
-    });
+    };
+    void setup();
 
     return () => {
-      remove.remove();
+      try {
+        handle?.remove?.();
+      } catch {}
     };
   }, [location.pathname, navigate]);
 

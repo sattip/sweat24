@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, Calendar as CalendarIcon, Clock, Info, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { apiRequest, API_ENDPOINTS, buildApiUrl } from "@/config/api";
+import * as API from "@/config/api";
 import { bookingService } from "@/services/apiService";
 
 interface CancellationModalProps {

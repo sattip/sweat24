@@ -7,11 +7,11 @@ import EventNotification from "@/components/notifications/EventNotification";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 
 const fetchEvents = async () => {
   try {
-    const response = await apiRequest('/events');
+    const response = await API.apiRequest('/events');
     if (!response.ok) throw new Error('Failed to fetch events');
     return await response.json();
   } catch (error) {
@@ -22,7 +22,7 @@ const fetchEvents = async () => {
 
 const submitRSVP = async (eventId: string, rsvpStatus: string) => {
   try {
-    const response = await apiRequest(`/events/${eventId}/rsvp`, {
+    const response = await API.apiRequest(`/events/${eventId}/rsvp`, {
       method: 'POST',
       body: JSON.stringify({
         response: rsvpStatus,

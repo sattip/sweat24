@@ -1,4 +1,4 @@
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import * as API from '@/config/api';
 
 export interface LoginCredentials {
   email: string;

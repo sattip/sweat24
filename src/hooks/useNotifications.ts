@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiRequest } from '@/config/api';
+import * as API from '@/config/api';
 import { toast } from 'sonner';
 
 interface Notification {
@@ -32,7 +32,7 @@ export function useNotifications() {
     if (!user) return; // Don't fetch if no user
     
     try {
-      const response = await apiRequest('/notifications/user?per_page=20');
+      const response = await API.apiRequest('/notifications/user?per_page=20');
       
       // Handle different HTTP status codes gracefully
       if (response.status === 401) {
@@ -103,7 +103,7 @@ export function useNotifications() {
   
   const markAsRead = async (notificationId: number) => {
     try {
-      const response = await apiRequest(`/notifications/${notificationId}/read`, {
+      const response = await API.apiRequest(`/notifications/${notificationId}/read`, {
         method: 'POST'
       });
       
@@ -122,7 +122,7 @@ export function useNotifications() {
   
   const markAllAsRead = async () => {
     try {
-      const response = await apiRequest('/notifications/read-all', {
+      const response = await API.apiRequest('/notifications/read-all', {
         method: 'POST'
       });
       

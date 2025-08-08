@@ -11,9 +11,9 @@ import {
 import { AlertTriangle, TrendingUp } from 'lucide-react';
 
 interface SessionCountIndicatorProps {
-  usedSessions: number;
-  totalSessions: number;
-  remainingSessions: number;
+  usedSessions?: number;
+  totalSessions?: number | null;
+  remainingSessions?: number | null;
   membershipType: string;
 }
 
@@ -31,16 +31,16 @@ const SessionCountIndicator: React.FC<SessionCountIndicatorProps> = ({
 }) => {
   const [showUpsellDialog, setShowUpsellDialog] = React.useState(false);
   
-  // Determine if we need to show warning
-  const showWarning = remainingSessions <= 2 && remainingSessions > 0;
+  // Determine if we need to show warning (μόνο όταν υπάρχει αριθμητικό υπόλοιπο)
+  const showWarning = typeof remainingSessions === 'number' && remainingSessions <= 2 && remainingSessions > 0;
   const isLastSession = remainingSessions === 1;
   const isSecondToLast = remainingSessions === 2;
   
   // Get variant based on remaining sessions
   const getVariant = () => {
     if (remainingSessions === 0) return 'destructive';
-    if (remainingSessions <= 2) return 'secondary';
-    if (remainingSessions <= 3) return 'outline';
+    if (typeof remainingSessions === 'number' && remainingSessions <= 2) return 'secondary';
+    if (typeof remainingSessions === 'number' && remainingSessions <= 3) return 'outline';
     return 'default';
   };
 
@@ -74,7 +74,9 @@ const SessionCountIndicator: React.FC<SessionCountIndicatorProps> = ({
         onClick={handleIndicatorClick}
       >
         <Badge variant={getVariant()} className="text-sm">
-          {usedSessions}/{totalSessions}
+          {typeof remainingSessions === 'number'
+            ? `Απομένουν ${remainingSessions}${typeof totalSessions === 'number' ? `/${totalSessions}` : ''}`
+            : 'Απεριόριστο'}
           {showWarning && <AlertTriangle className="h-3 w-3 ml-1" />}
         </Badge>
       </Button>

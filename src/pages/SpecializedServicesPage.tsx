@@ -5,7 +5,7 @@ import { Dumbbell, User, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 
 // Service type for specialized services
 type SpecializedService = {
@@ -23,7 +23,7 @@ const SpecializedServicesPage = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await apiRequest('/specialized-services');
+        const response = await API.apiRequest('/specialized-services');
         if (!response.ok) {
           throw new Error('Failed to fetch services');
         }

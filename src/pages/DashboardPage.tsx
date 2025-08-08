@@ -10,7 +10,7 @@ import SimulationPanel from "@/components/SimulationPanel";
 import SessionCountIndicator from "@/components/SessionCountIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSimulation } from "@/hooks/useSimulation";
-import { dashboardService, bookingService } from "@/services/apiService";
+import { dashboardService, bookingService, profileService } from "@/services/apiService";
 import { toast } from "sonner";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { UpcomingBookings } from "@/components/UpcomingBookings";
@@ -50,9 +50,24 @@ const DashboardPage = () => {
   const [stats, setStats] = useState<any>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activePackages, setActivePackages] = useState<any[]>([]);
   
   useEffect(() => {
     fetchDashboardData();
+  }, []);
+
+  // Refetch όταν επιστρέφει ο χρήστης στο tab ή στο παράθυρο
+  useEffect(() => {
+    const onFocus = () => fetchDashboardData();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') fetchDashboardData();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, []);
   
   const fetchDashboardData = async () => {
@@ -60,14 +75,16 @@ const DashboardPage = () => {
       setLoading(true);
       
       // Fetch all data in parallel
-      const [statsData, bookingsData] = await Promise.all([
+      const [statsData, bookingsData, activePkgs] = await Promise.all([
         dashboardService.getStats(),
-        bookingService.getAll()
+        bookingService.getAll(),
+        profileService.getActivePackages()
       ]);
       
       setStats(statsData);
       const bookingsArray = Array.isArray(bookingsData) ? bookingsData : (Array.isArray(bookingsData?.data) ? bookingsData.data : []);
       setRecentBookings(bookingsArray.slice(0, 5));
+      setActivePackages(Array.isArray(activePkgs) ? activePkgs : []);
     } catch (error) {
       toast.error("Σφάλμα κατά τη φόρτωση δεδομένων");
       console.error(error);
@@ -89,12 +106,33 @@ const DashboardPage = () => {
   
   // Get the appropriate user data (simulated for admin, real for others)
   const displayUser = isAdminTester ? getSimulatedUser() : user;
+
+  // Derive active package from user model (backend may not send aggregates)
+  const derivedActivePackage: any = (() => {
+    const activeFromRoot = (displayUser as any)?.active_package;
+    const fromList = Array.isArray((displayUser as any)?.user_packages)
+      ? (displayUser as any).user_packages.find((p: any) => p?.status === 'active')
+      : undefined;
+    return activeFromRoot || fromList || null;
+  })();
   
   // Check if it's the user's birthday week (simulated or real)
   const birthdayWeek = isAdminTester ? isSimulatedBirthdayWeek() : (displayUser ? isBirthdayWeek(displayUser.birth_date) : false);
   
+  const apiActivePackage = Array.isArray(activePackages) ? activePackages.find(p => p?.status === 'active' && p?.is_frozen === false) : null;
   // Determine package status (simulated for admin, real for others)
-  const packageStatus = isAdminTester ? getPackageStatus() : getLocalPackageStatus(displayUser?.remaining_sessions, displayUser?.last_visit);
+  const packageStatus = isAdminTester
+    ? getPackageStatus()
+    : (() => {
+        const rem = apiActivePackage?.remaining_sessions ?? displayUser?.remaining_sessions;
+        return getLocalPackageStatus(rem as any, displayUser?.last_visit);
+      })();
+  const remainingSessions = (
+    apiActivePackage?.remaining_sessions ??
+    derivedActivePackage?.remaining_sessions ??
+    displayUser?.remaining_sessions ?? 0
+  );
+  const hasActivePackage = Boolean(apiActivePackage || derivedActivePackage) || remainingSessions === null || (typeof remainingSessions === 'number' && remainingSessions > 0);
   
   if (loading) {
     return (
@@ -159,14 +197,14 @@ const DashboardPage = () => {
           </Card>
         )}
         
-        {/* Package alerts based on status */}
-        {packageStatus === "last-session" && (
+        {/* Package alerts based on status - προβάλλονται μόνο όταν ΔΕΝ υπάρχει ενεργό πακέτο */}
+        {!hasActivePackage && packageStatus === "last-session" && (
           <PackageAlert type="last-session" />
         )}
-        {packageStatus === "expiring-soon" && (
+        {!hasActivePackage && packageStatus === "expiring-soon" && (
           <PackageAlert type="expiring-soon" daysRemaining={3} />
         )}
-        {packageStatus === "expired" && (
+        {!hasActivePackage && packageStatus === "expired" && (
           <PackageAlert type="expired" />
         )}
         
@@ -205,7 +243,8 @@ const DashboardPage = () => {
             </Card>
           )}
           
-          {/* Active Package Status */}
+          {/* Active Package Status - show only when there is an active package */}
+          {hasActivePackage && (
           <Card className="border-l-4 border-l-primary shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-xl">Ενεργή Συνδρομή</CardTitle>
@@ -216,11 +255,13 @@ const DashboardPage = () => {
                 <div>
                   <h3 className="font-medium text-lg flex items-center gap-2">
                     Συνδρομή
-                    {displayUser?.total_sessions !== undefined && displayUser?.remaining_sessions !== undefined && (
+                    {(
+                      (apiActivePackage?.total_sessions ?? displayUser?.total_sessions) !== undefined ||
+                      (apiActivePackage?.remaining_sessions ?? displayUser?.remaining_sessions) !== undefined
+                    ) && (
                       <SessionCountIndicator 
-                        usedSessions={displayUser.total_sessions - displayUser.remaining_sessions}
-                        totalSessions={displayUser.total_sessions}
-                        remainingSessions={displayUser.remaining_sessions}
+                        totalSessions={(apiActivePackage?.total_sessions ?? displayUser.total_sessions) ?? null}
+                        remainingSessions={(apiActivePackage?.remaining_sessions ?? displayUser.remaining_sessions) ?? null}
                         membershipType="Μηνιαίο"
                       />
                     )}
@@ -252,6 +293,28 @@ const DashboardPage = () => {
               {/* Package purchase button removed per user request */}
             </CardFooter>
           </Card>
+          )}
+
+          {/* No Active Package - show informative message */}
+          {!hasActivePackage && (
+            <Card className="border-l-4 border-l-red-500 shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Το Πακέτο σας Έληξε</CardTitle>
+                <CardDescription>Δεν έχετε ενεργή συνδρομή αυτή τη στιγμή</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Δεν μπορείτε να κλείσετε νέα μαθήματα μέχρι να αγοράσετε νέο πακέτο. Παρακαλούμε
+                  επικοινωνήστε με τη γραμματεία για να ανανεώσετε την συνδρομή σας.
+                </p>
+              </CardContent>
+              <CardFooter className="border-t pt-4 flex justify-end">
+                <Link to="/contact">
+                  <Button variant="outline">Επικοινωνία</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          )}
           
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">

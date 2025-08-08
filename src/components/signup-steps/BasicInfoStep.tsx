@@ -180,7 +180,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="birthDate">Ημερομηνία Γέννησης</Label>
           <Input
@@ -199,7 +199,6 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
             <SelectContent>
               <SelectItem value="male">Άνδρας</SelectItem>
               <SelectItem value="female">Γυναίκα</SelectItem>
-              <SelectItem value="other">Άλλο</SelectItem>
             </SelectContent>
           </Select>
         </div>

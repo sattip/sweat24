@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 
 const PartnersPage = () => {
   const { toast } = useToast();
@@ -20,7 +20,7 @@ const PartnersPage = () => {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const response = await apiRequest('/partners');
+        const response = await API.apiRequest('/partners');
         const data = await response.json();
         setPartners(data);
       } catch (error) {
@@ -49,7 +49,7 @@ const PartnersPage = () => {
         return;
       }
 
-      const response = await apiRequest(`/partners/offers/${partner.offer_id}/redeem`, {
+      const response = await API.apiRequest(`/partners/offers/${partner.offer_id}/redeem`, {
         method: 'POST'
       });
 
@@ -59,10 +59,30 @@ const PartnersPage = () => {
         setRedemptionData(data);
         setIsVerificationOpen(true);
       } else {
-        const error = await response.json();
+        // Χαρτογράφηση γνωστών λαθών από backend (400)
+        let errorJson: any = null;
+        try { errorJson = await response.json(); } catch {}
+
+        const msg = (errorJson?.message || '').toString().toLowerCase();
+
+        // Αν υπάρχει ήδη redemption για σήμερα, δείξε τον υπάρχοντα κωδικό αντί για σφάλμα
+        if (response.status === 400 && msg.includes('already') && msg.includes('used') && errorJson?.redemption) {
+          setSelectedPartner(partner);
+          setRedemptionData(errorJson);
+          setIsVerificationOpen(true);
+          toast({ title: "Ήδη χρησιμοποιήθηκε σήμερα", description: "Σας εμφανίζουμε τον υφιστάμενο κωδικό.", duration: 2500 });
+          return;
+        }
+
+        // Όριο ανά χρήστη
+        if (response.status === 400 && msg.includes('usage') && msg.includes('limit')) {
+          toast({ title: "Όριο χρήσης", description: "Έχετε εξαντλήσει το όριο χρήσης αυτής της προσφοράς.", variant: "destructive" });
+          return;
+        }
+
         toast({
           title: "Σφάλμα",
-          description: error.message || "Αποτυχία δημιουργίας κωδικού",
+          description: errorJson?.message || "Αποτυχία δημιουργίας κωδικού",
           variant: "destructive",
         });
       }
@@ -80,7 +100,7 @@ const PartnersPage = () => {
     try {
       if (!redemptionData?.redemption?.id) return;
 
-      const response = await apiRequest(`/partners/redemptions/${redemptionData.redemption.id}/use`, {
+      const response = await API.apiRequest(`/partners/redemptions/${redemptionData.redemption.id}/use`, {
         method: 'POST'
       });
 
