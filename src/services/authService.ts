@@ -1,4 +1,4 @@
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import * as API from '@/config/api';
 
 export interface LoginCredentials {
   email: string;
@@ -16,6 +16,10 @@ export interface RegisterData {
   documentVersion?: string;
   // Medical history data
   medicalHistory?: any;
+  // How found us (optional)
+  howFoundUs?: any;
+  // Parent/guardian consent for minors (optional)
+  parentConsent?: any;
 }
 
 export interface User {

@@ -1,5 +1,6 @@
 import { userService } from '@/services/apiService';
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import { apiRequest } from '@/config/api';
+import * as API from '@/config/api';
 
 /**
  * Ενημερώνει το status του χρήστη user@sweat24.gr σε ενεργή συνδρομή
@@ -10,7 +11,7 @@ export async function updateUserStatusToActive(): Promise<void> {
     const targetEmail = 'user@sweat24.gr';
     
     // Ανακτούμε όλους τους χρήστες για να βρούμε τον συγκεκριμένο
-    const response = await apiRequest(API_ENDPOINTS.users.list);
+    const response = await apiRequest(API.API_ENDPOINTS.users.list);
     const users = await response.json();
     
     const targetUser = users.find((user: any) => user.email === targetEmail);

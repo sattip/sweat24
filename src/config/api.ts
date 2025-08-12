@@ -56,6 +56,8 @@ export const API_ENDPOINTS = {
   dashboard: {
     stats: '/dashboard/stats',
   },
+  // Profile
+  profile: '/profile',
   // Signatures
   signatures: '/signatures',
   userSignatures: (userId: string | number) => `/users/${userId}/signatures`,

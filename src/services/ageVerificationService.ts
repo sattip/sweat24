@@ -1,4 +1,4 @@
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import * as API from '@/config/api';
 
 export interface AgeVerificationRequest {
   birth_date: string;
@@ -17,7 +17,7 @@ class AgeVerificationService {
    */
   async checkAge(birthDate: string): Promise<AgeVerificationResponse> {
     try {
-      const response = await apiRequest(API_ENDPOINTS.auth.checkAge, {
+      const response = await API.apiRequest(API.API_ENDPOINTS.auth.checkAge, {
         method: 'POST',
         body: JSON.stringify({
           birth_date: birthDate

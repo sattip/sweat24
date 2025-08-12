@@ -91,6 +91,12 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    /* Κρύψε την οριζόντια μπάρα κύλισης, διατηρώντας την κύλιση ενεργή */
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+  }
+  body::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
   
   /* iOS Safe Area Support - Only on actual iOS devices */

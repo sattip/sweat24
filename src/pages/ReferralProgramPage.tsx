@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { apiRequest } from "@/config/api";
+import * as API from "@/config/api";
 import { referralsService } from "@/services/apiService";
 
 // Error handling helper function

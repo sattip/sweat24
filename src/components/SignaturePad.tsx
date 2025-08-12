@@ -14,6 +14,7 @@ export interface SignaturePadRef {
   clear: () => void;
   isEmpty: () => boolean;
   toDataURL: () => string;
+  toDataURLJpeg?: () => string;
 }
 
 const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
@@ -29,6 +30,14 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
       },
       toDataURL: () => {
         return sigCanvas.current?.toDataURL() || '';
+      },
+      toDataURLJpeg: () => {
+        try {
+          // @ts-expect-error react-signature-canvas toDataURL supports type/quality
+          return sigCanvas.current?.toDataURL('image/jpeg', 0.9) || '';
+        } catch {
+          return sigCanvas.current?.toDataURL() || '';
+        }
       }
     }));
 
@@ -38,7 +47,9 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
 
     const handleSave = () => {
       if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
-        const signature = sigCanvas.current.toDataURL();
+        // Prefer JPEG output when saving via button
+        // @ts-expect-error react-signature-canvas toDataURL supports type/quality
+        const signature = sigCanvas.current.toDataURL('image/jpeg', 0.9);
         onSave?.(signature);
       }
     };

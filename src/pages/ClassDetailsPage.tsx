@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar, Clock, MapPin, User, BarChart, Loader2, Users, AlertTriangle, Info } from "lucide-react";
-import { classService, bookingService, waitlistService, userService } from "@/services/apiService";
+import { classService, bookingService, waitlistService, userService, profileService } from "@/services/apiService";
 import { toast } from "sonner";
 
 const ClassDetailsPage = () => {
@@ -58,12 +58,27 @@ const ClassDetailsPage = () => {
       return;
     }
 
-    // Check if user has remaining sessions
-    if (currentUser?.remaining_sessions === 0) {
-      toast.error(
-        "Δεν έχετε διαθέσιμες συνεδρίες. Παρακαλούμε επικοινωνήστε με τη γραμματεία για να αγοράσετε νέο πακέτο.",
-        { duration: 5000 }
-      );
+    // Check active package via profile API
+    let canBook = false;
+    try {
+      const pkgs = await profileService.getActivePackages();
+      const today = new Date().toISOString().split('T')[0];
+      const active = Array.isArray(pkgs)
+        ? pkgs.find((p: any) => p?.status === 'active' && p?.is_frozen === false && (!p?.expiry_date || p.expiry_date > today))
+        : null;
+      if (active) {
+        const rem = active.remaining_sessions;
+        canBook = rem === null || rem === undefined || rem > 0;
+      }
+    } catch {}
+    // Fallback to aggregate check only if we didn't detect active package
+    if (!canBook) {
+      if (currentUser?.remaining_sessions === null || currentUser?.remaining_sessions === undefined || currentUser?.remaining_sessions > 0) {
+        canBook = true;
+      }
+    }
+    if (!canBook) {
+      toast.error("Δεν έχετε διαθέσιμες συνεδρίες. Παρακαλούμε επικοινωνήστε με τη γραμματεία για να αγοράσετε νέο πακέτο.", { duration: 5000 });
       return;
     }
 

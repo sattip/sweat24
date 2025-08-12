@@ -2,10 +2,9 @@
 import React, { useState } from "react";
 import Logo from "../Logo";
 import { Button } from "../ui/button";
-import { Menu, User, Contact, ShoppingCart, ChevronLeft } from "lucide-react";
+import { Menu, User, MessageCircle, ShoppingCart, ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
-import PageTitle from "./PageTitle";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { useCart } from "@/hooks/use-cart";
 import {
@@ -28,7 +27,13 @@ const Header: React.FC = () => {
   const showBackButton = location.pathname !== '/dashboard' && location.pathname !== '/';
   
   return (
-    <header className="bg-white border-b sticky top-0 z-10">
+    <header
+      className="bg-white border-b sticky top-0 z-10"
+      style={{
+        paddingTop: 'max(20px, env(safe-area-inset-top))',
+        minHeight: 'calc(64px + max(20px, env(safe-area-inset-top)))'
+      }}
+    >
       <div className="container flex h-16 md:h-16 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
           {/* Back button for mobile */}
@@ -65,9 +70,6 @@ const Header: React.FC = () => {
           <Link to="/dashboard" className="flex items-center shrink-0">
             <Logo />
           </Link>
-          <div className="min-w-0 flex-1">
-            <PageTitle />
-          </div>
         </div>
         
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
@@ -87,7 +89,7 @@ const Header: React.FC = () => {
           
           <Link to="/contact">
             <Button variant="ghost" size="icon" className="h-12 w-12 md:h-10 md:w-10 touch-manipulation">
-              <Contact className="h-6 w-6 md:h-5 md:w-5" />
+              <MessageCircle className="h-6 w-6 md:h-5 md:w-5" />
               <span className="sr-only">Επικοινωνία</span>
             </Button>
           </Link>

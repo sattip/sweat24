@@ -1,4 +1,4 @@
-import { apiRequest, API_ENDPOINTS } from '@/config/api';
+import * as API from '@/config/api';
 import { SignupData } from '@/components/SignupSteps';
 
 export interface MedicalHistoryPayload {
@@ -95,7 +95,7 @@ class MedicalHistoryService {
     try {
       const payload = this.transformSignupDataToPayload(signupData);
       
-      const response = await apiRequest(API_ENDPOINTS.medicalHistory.submit, {
+      const response = await API.apiRequest(API.API_ENDPOINTS.medicalHistory.submit, {
         method: 'POST',
         body: JSON.stringify(payload),
       });
@@ -118,7 +118,7 @@ class MedicalHistoryService {
    */
   async getMedicalHistory(): Promise<any> {
     try {
-      const response = await apiRequest(API_ENDPOINTS.medicalHistory.get, {
+      const response = await API.apiRequest(API.API_ENDPOINTS.medicalHistory.get, {
         method: 'GET',
       });
 

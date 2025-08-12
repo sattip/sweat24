@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService, User } from '@/services/authService';
+import { pusherService } from '@/services/pusherService';
 import { PendingUserModal } from '@/components/modals/PendingUserModal';
 import { toast } from 'sonner';
 
@@ -58,15 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuth = async () => {
     try {
       if (authService.isAuthenticated()) {
-        // First try synchronous method for immediate load
+        // Φόρτωση άμεσα από localStorage για γρήγορο render
         const storedUser = authService.getStoredUser();
-        if (storedUser) {
-          setUser(storedUser);
-        } else {
-          // Fallback to async method if needed
-          const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
-        }
+        if (storedUser) setUser(storedUser);
+
+        // ΠΑΝΤΑ φέρνουμε φρέσκα στοιχεία από backend στο background
+        const currentUser = await authService.getCurrentUser();
+        setUser(currentUser);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -79,11 +78,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
     setUser(response.user);
+    // Αμέσως μετά το login, φέρε φρέσκο user από backend (για πακέτα κ.λπ.)
+    await refreshUser();
   };
 
   const logout = async () => {
     await authService.logout();
     setUser(null);
+    // Disconnect Pusher when logging out
+    pusherService.disconnect();
   };
 
   const refreshUser = async () => {
@@ -114,10 +117,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🔄 FRESH USER DATA from backend:', data);
       
       if (data.success && data.user) {
-        // Update localStorage with fresh data
-        localStorage.setItem('sweat24_user', JSON.stringify(data.user));
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setUser(data.user);
+        let updatedUser = data.user;
+
+        // Fallback: αν δεν υπάρχουν aggregates για πακέτο, προσπάθησε να τα αντλήσεις από /users/{id}
+        const needsPackageDerive =
+          updatedUser?.remaining_sessions === 0 ||
+          (updatedUser?.remaining_sessions === undefined && !updatedUser?.package_end_date);
+
+        if (needsPackageDerive) {
+          try {
+            const detailsResp = await fetch(`https://sweat93laravel.obs.com.gr/api/v1/users/${updatedUser.id}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+            });
+            if (detailsResp.ok) {
+              const detailsData = await detailsResp.json();
+              const userDetails = detailsData?.user || detailsData;
+              const activePkg =
+                userDetails?.active_package ||
+                userDetails?.current_package ||
+                (Array.isArray(userDetails?.user_packages)
+                  ? userDetails.user_packages.find((p: any) => p?.status === 'active')
+                  : undefined);
+
+              if (activePkg) {
+                updatedUser = {
+                  ...updatedUser,
+                  remaining_sessions:
+                    activePkg.remaining_sessions !== undefined ? activePkg.remaining_sessions : null,
+                  total_sessions: activePkg.total_sessions ?? updatedUser.total_sessions,
+                  membership_type:
+                    activePkg?.package?.name || activePkg?.package_name || updatedUser.membership_type,
+                  package_start_date: activePkg.starts_at || activePkg.assigned_at || updatedUser.package_start_date,
+                  package_end_date: activePkg.expires_at || updatedUser.package_end_date,
+                };
+              }
+            }
+          } catch (e) {
+            // ignore fallback errors
+          }
+        }
+
+        // Store and set
+        localStorage.setItem('sweat24_user', JSON.stringify(updatedUser));
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
         console.log('✅ User refreshed - has_signed_terms:', data.user.has_signed_terms);
       }
     } catch (error) {

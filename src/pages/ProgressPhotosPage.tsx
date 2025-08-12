@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Camera, X, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
+import { Camera as DeviceCamera } from "@capacitor/camera";
 
 // Mock data for progress photos
 interface ProgressPhoto {
@@ -105,6 +107,7 @@ const ProgressPhotosPage = () => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number>(0);
   const [showEmptyState, setShowEmptyState] = useState<boolean>(false);
   const [showTips, setShowTips] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // For demo purposes, we'll show the empty state if showEmptyState is true
   const hasPhotos = !showEmptyState && mockProgressPhotos.length > 0;
@@ -142,9 +145,26 @@ const ProgressPhotosPage = () => {
     setSelectedPhoto(null);
   };
   
-  const handleUploadPhoto = () => {
-    // In a real app, this would open the file picker or camera
-    toast.success("Η φωτογραφία μεταφορτώθηκε επιτυχώς");
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    toast.success(`Επιλέχθηκαν ${files.length} φωτογραφίες`);
+    // TODO: Upload to backend when API is ready
+    e.currentTarget.value = "";
+  };
+
+  const handleUploadPhoto = async () => {
+    try {
+      if (Capacitor.getPlatform() !== "web") {
+        const result = await DeviceCamera.pickImages({ quality: 85, limit: 10 });
+        const count = result.photos?.length || 0;
+        if (count > 0) {
+          toast.success(`Επιλέχθηκαν ${count} φωτογραφίες`);
+        }
+      } else {
+        fileInputRef.current?.click();
+      }
+    } catch {}
   };
   
   return (
@@ -155,7 +175,7 @@ const ProgressPhotosPage = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Φωτογραφίες Προόδου</h1>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <Button
               variant="outline"
               size="icon"
@@ -173,7 +193,7 @@ const ProgressPhotosPage = () => {
                 setSortOrder(value as "newest" | "oldest");
               }
             }}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[140px] sm:w-[180px]">
                 <SelectValue placeholder="Σειρά ταξινόμησης" />
               </SelectTrigger>
               <SelectContent>
@@ -187,6 +207,14 @@ const ProgressPhotosPage = () => {
               <Camera className="h-4 w-4 mr-2" />
               Προσθήκη Φωτογραφίας
             </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFilesSelected}
+            />
           </div>
         </div>
         

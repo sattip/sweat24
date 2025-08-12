@@ -2,7 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
 import { useStatusBar } from "@/hooks/useStatusBar";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
@@ -45,6 +47,38 @@ import { NotificationManager } from "./components/notifications/NotificationMana
 
 const queryClient = new QueryClient();
 
+function BackButtonHandler() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Android back gesture / hardware back button
+    let handle: any = null;
+    const setup = async () => {
+      try {
+        handle = await CapacitorApp.addListener("backButton", () => {
+          if (location.pathname === "/dashboard") {
+            CapacitorApp.exitApp();
+          } else {
+            navigate(-1);
+          }
+        });
+      } catch (err) {
+        // noop
+      }
+    };
+    void setup();
+
+    return () => {
+      try {
+        handle?.remove?.();
+      } catch {}
+    };
+  }, [location.pathname, navigate]);
+
+  return null;
+}
+
 const App = () => {
   useStatusBar();
   
@@ -56,6 +90,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <BackButtonHandler />
             <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />

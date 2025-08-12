@@ -102,7 +102,8 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
       return;
     }
 
-    const signatureData = signaturePadRef.current?.toDataURL();
+    const sigRef = signaturePadRef.current;
+    const signatureData = sigRef?.toDataURLJpeg ? sigRef.toDataURLJpeg() : sigRef?.toDataURL();
     if (!signatureData || signaturePadRef.current?.isEmpty()) {
       toast.error("Παρακαλώ υπογράψτε την υπεύθυνη δήλωση");
       return;
