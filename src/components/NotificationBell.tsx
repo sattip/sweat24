@@ -139,7 +139,12 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
+      <PopoverContent 
+        align="end" 
+        alignOffset={-20}
+        sideOffset={5}
+        className="w-80 p-0 sm:w-80 w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-none"
+      >
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Ειδοποιήσεις</h3>

@@ -1084,7 +1084,7 @@ export const userService = {
 
   async uploadAvatar(file: File) {
     try {
-      const token = localStorage.getItem('sweat24_token');
+      const token = localStorage.getItem('auth_token');
       const formData = new FormData();
       formData.append('avatar', file);
 

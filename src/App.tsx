@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-ro
 import { useEffect } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import { useStatusBar } from "@/hooks/useStatusBar";
+import { useMobileKeyboardFix } from "@/hooks/use-keyboard";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import SignupSuccessPage from "./pages/SignupSuccessPage";
@@ -50,6 +51,9 @@ const queryClient = new QueryClient();
 function BackButtonHandler() {
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Apply mobile keyboard fixes
+  useMobileKeyboardFix();
 
   useEffect(() => {
     // Android back gesture / hardware back button
