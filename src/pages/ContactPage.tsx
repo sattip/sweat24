@@ -56,10 +56,10 @@ const ContactPage = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Mock user data (in a real app, this would come from authentication/user context)
+  // Note: In a real app, this would come from authentication/user context
   const userData = {
-    name: "Γιάννης Παπαδόπουλος",
-    email: "giannis.papadopoulos@example.com"
+    name: "",
+    email: ""
   };
 
   const form = useForm<FormValues>({

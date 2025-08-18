@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { User, Mail, Phone, Calendar, Heart, Users, CheckCircle, Loader2 } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
 import { SignupData } from "../SignupSteps";
 
 interface ReviewStepProps {
@@ -21,15 +22,30 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 }) => {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Δεν έχει οριστεί";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('el-GR');
+    
+    try {
+      // Parse the date string (expecting YYYY-MM-DD format from backend)
+      const date = parseISO(dateString);
+      
+      // Check if the parsed date is valid
+      if (!isValid(date)) {
+        return "Μη έγκυρη ημερομηνία";
+      }
+      
+      // Format for display as DD/MM/YYYY
+      return format(date, 'dd/MM/yyyy');
+    } catch (error) {
+      console.warn('Date parsing error:', error);
+      return "Μη έγκυρη ημερομηνία";
+    }
   };
 
   const formatGender = (gender: string) => {
     const genderMap: { [key: string]: string } = {
       male: "Άνδρας",
       female: "Γυναίκα", 
-      other: "Άλλο"
+      other: "Άλλο",
+      prefer_not_to_say: "Προτιμώ να μη το πω"
     };
     return genderMap[gender] || "Δεν έχει οριστεί";
   };

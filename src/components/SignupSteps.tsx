@@ -134,7 +134,9 @@ interface SignupStepsProps {
 
 export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = false }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [signupData, setSignupData] = useState<SignupData>({
+
+  // Default signup data structure
+  const getDefaultSignupData = (): SignupData => ({
     firstName: "",
     lastName: "",
     email: "",
@@ -166,9 +168,24 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     recentIllness: "",
     emsInterest: false,
     emsContraindications: {},
-
     isMinor: false,
   });
+
+  // Load saved data from localStorage or use default
+  const loadSavedData = (): SignupData => {
+    try {
+      const saved = localStorage.getItem('sweat24_signup_data');
+      if (saved) {
+        const parsedData = JSON.parse(saved);
+        return { ...getDefaultSignupData(), ...parsedData };
+      }
+    } catch (error) {
+      console.warn('Failed to load saved signup data:', error);
+    }
+    return getDefaultSignupData();
+  };
+
+  const [signupData, setSignupData] = useState<SignupData>(loadSavedData());
 
   // Dynamic steps based on whether user is minor
   const getSteps = (): Step[] => {
@@ -223,7 +240,18 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   const steps = getSteps();
 
   const updateSignupData = (updates: Partial<SignupData>) => {
-    setSignupData(prev => ({ ...prev, ...updates }));
+    const newData = (prev: SignupData) => ({ ...prev, ...updates });
+    setSignupData(newData);
+    
+    // Auto-save to localStorage (excluding sensitive data like passwords)
+    const dataToSave = newData(signupData);
+    const { password, confirmPassword, ...safeData } = dataToSave;
+    
+    try {
+      localStorage.setItem('sweat24_signup_data', JSON.stringify(safeData));
+    } catch (error) {
+      console.warn('Failed to save signup data:', error);
+    }
   };
 
   const nextStep = () => {
@@ -247,6 +275,13 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   };
 
   const handleComplete = () => {
+    // Clear saved data on successful completion
+    try {
+      localStorage.removeItem('sweat24_signup_data');
+    } catch (error) {
+      console.warn('Failed to clear saved signup data:', error);
+    }
+    
     onComplete(signupData);
   };
 

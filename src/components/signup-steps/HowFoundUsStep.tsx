@@ -200,7 +200,7 @@ export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({
                     type="text"
                     value={referralInput}
                     onChange={(e) => handleReferralChange(e.target.value)}
-                    placeholder="π.χ. Γιάννης Παπαδόπουλος ή JOHN123"
+                    placeholder="π.χ. Όνομα προσώπου ή κωδικός παραπομπής"
                     className={
                       validationStatus === 'valid' ? 'border-green-500' :
                       validationStatus === 'invalid' ? 'border-red-500' :

@@ -537,26 +537,7 @@ export const profileService = {
   }
 };
 
-// User Profile
-export const userService = {
-  async getCurrentUser() {
-    // Use our local storage user instead of API call to avoid auth redirect
-    const userStr = localStorage.getItem('sweat24_user');
-    if (!userStr) {
-      throw new Error('Not authenticated');
-    }
-    return JSON.parse(userStr);
-  },
-
-  async updateProfile(id: string | number, data: any) {
-    const response = await apiRequest(API_ENDPOINTS.users.update(id), {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) throw new Error('Failed to update profile');
-    return response.json();
-  }
-};
+// User Profile (removed - using newer implementation below)
 
 // Waitlist
 export const waitlistService = {
@@ -1065,6 +1046,69 @@ export const referralsService = {
       return data.data || data;
     } catch (error) {
       console.error('Error fetching test dashboard:', error);
+      throw error;
+    }
+  }
+};
+
+// User Profile Service
+export const userService = {
+  async updateProfile(userId: number, data: any) {
+    try {
+      const token = localStorage.getItem('sweat24_token');
+      const response = await fetch(buildApiUrl('/profile'), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Validation failed');
+        }
+        throw new Error('Failed to update profile');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  },
+
+  async uploadAvatar(file: File) {
+    try {
+      const token = localStorage.getItem('sweat24_token');
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch(buildApiUrl('/profile/avatar'), {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Validation failed');
+        }
+        throw new Error('Failed to upload avatar');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
       throw error;
     }
   }

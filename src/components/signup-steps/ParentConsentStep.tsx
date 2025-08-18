@@ -67,9 +67,9 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
   // Quick fill function for testing
   const fillTestData = () => {
     setParentData({
-      parentFullName: "Γιώργος Παπαδόπουλος",
-      fatherFirstName: "Νικόλαος",
-      fatherLastName: "Παπαδόπουλος",
+      parentFullName: "",
+      fatherFirstName: "",
+      fatherLastName: "",
       motherFirstName: "Μαρία",
       motherLastName: "Γεωργίου",
       parentBirthDate: "1978-08-09",
@@ -155,7 +155,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
             <Input
               id="parentFullName"
               type="text"
-              placeholder="π.χ. Γιώργος Παπαδόπουλος"
+              placeholder="Πλήρες όνομα γονέα/κηδεμόνα"
               value={parentData.parentFullName}
               onChange={(e) => updateParentData({ parentFullName: e.target.value })}
               required
@@ -179,7 +179,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
               <Input
                 id="fatherLastName"
                 type="text"
-                placeholder="π.χ. Παπαδόπουλος"
+                placeholder="Επώνυμο πατρός"
                 value={parentData.fatherLastName}
                 onChange={(e) => updateParentData({ fatherLastName: e.target.value })}
                 required

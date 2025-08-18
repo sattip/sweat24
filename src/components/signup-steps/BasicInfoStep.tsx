@@ -199,6 +199,8 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
             <SelectContent>
               <SelectItem value="male">Άνδρας</SelectItem>
               <SelectItem value="female">Γυναίκα</SelectItem>
+              <SelectItem value="other">Άλλο</SelectItem>
+              <SelectItem value="prefer_not_to_say">Προτιμώ να μη το πω</SelectItem>
             </SelectContent>
           </Select>
         </div>

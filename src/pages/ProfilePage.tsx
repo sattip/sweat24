@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity } from "lucide-react";
+import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity, Camera } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { profileService } from "@/services/apiService";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,9 @@ import { BookingRequests } from "@/components/BookingRequests";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { validateProfileData } from "@/utils/validation";
+import { format, parseISO, differenceInYears } from "date-fns";
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -35,6 +38,10 @@ const ProfilePage = () => {
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [editGender, setEditGender] = useState("");
+  const [editWeight, setEditWeight] = useState("");
+  const [editHeight, setEditHeight] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   // Δεν φορτώνουμε πλέον mock πακέτα. Θα βασιστούμε μόνο στα πραγματικά πεδία του χρήστη από το auth context.
 
@@ -44,6 +51,9 @@ const ProfilePage = () => {
       setEditName(user.name || "");
       setEditEmail(user.email || "");
       setEditPhone((user as any).phone || "");
+      setEditGender((user as any).gender || "");
+      setEditWeight((user as any).weight ? (user as any).weight.toString() : "");
+      setEditHeight((user as any).height ? (user as any).height.toString() : "");
     }
   }, [user]);
 
@@ -63,6 +73,110 @@ const ProfilePage = () => {
     loadPackages();
   }, []);
   
+  // Debug logging - αφαίρεσε μετά τη διόρθωση
+  console.log('User data from AuthContext:', user);
+  console.log('Date of birth:', (user as any)?.date_of_birth);
+  console.log('Gender:', (user as any)?.gender);
+  console.log('Weight:', (user as any)?.weight);
+  console.log('Height:', (user as any)?.height);
+
+  // Helper functions
+  const isNameLocked = () => {
+    return (user as any)?.registration_status === 'completed' && (user as any)?.approved_at !== null;
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Δεν έχει οριστεί";
+    try {
+      const date = parseISO(dateString);
+      return format(date, 'dd/MM/yyyy');
+    } catch (error) {
+      console.warn('Date parsing error:', error);
+      return "Μη έγκυρη ημερομηνία";
+    }
+  };
+
+  const calculateAge = (dateOfBirth: string | null) => {
+    if (!dateOfBirth) return null;
+    try {
+      const birthDate = parseISO(dateOfBirth);
+      return differenceInYears(new Date(), birthDate);
+    } catch (error) {
+      console.warn('Age calculation error:', error);
+      return null;
+    }
+  };
+
+  const formatGender = (gender: string | null) => {
+    if (!gender) return "Δεν έχει οριστεί";
+    const genderMap: { [key: string]: string } = {
+      male: "Άνδρας",
+      female: "Γυναίκα", 
+      other: "Άλλο",
+      prefer_not_to_say: "Προτιμώ να μη το πω"
+    };
+    return genderMap[gender] || "Δεν έχει οριστεί";
+  };
+
+  const formatWeight = (weight: number | null) => {
+    if (!weight) return "Δεν έχει οριστεί";
+    return `${weight} kg`;
+  };
+
+  const formatHeight = (height: number | null) => {
+    if (!height) return "Δεν έχει οριστεί";
+    return `${height} cm`;
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ 
+        title: "Μη έγκυρο αρχείο", 
+        description: "Παρακαλώ επιλέξτε μια εικόνα",
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ 
+        title: "Πολύ μεγάλο αρχείο", 
+        description: "Η εικόνα δεν μπορεί να ξεπερνά τα 2MB",
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      const result = await userService.uploadAvatar(file);
+      
+      // Update the user's avatar in the auth context
+      await refreshUser();
+      
+      toast({ 
+        title: "Επιτυχία!", 
+        description: "Η φωτογραφία προφίλ ενημερώθηκε επιτυχώς" 
+      });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast({ 
+        title: "Σφάλμα", 
+        description: error instanceof Error ? error.message : "Αποτυχία ενημέρωσης φωτογραφίας",
+        variant: "destructive" 
+      });
+    } finally {
+      setAvatarUploading(false);
+      // Reset the input
+      event.target.value = '';
+    }
+  };
+
   // Πραγματικά δεδομένα χρήστη από το auth context (χωρίς mock sections)
   const activePkg = (Array.isArray(activePackages) && activePackages.length > 0)
     ? activePackages.find((p: any) => p?.status === 'active')
@@ -71,8 +185,11 @@ const ProfilePage = () => {
   const userData = {
     name: user?.name || "Χρήστης",
     email: user?.email || "",
+    gender: (user as any)?.gender || null,
+    weight: (user as any)?.weight || null,
+    height: (user as any)?.height || null,
     phone: (user as any)?.phone || "",
-    dateOfBirth: user?.birth_date || "",
+    dateOfBirth: (user as any)?.date_of_birth || "",
     activePackage: {
       exists: Boolean(activePkg) || (user?.remaining_sessions === null) || ((user?.remaining_sessions ?? 0) > 0),
       name: "Συνδρομή",
@@ -125,10 +242,39 @@ const ProfilePage = () => {
             <Card className="border shadow-sm overflow-hidden">
               <div className="bg-gradient-to-r from-primary to-secondary h-32 relative">
                 <div className="absolute -bottom-16 left-6 flex items-end">
-                  <Avatar className="h-24 w-24 border-4 border-background">
-                    <AvatarImage src="/placeholder.svg" alt={userData.name} />
-                    <AvatarFallback className="text-2xl">{userData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-24 w-24 border-4 border-background">
+                      <AvatarImage 
+                        src={(user as any)?.avatar || "/placeholder.svg"} 
+                        alt={userData.name} 
+                      />
+                      <AvatarFallback className="text-2xl">
+                        {userData.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    {/* Camera button for avatar upload */}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                      disabled={avatarUploading}
+                    >
+                      {avatarUploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </Button>
+                    {/* Hidden file input */}
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -156,7 +302,18 @@ const ProfilePage = () => {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="name">Ονοματεπώνυμο</Label>
-                    <Input id="name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    <Input 
+                      id="name" 
+                      value={editName} 
+                      onChange={(e) => setEditName(e.target.value)}
+                      disabled={isNameLocked()}
+                      placeholder={isNameLocked() ? "Το όνομα είναι κλειδωμένο μετά την έγκριση" : ""}
+                    />
+                    {isNameLocked() && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Το όνομα δεν μπορεί να αλλάξει μετά την έγκριση του λογαριασμού
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
@@ -166,25 +323,134 @@ const ProfilePage = () => {
                     <Label htmlFor="phone">Τηλέφωνο</Label>
                     <Input id="phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
                   </div>
+                  
+                  <div>
+                    <Label htmlFor="gender">Φύλο</Label>
+                    <Select value={editGender} onValueChange={setEditGender}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Επιλέξτε φύλο" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Άνδρας</SelectItem>
+                        <SelectItem value="female">Γυναίκα</SelectItem>
+                        <SelectItem value="other">Άλλο</SelectItem>
+                        <SelectItem value="prefer_not_to_say">Προτιμώ να μη το πω</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="weight">Βάρος (kg)</Label>
+                      <Input 
+                        id="weight" 
+                        type="number" 
+                        placeholder="π.χ. 70"
+                        min="30" 
+                        max="300" 
+                        step="0.1"
+                        value={editWeight} 
+                        onChange={(e) => setEditWeight(e.target.value)} 
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="height">Ύψος (cm)</Label>
+                      <Input 
+                        id="height" 
+                        type="number" 
+                        placeholder="π.χ. 175"
+                        min="100" 
+                        max="250" 
+                        step="0.1"
+                        value={editHeight} 
+                        onChange={(e) => setEditHeight(e.target.value)} 
+                      />
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter className="gap-2 sm:gap-2">
                   <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={savingProfile}>Ακύρωση</Button>
                   <Button
                     onClick={async () => {
                       if (!user) return;
+                      
+                      // Client-side validation
+                      const validationData = {
+                        name: isNameLocked() ? undefined : editName,
+                        email: editEmail,
+                        phone: editPhone,
+                        gender: editGender,
+                        weight: editWeight,
+                        height: editHeight
+                      };
+                      
+                      const validationErrors = validateProfileData(validationData);
+                      
+                      if (Object.keys(validationErrors).length > 0) {
+                        const firstError = Object.values(validationErrors)[0];
+                        toast({ 
+                          title: "Μη έγκυρα δεδομένα", 
+                          description: firstError,
+                          variant: "destructive" 
+                        });
+                        return;
+                      }
+                      
                       try {
                         setSavingProfile(true);
-                        await userService.updateProfile(user.id, {
-                          name: editName,
+                        // Prepare update data - only include non-empty values
+                        const updateData: any = {
                           email: editEmail,
                           phone: editPhone,
-                        });
+                        };
+
+                        // Only add name if it's not locked
+                        if (!isNameLocked()) {
+                          updateData.name = editName;
+                        }
+
+                        // Add optional fields only if they have values
+                        if (editGender) {
+                          updateData.gender = editGender;
+                        }
+                        if (editWeight && !isNaN(parseFloat(editWeight))) {
+                          updateData.weight = parseFloat(editWeight);
+                        }
+                        if (editHeight && !isNaN(parseFloat(editHeight))) {
+                          updateData.height = parseFloat(editHeight);
+                        }
+
+                        await userService.updateProfile(user.id, updateData);
                         toast({ title: "Το προφίλ ενημερώθηκε επιτυχώς" });
                         await refreshUser();
                         setIsEditOpen(false);
                       } catch (error) {
                         console.error(error);
-                        toast({ title: "Σφάλμα ενημέρωσης προφίλ", description: "Παρακαλώ δοκιμάστε ξανά", variant: "destructive" });
+                        
+                        // Handle specific error cases
+                        let errorMessage = "Παρακαλώ δοκιμάστε ξανά";
+                        let errorTitle = "Σφάλμα ενημέρωσης προφίλ";
+
+                        if (error instanceof Error) {
+                          if (error.message.includes('Το όνομα δεν μπορεί να αλλάξει')) {
+                            errorTitle = "Όνομα κλειδωμένο";
+                            errorMessage = "Το όνομα δεν μπορεί να αλλάξει μετά την έγκριση του λογαριασμού";
+                          } else if (error.message.includes('Validation failed')) {
+                            errorTitle = "Μη έγκυρα δεδομένα";
+                            errorMessage = "Παρακαλώ ελέγξτε τα στοιχεία που εισάγατε";
+                          } else if (error.message.includes('email χρησιμοποιείται')) {
+                            errorTitle = "Email σε χρήση";
+                            errorMessage = "Αυτό το email χρησιμοποιείται ήδη από άλλον χρήστη";
+                          } else {
+                            errorMessage = error.message;
+                          }
+                        }
+
+                        toast({ 
+                          title: errorTitle, 
+                          description: errorMessage, 
+                          variant: "destructive" 
+                        });
                       } finally {
                         setSavingProfile(false);
                       }
@@ -470,13 +736,28 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Ημερομηνία Γέννησης</p>
-                    <p className="font-medium">{new Date(userData.dateOfBirth).toLocaleDateString()}</p>
+                    <p className="font-medium">{formatDate(userData.dateOfBirth)}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Ηλικία</p>
                     <p className="font-medium">
-                      {new Date().getFullYear() - new Date(userData.dateOfBirth).getFullYear()} χρόνια
+                      {(() => {
+                        const age = calculateAge(userData.dateOfBirth);
+                        return age !== null ? `${age} χρόνια` : 'Άγνωστη ηλικία';
+                      })()}
                     </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Φύλο</p>
+                    <p className="font-medium">{formatGender(userData.gender)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Βάρος</p>
+                    <p className="font-medium">{formatWeight(userData.weight)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Ύψος</p>
+                    <p className="font-medium">{formatHeight(userData.height)}</p>
                   </div>
                 </div>
                 {fitnessGoals.length > 0 && (

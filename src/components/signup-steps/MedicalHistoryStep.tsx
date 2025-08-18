@@ -107,8 +107,8 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
         frequency: "3 φορές την εβδομάδα", 
         duration: "30 λεπτά" 
       },
-      emergencyContactName: "Γιάννης Παπαδόπουλος",
-      emergencyContactPhone: "6901234567",
+      emergencyContactName: "",
+      emergencyContactPhone: "",
       emsInterest: true,
       emsContraindications: {
         "Βηματοδότης": { hasCondition: true, yearOfOnset: "2019" }
