@@ -20,36 +20,6 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
   // Production ready - χρησιμοποιεί πραγματικό API για έλεγχο ηλικίας
   const USE_MOCK_AGE_CHECK = false;
 
-  // Quick fill functions for testing
-  const fillAdultData = () => {
-    const randomNum = Math.floor(Math.random() * 1000);
-    updateData({
-      firstName: "Τεστ",
-      lastName: "Ενήλικας",
-      email: `adult.test${randomNum}@example.com`,
-      phone: "6901234567",
-      birthDate: "1990-01-15", // 34 years old
-      gender: "male",
-      password: "123456789",
-      confirmPassword: "123456789"
-    });
-    toast.success("Συμπληρώθηκαν στοιχεία ενήλικα για δοκιμή");
-  };
-
-  const fillMinorData = () => {
-    const randomNum = Math.floor(Math.random() * 1000);
-    updateData({
-      firstName: "Τεστ",
-      lastName: "Ανήλικος",
-      email: `minor.test${randomNum}@example.com`,
-      phone: "6907654321",
-      birthDate: "2012-08-08", // 12 years old
-      gender: "male",
-      password: "123456789",
-      confirmPassword: "123456789"
-    });
-    toast.success("Συμπληρώθηκαν στοιχεία ανηλίκου για δοκιμή");
-  };
 
   const handleNext = async () => {
     // Validation
@@ -238,28 +208,6 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
         </div>
       </div>
 
-      {/* Test buttons for quick fill */}
-      <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-        <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
-        <Button 
-          type="button"
-          variant="outline" 
-          size="sm"
-          onClick={fillAdultData}
-          className="text-xs"
-        >
-          Συμπλήρωση Ενήλικα
-        </Button>
-        <Button 
-          type="button"
-          variant="outline" 
-          size="sm"
-          onClick={fillMinorData}
-          className="text-xs"
-        >
-          Συμπλήρωση Ανηλίκου
-        </Button>
-      </div>
 
       <div className="flex justify-end">
         <Button onClick={handleNext} disabled={loading}>
