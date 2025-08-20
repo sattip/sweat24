@@ -183,7 +183,10 @@ export const NotificationBell: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <Card className="fixed right-4 left-4 sm:absolute sm:left-auto sm:right-0 top-20 sm:top-full sm:mt-2 max-w-sm sm:w-80 z-50 shadow-lg border">
+        <div className="fixed inset-0 sm:static sm:inset-auto z-50">
+          <div className="flex items-end justify-center min-h-screen sm:block">
+            {/* Mobile: Bottom sheet style */}
+            <Card className="fixed bottom-0 left-0 right-0 sm:absolute sm:right-0 sm:left-auto sm:bottom-auto sm:top-full sm:mt-2 w-full sm:w-80 max-h-[70vh] sm:max-h-[600px] z-50 shadow-lg border rounded-t-xl sm:rounded-xl">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold">
@@ -287,7 +290,9 @@ export const NotificationBell: React.FC = () => {
               )}
             </ScrollArea>
           </CardContent>
-        </Card>
+            </Card>
+          </div>
+        </div>
       )}
     </div>
   );
