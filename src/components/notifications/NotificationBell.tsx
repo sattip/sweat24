@@ -64,7 +64,6 @@ export const NotificationBell: React.FC = () => {
       const unread = data.filter((n: Notification) => !n.is_read && !n.read_at).length;
       setUnreadCount(unread);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
       // Don't show error toast for polling - just log
     } finally {
       setLoading(false);
@@ -88,7 +87,6 @@ export const NotificationBell: React.FC = () => {
       setUnreadCount(prev => Math.max(0, prev - 1));
       
     } catch (error) {
-      console.error('Error marking notification as read:', error);
       toast.error('Σφάλμα κατά την ενημέρωση ειδοποίησης');
     }
   };
@@ -106,7 +104,6 @@ export const NotificationBell: React.FC = () => {
       toast.success('Όλες οι ειδοποιήσεις σημειώθηκαν ως αναγνωσμένες');
       
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
       toast.error('Σφάλμα κατά την ενημέρωση ειδοποιήσεων');
     }
   };

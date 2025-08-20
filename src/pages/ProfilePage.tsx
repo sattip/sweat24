@@ -70,11 +70,6 @@ const ProfilePage = () => {
     loadPackages();
   }, []);
   
-  // Debug logging - αφαίρεσε μετά τη διόρθωση
-  console.log('User data from AuthContext:', user);
-  console.log('User avatar:', (user as any)?.avatar);
-  console.log('Date of birth:', (user as any)?.date_of_birth);
-  console.log('Gender:', (user as any)?.gender);
 
   // Helper functions
   const isNameLocked = () => {
@@ -143,7 +138,6 @@ const ProfilePage = () => {
       setAvatarUploading(true);
       const result = await userService.uploadAvatar(file);
       
-      console.log('Avatar upload response:', result);
       
       // No need to update localStorage manually, refreshUser will handle it
       

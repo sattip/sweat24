@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import PackageAlert from "@/components/notifications/PackageAlert";
 import { DashboardAlert } from "@/components/notifications/DashboardAlert";
-import SimulationPanel from "@/components/SimulationPanel";
 import SessionCountIndicator from "@/components/SessionCountIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSimulation } from "@/hooks/useSimulation";
@@ -44,8 +43,7 @@ const DashboardPage = () => {
     isAdminTester, 
     getSimulatedUser, 
     getPackageStatus, 
-    isBirthdayWeek: isSimulatedBirthdayWeek,
-    updateSimulationState 
+    isBirthdayWeek: isSimulatedBirthdayWeek
   } = useSimulation();
   const [stats, setStats] = useState<any>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
@@ -156,12 +154,6 @@ const DashboardPage = () => {
           </h1>
         </div>
         
-        {/* Simulation Panel - Only visible to admin@sweat93.gr */}
-        {isAdminTester && (
-          <div className="mb-6">
-            <SimulationPanel onStateChange={updateSimulationState} />
-          </div>
-        )}
 
         {/* Admin Controls - Only visible to admin users */}
         {user?.email === 'admin@sweat93.gr' && (
