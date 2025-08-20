@@ -105,8 +105,6 @@ const ProgressPage = () => {
       setLoading(true);
       const data = await bodyMeasurementService.getMeasurements();
       
-      console.log('📊 Loaded measurements from API:', data);
-      
       // Convert API data to component format
       const convertedMeasurements: Measurement[] = data.map(item => {
         const parsedDate = bodyMeasurementService.parseDateFromAPI(item.date);
@@ -171,8 +169,6 @@ const ProgressPage = () => {
       }
 
       const newApiMeasurement = await bodyMeasurementService.createMeasurement(measurementData);
-      
-      console.log('📊 New measurement response:', newApiMeasurement);
       
       // Check if response contains the expected data
       if (!newApiMeasurement || typeof newApiMeasurement !== 'object') {
@@ -264,8 +260,6 @@ const ProgressPage = () => {
         parseInt(editingMeasurement.id), 
         measurementData
       );
-      
-      console.log('📊 Updated measurement response:', updatedApiMeasurement);
       
       // Convert to component format and update state
       const convertedMeasurement: Measurement = {

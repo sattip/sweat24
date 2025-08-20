@@ -91,8 +91,6 @@ export const ProgressPhotosTab = () => {
     try {
       setLoading(true);
       const data = await progressPhotoService.getPhotos();
-      console.log('📸 Progress Photos from API:', data);
-      console.log('📸 Number of photos:', data.length);
       setPhotos(data);
     } catch (error) {
       console.error('Error loading photos:', error);

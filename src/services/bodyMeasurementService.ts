@@ -304,7 +304,7 @@ class BodyMeasurementService {
   // Helper to parse API date (YYYY-MM-DD) to Date object
   parseDateFromAPI(dateString: string): Date {
     if (!dateString) {
-      console.warn('Empty date string provided, using current date');
+      // Empty date string, use current date
       return new Date();
     }
     
@@ -315,13 +315,13 @@ class BodyMeasurementService {
       
       // Check if date is valid
       if (isNaN(date.getTime())) {
-        console.warn('Invalid date string:', dateString, 'using current date');
+        // Invalid date, use current date
         return new Date();
       }
       
       return date;
     } catch (error) {
-      console.error('Error parsing date:', dateString, error);
+      // Error parsing date, use current date
       return new Date();
     }
   }

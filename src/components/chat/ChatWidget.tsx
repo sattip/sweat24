@@ -63,8 +63,6 @@ export function ChatWidget() {
         // Subscribe to chat channel
         channelRef.current = pusherService.subscribeToChat(user.id, (payload: any) => {
           // Handle incoming message with backend payload structure
-          console.log('📨 New message received:', payload);
-          
           // Backend sends: { message: {...}, recipient: {...}, isForUser: true }
           if (payload.message && payload.isForUser) {
             const incomingMessage = payload.message;
@@ -72,7 +70,6 @@ export function ChatWidget() {
             setConversation(prev => {
               // If no conversation exists yet, create one with the new message
               if (!prev) {
-                console.log('📝 Creating new conversation with incoming message');
                 return {
                   id: incomingMessage.conversation_id || 0,
                   messages: [incomingMessage],
@@ -91,10 +88,7 @@ export function ChatWidget() {
               
               // Increase unread count only if chat is closed and message is from admin
               const shouldIncreaseUnread = !isOpenRef.current && newMessage.sender_type === 'admin';
-              console.log('🔔 Should increase unread:', shouldIncreaseUnread, 'isOpen:', isOpenRef.current);
-              
               const newUnreadCount = shouldIncreaseUnread ? prev.unread_count + 1 : prev.unread_count;
-              console.log('📊 New unread count:', newUnreadCount);
               
               return {
                 ...prev,
