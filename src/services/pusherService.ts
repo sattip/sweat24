@@ -57,12 +57,13 @@ class PusherService {
     }
 
     // Use the correct channel name format from backend
+    // Backend sends to private-chat.{userId}
     const channelName = `chat.${userId}`;
-    // Subscribe to private channel
+    // Subscribe to private channel (Echo automatically adds 'private-' prefix)
     const channel = this.echo.private(channelName);
 
-    // Listen for ChatMessageReceived event
-    channel.listen('ChatMessageReceived', (payload: any) => {
+    // Listen for ChatMessageReceived event (without App\Events prefix)
+    channel.listen('.ChatMessageReceived', (payload: any) => {
       onMessageReceived(payload);
     });
 

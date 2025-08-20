@@ -61,11 +61,12 @@ export function ChatWidget() {
         pusherService.initialize(user.id, token);
         
         // Subscribe to chat channel
-        channelRef.current = pusherService.subscribeToChat(user.id, (payload: any) => {
-          // Handle incoming message with backend payload structure
-          // Backend sends: { message: {...}, recipient: {...}, isForUser: true }
-          if (payload.message && payload.isForUser) {
-            const incomingMessage = payload.message;
+        channelRef.current = pusherService.subscribeToChat(user.id, (data: any) => {
+          // Handle incoming message
+          // Backend sends: { message: {...} }
+          // data.message contains: id, content, sender_id, sender_type, created_at, sender (object)
+          if (data.message) {
+            const incomingMessage = data.message;
             
             setConversation(prev => {
               // If no conversation exists yet, create one with the new message
@@ -77,22 +78,19 @@ export function ChatWidget() {
                 };
               }
               
-              // Add the new message to the conversation
-              const newMessage = incomingMessage;
-              
               // Check if message already exists to avoid duplicates
-              const messageExists = prev.messages.some(m => m.id === newMessage.id);
+              const messageExists = prev.messages.some(m => m.id === incomingMessage.id);
               if (messageExists) {
                 return prev;
               }
               
               // Increase unread count only if chat is closed and message is from admin
-              const shouldIncreaseUnread = !isOpenRef.current && newMessage.sender_type === 'admin';
+              const shouldIncreaseUnread = !isOpenRef.current && incomingMessage.sender_type === 'admin';
               const newUnreadCount = shouldIncreaseUnread ? prev.unread_count + 1 : prev.unread_count;
               
               return {
                 ...prev,
-                messages: [...prev.messages, newMessage],
+                messages: [...prev.messages, incomingMessage],
                 unread_count: newUnreadCount
               };
             });
@@ -110,8 +108,9 @@ export function ChatWidget() {
     }
 
     return () => {
-      // Cleanup on unmount
-      if (channelRef.current) {
+      // Cleanup on unmount - unsubscribe from Pusher channel
+      if (channelRef.current && user?.id) {
+        pusherService.disconnect();
         channelRef.current = null;
       }
     };
