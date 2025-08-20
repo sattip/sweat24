@@ -2,7 +2,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.b6ef2949a22343a2a358dd33ab8b8870',
+  appId: 'com.sweat93.app',
   appName: 'sweat93',
   webDir: 'dist',
   server: {
