@@ -70,14 +70,14 @@ export const NotificationBell: React.FC = () => {
     }
   };
 
-  const handleMarkAsRead = async (notificationId: number) => {
+  const handleMarkAsRead = async (recipientId: number) => {
     try {
-      await notificationService.markAsRead(notificationId);
+      await notificationService.markAsRead(recipientId);
       
       // Update local state
       setNotifications(prev => 
         prev.map(n => 
-          n.id === notificationId 
+          n.id === recipientId 
             ? { ...n, is_read: true, read_at: new Date().toISOString() }
             : n
         )

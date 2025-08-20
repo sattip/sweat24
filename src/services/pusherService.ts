@@ -15,7 +15,6 @@ class PusherService {
 
   initialize(userId: number, token: string) {
     if (this.isInitialized && this.userId === userId) {
-      console.log('Pusher already initialized for user', userId);
       return;
     }
 
