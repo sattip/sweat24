@@ -43,23 +43,42 @@ export function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<any>(null);
+  const isOpenRef = useRef(isOpen);
+  
+  // Update isOpenRef when isOpen changes
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
-  // Initialize Pusher when authenticated
+  // Initialize Pusher and fetch initial conversation when authenticated
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       const token = localStorage.getItem('auth_token');
       if (token) {
+        // Fetch initial conversation to get unread count
+        fetchOrCreateConversation();
+        
         pusherService.initialize(user.id, token);
         
         // Subscribe to chat channel
         channelRef.current = pusherService.subscribeToChat(user.id, (payload: any) => {
-          // Handle incoming message
-          if (payload.message) {
+          // Handle incoming message with backend payload structure
+          // Backend sends: { message: {...}, recipient: {...}, isForUser: true }
+          if (payload.message && payload.isForUser) {
+            const incomingMessage = payload.message;
+            
             setConversation(prev => {
-              if (!prev) return null;
+              // If no conversation exists yet, create one with the new message
+              if (!prev) {
+                return {
+                  id: incomingMessage.conversation_id || 0,
+                  messages: [incomingMessage],
+                  unread_count: incomingMessage.sender_type === 'admin' ? 1 : 0
+                };
+              }
               
               // Add the new message to the conversation
-              const newMessage = payload.message;
+              const newMessage = incomingMessage;
               
               // Check if message already exists to avoid duplicates
               const messageExists = prev.messages.some(m => m.id === newMessage.id);
@@ -67,12 +86,24 @@ export function ChatWidget() {
                 return prev;
               }
               
+              // Increase unread count only if chat is closed and message is from admin
+              const shouldIncreaseUnread = !isOpenRef.current && newMessage.sender_type === 'admin';
+              const newUnreadCount = shouldIncreaseUnread ? prev.unread_count + 1 : prev.unread_count;
+              
               return {
                 ...prev,
                 messages: [...prev.messages, newMessage],
-                unread_count: newMessage.sender_type === 'admin' ? prev.unread_count + 1 : prev.unread_count
+                unread_count: newUnreadCount
               };
             });
+            
+            // Show toast notification for new admin messages when chat is closed
+            if (!isOpenRef.current && incomingMessage.sender_type === 'admin') {
+              toast.info('Νέο μήνυμα από την υποστήριξη', {
+                description: incomingMessage.content.substring(0, 50) + '...',
+                duration: 5000,
+              });
+            }
           }
         });
       }
@@ -84,17 +115,12 @@ export function ChatWidget() {
         channelRef.current = null;
       }
     };
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id]); // Removed isOpen from dependencies to avoid re-subscribing
 
-  // Fetch or create conversation on mount and mark as read
+  // Mark messages as read when chat is opened
   useEffect(() => {
-    if (isOpen && isAuthenticated) {
-      if (!conversation) {
-        fetchOrCreateConversation();
-      } else if (conversation.id > 0 && conversation.unread_count > 0) {
-        // Mark messages as read when chat is opened
-        markMessagesAsRead();
-      }
+    if (isOpen && isAuthenticated && conversation?.id > 0 && conversation?.unread_count > 0) {
+      markMessagesAsRead();
     }
   }, [isOpen, isAuthenticated, conversation?.id, conversation?.unread_count]);
 
@@ -206,10 +232,26 @@ export function ChatWidget() {
         )}
       >
         <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
-        {conversation?.unread_count ? (
-          <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-5 w-5 sm:h-6 sm:w-6 rounded-full p-0 flex items-center justify-center">
-            {conversation.unread_count}
-          </Badge>
+        {conversation?.unread_count && conversation.unread_count > 0 ? (
+          <>
+            {/* Pulse animation */}
+            <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 flex h-5 w-5 sm:h-6 sm:w-6">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            </span>
+            {/* Badge with count */}
+            <Badge 
+              className={cn(
+                "absolute -top-1 -right-1 sm:-top-2 sm:-right-2",
+                "min-w-[20px] h-5 sm:min-w-[24px] sm:h-6",
+                "rounded-full p-0 flex items-center justify-center",
+                "bg-red-500 text-white border-2 border-white",
+                "text-xs font-bold",
+                "animate-[bounce_2s_ease-in-out_infinite]"
+              )}
+            >
+              {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
+            </Badge>
+          </>
         ) : null}
       </Button>
 

@@ -32,9 +32,9 @@ class PusherService {
     // Initialize Laravel Echo with Pusher
     this.echo = new Echo({
       broadcaster: 'pusher',
-      key: import.meta.env.VITE_PUSHER_APP_KEY || 'YOUR_PUSHER_APP_KEY',
-      cluster: import.meta.env.VITE_PUSHER_CLUSTER || 'eu',
-      forceTLS: import.meta.env.VITE_PUSHER_FORCE_TLS !== 'false',
+      key: import.meta.env.VITE_PUSHER_APP_KEY || '9a32af76b0f65715f3ea',
+      cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'eu',
+      forceTLS: true,
       authEndpoint: 'https://sweat93laravel.obs.com.gr/broadcasting/auth',
       auth: {
         headers: {
@@ -42,12 +42,12 @@ class PusherService {
           Accept: 'application/json',
         },
       },
-      // Disable Pusher logging in production
+      // Enable debug logging to troubleshoot
       enabledTransports: ['ws', 'wss'],
+      disableStats: true,
     });
 
     this.isInitialized = true;
-    console.log('Pusher initialized for user', userId);
   }
 
   subscribeToChat(userId: number, onMessageReceived: (payload: any) => void) {
@@ -56,26 +56,21 @@ class PusherService {
       return null;
     }
 
+    // Use the correct channel name format from backend
     const channelName = `chat.${userId}`;
-    console.log('Subscribing to private channel:', channelName);
-
     // Subscribe to private channel
     const channel = this.echo.private(channelName);
 
     // Listen for ChatMessageReceived event
     channel.listen('ChatMessageReceived', (payload: any) => {
-      console.log('New chat message received:', payload);
       onMessageReceived(payload);
-    });
-
-    // Handle subscription success
-    channel.subscribed(() => {
-      console.log('Successfully subscribed to channel:', channelName);
     });
 
     // Handle subscription error
     channel.error((error: any) => {
-      console.error('Channel subscription error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Channel subscription error:', error);
+      }
     });
 
     return channel;
@@ -87,7 +82,7 @@ class PusherService {
       this.echo = null;
       this.isInitialized = false;
       this.userId = null;
-      console.log('Pusher disconnected');
+      // Disconnected
     }
   }
 

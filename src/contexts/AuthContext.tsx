@@ -118,6 +118,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data.success && data.user) {
         let updatedUser = data.user;
+        
+        // Backend already sends full URL for avatar, no need to modify it
+        console.log('📸 Avatar from backend:', updatedUser.avatar);
 
         // Fallback: αν δεν υπάρχουν aggregates για πακέτο, προσπάθησε να τα αντλήσεις από /users/{id}
         const needsPackageDerive =

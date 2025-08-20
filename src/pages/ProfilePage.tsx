@@ -39,9 +39,8 @@ const ProfilePage = () => {
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editGender, setEditGender] = useState("");
-  const [editWeight, setEditWeight] = useState("");
-  const [editHeight, setEditHeight] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarKey, setAvatarKey] = useState(Date.now()); // Force re-render key
 
   // Δεν φορτώνουμε πλέον mock πακέτα. Θα βασιστούμε μόνο στα πραγματικά πεδία του χρήστη από το auth context.
 
@@ -52,8 +51,6 @@ const ProfilePage = () => {
       setEditEmail(user.email || "");
       setEditPhone((user as any).phone || "");
       setEditGender((user as any).gender || "");
-      setEditWeight((user as any).weight ? (user as any).weight.toString() : "");
-      setEditHeight((user as any).height ? (user as any).height.toString() : "");
     }
   }, [user]);
 
@@ -75,10 +72,9 @@ const ProfilePage = () => {
   
   // Debug logging - αφαίρεσε μετά τη διόρθωση
   console.log('User data from AuthContext:', user);
+  console.log('User avatar:', (user as any)?.avatar);
   console.log('Date of birth:', (user as any)?.date_of_birth);
   console.log('Gender:', (user as any)?.gender);
-  console.log('Weight:', (user as any)?.weight);
-  console.log('Height:', (user as any)?.height);
 
   // Helper functions
   const isNameLocked = () => {
@@ -118,15 +114,6 @@ const ProfilePage = () => {
     return genderMap[gender] || "Δεν έχει οριστεί";
   };
 
-  const formatWeight = (weight: number | null) => {
-    if (!weight) return "Δεν έχει οριστεί";
-    return `${weight} kg`;
-  };
-
-  const formatHeight = (height: number | null) => {
-    if (!height) return "Δεν έχει οριστεί";
-    return `${height} cm`;
-  };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -156,8 +143,15 @@ const ProfilePage = () => {
       setAvatarUploading(true);
       const result = await userService.uploadAvatar(file);
       
+      console.log('Avatar upload response:', result);
+      
+      // No need to update localStorage manually, refreshUser will handle it
+      
       // Update the user's avatar in the auth context
       await refreshUser();
+      
+      // Force re-render of avatar image
+      setAvatarKey(Date.now());
       
       toast({ 
         title: "Επιτυχία!", 
@@ -186,8 +180,6 @@ const ProfilePage = () => {
     name: user?.name || "Χρήστης",
     email: user?.email || "",
     gender: (user as any)?.gender || null,
-    weight: (user as any)?.weight || null,
-    height: (user as any)?.height || null,
     phone: (user as any)?.phone || "",
     dateOfBirth: (user as any)?.date_of_birth || "",
     activePackage: {
@@ -243,7 +235,7 @@ const ProfilePage = () => {
               <div className="bg-gradient-to-r from-primary to-secondary h-32 relative">
                 <div className="absolute -bottom-16 left-6 flex items-end">
                   <div className="relative">
-                    <Avatar className="h-24 w-24 border-4 border-background">
+                    <Avatar className="h-24 w-24 border-4 border-background" key={avatarKey}>
                       <AvatarImage 
                         src={(user as any)?.avatar || "/placeholder.svg"} 
                         alt={userData.name} 
@@ -339,34 +331,6 @@ const ProfilePage = () => {
                     </Select>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="weight">Βάρος (kg)</Label>
-                      <Input 
-                        id="weight" 
-                        type="number" 
-                        placeholder="π.χ. 70"
-                        min="30" 
-                        max="300" 
-                        step="0.1"
-                        value={editWeight} 
-                        onChange={(e) => setEditWeight(e.target.value)} 
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="height">Ύψος (cm)</Label>
-                      <Input 
-                        id="height" 
-                        type="number" 
-                        placeholder="π.χ. 175"
-                        min="100" 
-                        max="250" 
-                        step="0.1"
-                        value={editHeight} 
-                        onChange={(e) => setEditHeight(e.target.value)} 
-                      />
-                    </div>
-                  </div>
                 </div>
                 <DialogFooter className="gap-2 sm:gap-2">
                   <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={savingProfile}>Ακύρωση</Button>
@@ -380,8 +344,6 @@ const ProfilePage = () => {
                         email: editEmail,
                         phone: editPhone,
                         gender: editGender,
-                        weight: editWeight,
-                        height: editHeight
                       };
                       
                       const validationErrors = validateProfileData(validationData);
@@ -412,12 +374,6 @@ const ProfilePage = () => {
                         // Add optional fields only if they have values
                         if (editGender) {
                           updateData.gender = editGender;
-                        }
-                        if (editWeight && !isNaN(parseFloat(editWeight))) {
-                          updateData.weight = parseFloat(editWeight);
-                        }
-                        if (editHeight && !isNaN(parseFloat(editHeight))) {
-                          updateData.height = parseFloat(editHeight);
                         }
 
                         await userService.updateProfile(user.id, updateData);
@@ -750,14 +706,6 @@ const ProfilePage = () => {
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Φύλο</p>
                     <p className="font-medium">{formatGender(userData.gender)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Βάρος</p>
-                    <p className="font-medium">{formatWeight(userData.weight)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Ύψος</p>
-                    <p className="font-medium">{formatHeight(userData.height)}</p>
                   </div>
                 </div>
                 {fitnessGoals.length > 0 && (

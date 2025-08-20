@@ -107,4 +107,30 @@
   .ios-device .pt-safe-ios {
     padding-top: env(safe-area-inset-top, 0px);
   }
+  
+  /* Mobile keyboard handling */
+  @media (max-width: 768px) {
+    /* Ensure inputs are visible when keyboard opens */
+    input:focus,
+    textarea:focus,
+    select:focus {
+      position: relative;
+      z-index: 999;
+    }
+    
+    /* Add padding to bottom when keyboard is likely open */
+    .has-keyboard-open {
+      padding-bottom: 50vh;
+    }
+    
+    /* Prevent viewport issues on mobile */
+    html {
+      overflow-x: hidden;
+    }
+    
+    body {
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }

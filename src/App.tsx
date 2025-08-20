@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-ro
 import { useEffect } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
 import { useStatusBar } from "@/hooks/useStatusBar";
+import { useMobileKeyboardFix } from "@/hooks/use-keyboard";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import SignupSuccessPage from "./pages/SignupSuccessPage";
@@ -17,7 +18,6 @@ import ProfilePage from "./pages/ProfilePage";
 import BookingsPage from "./pages/BookingsPage";
 import WorkoutHistoryPage from "./pages/WorkoutHistoryPage";
 import WorkoutDetailsPage from "./pages/WorkoutDetailsPage";
-import ProgressPhotosPage from "./pages/ProgressPhotosPage";
 import BodyMeasurementsPage from "./pages/BodyMeasurementsPage";
 import ProgressPage from "./pages/ProgressPage";
 import RewardsPage from "./pages/RewardsPage";
@@ -50,6 +50,9 @@ const queryClient = new QueryClient();
 function BackButtonHandler() {
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Apply mobile keyboard fixes
+  useMobileKeyboardFix();
 
   useEffect(() => {
     // Android back gesture / hardware back button
