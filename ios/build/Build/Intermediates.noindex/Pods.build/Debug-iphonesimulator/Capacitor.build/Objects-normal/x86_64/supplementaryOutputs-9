@@ -1,0 +1,24 @@
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/NotificationRouter.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationRouter.d"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationRouter.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationRouter.dia"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationRouter.swiftconstvalues"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationRouter.o"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/NotificationHandlerProtocol.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationHandlerProtocol.d"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationHandlerProtocol.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationHandlerProtocol.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationHandlerProtocol.dia"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/NotificationHandlerProtocol.swiftconstvalues"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/PluginCallResult.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/PluginCallResult.d"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/PluginCallResult.o"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/PluginCallResult.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/PluginCallResult.dia"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/PluginCallResult.swiftdeps"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/KeyValueStore.swift":
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyValueStore.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyValueStore.dia"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyValueStore.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyValueStore.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyValueStore.d"

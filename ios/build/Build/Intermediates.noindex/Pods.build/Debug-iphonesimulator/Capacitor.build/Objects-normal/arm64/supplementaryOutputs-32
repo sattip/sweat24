@@ -1,0 +1,24 @@
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Router.swift":
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/Router.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/Router.swiftdeps"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/Router.swiftconstvalues"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/Router.d"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/Router.dia"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/TmpViewController.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/TmpViewController.swiftconstvalues"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/TmpViewController.o"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/TmpViewController.d"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/TmpViewController.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/TmpViewController.dia"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/PluginConfig.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginConfig.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginConfig.dia"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginConfig.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginConfig.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginConfig.d"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/UIColor.swift":
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/UIColor.dia"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/UIColor.swiftconstvalues"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/UIColor.d"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/UIColor.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/UIColor.swiftdeps"

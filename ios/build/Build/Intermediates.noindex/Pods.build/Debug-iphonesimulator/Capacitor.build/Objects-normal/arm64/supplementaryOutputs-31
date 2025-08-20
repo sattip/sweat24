@@ -1,0 +1,24 @@
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/PluginCallResult.swift":
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginCallResult.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginCallResult.d"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginCallResult.o"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginCallResult.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/PluginCallResult.dia"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/KeyValueStore.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/KeyValueStore.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/KeyValueStore.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/KeyValueStore.d"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/KeyValueStore.dia"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/KeyValueStore.o"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/NotificationRouter.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationRouter.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationRouter.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationRouter.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationRouter.d"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationRouter.o"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/NotificationHandlerProtocol.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationHandlerProtocol.d"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationHandlerProtocol.swiftdeps"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationHandlerProtocol.o"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationHandlerProtocol.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/arm64/NotificationHandlerProtocol.dia"

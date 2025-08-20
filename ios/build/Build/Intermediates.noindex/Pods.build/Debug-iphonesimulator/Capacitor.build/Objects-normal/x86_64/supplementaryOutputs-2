@@ -1,0 +1,24 @@
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/CAPApplicationDelegateProxy.swift":
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPApplicationDelegateProxy.swiftdeps"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPApplicationDelegateProxy.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPApplicationDelegateProxy.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPApplicationDelegateProxy.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPApplicationDelegateProxy.swiftconstvalues"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Plugins/CapacitorHttp.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorHttp.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorHttp.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorHttp.d"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorHttp.swiftdeps"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorHttp.o"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/CapacitorExtension.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorExtension.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorExtension.swiftconstvalues"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorExtension.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorExtension.dia"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorExtension.swiftdeps"
+"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Plugins/CapacitorUrlRequest.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorUrlRequest.swiftconstvalues"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorUrlRequest.d"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorUrlRequest.dia"
+  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorUrlRequest.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CapacitorUrlRequest.swiftdeps"
