@@ -713,7 +713,7 @@ export const notificationService = {
       }
 
       const response = await fetch(buildApiUrl(`/notifications/${id}/read`), {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
