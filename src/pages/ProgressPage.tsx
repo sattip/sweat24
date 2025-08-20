@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -42,17 +42,12 @@ import {
   ChevronUp, 
   Pencil, 
   Trash2, 
-  LineChart,
-  Camera,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Info 
+  LineChart
 } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
-import { Camera as DeviceCamera } from "@capacitor/camera";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ProgressPhotosTab } from "@/components/ProgressPhotosTab";
+import { bodyMeasurementService, type BodyMeasurement, type CreateMeasurementRequest } from "@/services/bodyMeasurementService";
 import { 
   ChartContainer, 
   ChartTooltip, 
@@ -60,15 +55,8 @@ import {
 } from "@/components/ui/chart";
 import { ResponsiveContainer, LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
-// Types for progress photos
-interface ProgressPhoto {
-  id: number;
-  imageUrl: string;
-  date: string;
-  caption?: string;
-}
 
-// Types for measurements
+// Types for measurements - using BodyMeasurement from service
 interface Measurement {
   id: string;
   date: Date;
@@ -81,129 +69,14 @@ interface Measurement {
   thigh: string;
   bodyFat: string;
   notes: string;
+  bmi?: string; // Added BMI field
 }
 
-// Mock data for progress photos
-const mockProgressPhotos: ProgressPhoto[] = [
-  {
-    id: 1,
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2670&auto=format&fit=crop",
-    date: "20 Μαΐου 2025",
-    caption: "Πρώτος μήνας προπόνησης"
-  },
-  {
-    id: 2,
-    imageUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=2670&auto=format&fit=crop",
-    date: "10 Μαΐου 2025",
-    caption: "Αρχίζω να βλέπω διαμόρφωση"
-  },
-  {
-    id: 3,
-    imageUrl: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=2669&auto=format&fit=crop",
-    date: "25 Απριλίου 2025"
-  },
-  {
-    id: 4,
-    imageUrl: "https://images.unsplash.com/photo-1597452485669-2c7bb5fef90d?q=80&w=2574&auto=format&fit=crop",
-    date: "10 Απριλίου 2025",
-    caption: "Δύο μήνες μετά"
-  },
-  {
-    id: 5,
-    imageUrl: "https://images.unsplash.com/photo-1616803689943-5601631c7fec?q=80&w=2670&auto=format&fit=crop",
-    date: "28 Μαρτίου 2025"
-  },
-  {
-    id: 6,
-    imageUrl: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2940&auto=format&fit=crop",
-    date: "15 Μαρτίου 2025",
-    caption: "Ξεκινώντας το ταξίδι μου στη φυσική κατάσταση"
-  },
-];
-
-// Sample data for measurements
-const sampleMeasurements: Measurement[] = [
-  {
-    id: "1",
-    date: new Date(2024, 4, 10),
-    weight: "75",
-    height: "175",
-    waist: "80",
-    hips: "95",
-    chest: "100",
-    arm: "35",
-    thigh: "55",
-    bodyFat: "18",
-    notes: "Ξεκινώ το ταξίδι φυσικής κατάστασής μου"
-  },
-  {
-    id: "2",
-    date: new Date(2024, 4, 17),
-    weight: "74",
-    height: "175",
-    waist: "79",
-    hips: "94",
-    chest: "100",
-    arm: "35.5",
-    thigh: "54.5",
-    bodyFat: "17.5",
-    notes: "Μια εβδομάδα μετά, αισθάνομαι καλά"
-  },
-  {
-    id: "3",
-    date: new Date(2024, 4, 24),
-    weight: "73",
-    height: "175",
-    waist: "78",
-    hips: "93",
-    chest: "101",
-    arm: "36",
-    thigh: "54",
-    bodyFat: "17",
-    notes: "Αρχίζω να βλέπω αλλαγές"
-  }
-];
-
-// Group photos by month
-interface GroupedPhotos {
-  [monthYear: string]: ProgressPhoto[];
-}
-
-const groupPhotosByMonth = (photos: ProgressPhoto[]): GroupedPhotos => {
-  const grouped: GroupedPhotos = {};
-  
-  photos.forEach(photo => {
-    const monthMap: { [key: string]: string } = {
-      'Μαΐου': 'Μάιος',
-      'Απριλίου': 'Απρίλιος', 
-      'Μαρτίου': 'Μάρτιος'
-    };
-    
-    const parts = photo.date.split(' ');
-    const month = parts[1];
-    const year = parts[2];
-    const monthYear = `${monthMap[month] || month} ${year}`;
-    
-    if (!grouped[monthYear]) {
-      grouped[monthYear] = [];
-    }
-    
-    grouped[monthYear].push(photo);
-  });
-  
-  return grouped;
-};
 
 const ProgressPage = () => {
-  // Photos state
-  const [photoSortOrder, setPhotoSortOrder] = useState<"newest" | "oldest">("newest");
-  const [selectedPhoto, setSelectedPhoto] = useState<ProgressPhoto | null>(null);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number>(0);
-  const [showPhotosEmptyState, setShowPhotosEmptyState] = useState<boolean>(false);
-  const [showPhotoTips, setShowPhotoTips] = useState<boolean>(false);
-  
   // Measurements state
-  const [measurements, setMeasurements] = useState<Measurement[]>(sampleMeasurements);
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingMeasurement, setEditingMeasurement] = useState<Measurement | null>(null);
@@ -222,62 +95,45 @@ const ProgressPage = () => {
     notes: "",
   });
 
-  // Photos logic
-  const hasPhotos = !showPhotosEmptyState && mockProgressPhotos.length > 0;
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    toast.success(`Επιλέχθηκαν ${files.length} φωτογραφίες`);
-    // TODO: Θα σταλούν στο backend αποθήκευσης όταν υλοποιηθεί το API
-    e.currentTarget.value = ""; // reset για επόμενη επιλογή
-  };
-  
-  const sortedPhotos = [...mockProgressPhotos].sort((a, b) => {
-    return photoSortOrder === "newest" ? b.id - a.id : a.id - b.id;
-  });
-  
-  const groupedPhotos = groupPhotosByMonth(sortedPhotos);
-  const flatPhotos = sortedPhotos;
-  
-  const handlePhotoClick = (photo: ProgressPhoto) => {
-    setSelectedPhoto(photo);
-    setCurrentPhotoIndex(flatPhotos.findIndex(p => p.id === photo.id));
-  };
-  
-  const handlePreviousPhoto = () => {
-    if (currentPhotoIndex > 0) {
-      setCurrentPhotoIndex(currentPhotoIndex - 1);
-      setSelectedPhoto(flatPhotos[currentPhotoIndex - 1]);
-    }
-  };
-  
-  const handleNextPhoto = () => {
-    if (currentPhotoIndex < flatPhotos.length - 1) {
-      setCurrentPhotoIndex(currentPhotoIndex + 1);
-      setSelectedPhoto(flatPhotos[currentPhotoIndex + 1]);
-    }
-  };
-  
-  const handleDeletePhoto = (id: number) => {
-    toast.success("Η φωτογραφία διαγράφηκε επιτυχώς");
-    setSelectedPhoto(null);
-  };
-  
-  const handleUploadPhoto = async () => {
+  // Load measurements on component mount
+  useEffect(() => {
+    loadMeasurements();
+  }, []);
+
+  const loadMeasurements = async () => {
     try {
-      if (Capacitor.getPlatform() !== "web") {
-        const result = await DeviceCamera.pickImages({ quality: 85, limit: 10 });
-        const count = result.photos?.length || 0;
-        if (count > 0) {
-          toast.success(`Επιλέχθηκαν ${count} φωτογραφίες`);
-        }
-      } else {
-        fileInputRef.current?.click();
-      }
-    } catch (err) {
-      // συνήθως ακύρωση επιλογής
+      setLoading(true);
+      const data = await bodyMeasurementService.getMeasurements();
+      
+      console.log('📊 Loaded measurements from API:', data);
+      
+      // Convert API data to component format
+      const convertedMeasurements: Measurement[] = data.map(item => {
+        const parsedDate = bodyMeasurementService.parseDateFromAPI(item.date);
+        
+        return {
+          id: item.id ? item.id.toString() : Date.now().toString(),
+          date: parsedDate,
+          weight: item.weight || "",
+          height: item.height || "",
+          waist: item.waist || "",
+          hips: item.hips || "",
+          chest: item.chest || "",
+          arm: item.arm || "",
+          thigh: item.thigh || "",
+          bodyFat: item.bodyFat || "",
+          notes: item.notes || "",
+          bmi: item.bmi || ""
+        };
+      });
+      
+      setMeasurements(convertedMeasurements);
+    } catch (error) {
+      console.error('Error loading measurements:', error);
+      toast.error('Αποτυχία φόρτωσης μετρήσεων');
+      setMeasurements([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -292,49 +148,182 @@ const ProgressPage = () => {
     setExpandedCards(newExpanded);
   };
 
-  const handleAddMeasurement = () => {
-    const measurement: Measurement = {
-      ...newMeasurement,
-      id: Date.now().toString(),
-      date: newMeasurement.date || new Date(),
-    } as Measurement;
-    
-    setMeasurements([...measurements, measurement]);
-    setNewMeasurement({
-      date: new Date(),
-      weight: "",
-      height: "",
-      waist: "",
-      hips: "",
-      chest: "",
-      arm: "",
-      thigh: "",
-      bodyFat: "",
-      notes: "",
-    });
-    setShowAddDialog(false);
-    toast.success("Η μέτρηση προστέθηκε επιτυχώς!");
+  const handleAddMeasurement = async () => {
+    try {
+      // Client-side validation
+      const measurementData: CreateMeasurementRequest = {
+        date: bodyMeasurementService.formatDateForAPI(newMeasurement.date || new Date()),
+        weight: newMeasurement.weight || undefined,
+        height: newMeasurement.height || undefined,
+        waist: newMeasurement.waist || undefined,
+        hips: newMeasurement.hips || undefined,
+        chest: newMeasurement.chest || undefined,
+        arm: newMeasurement.arm || undefined,
+        thigh: newMeasurement.thigh || undefined,
+        bodyFat: newMeasurement.bodyFat || undefined,
+        notes: newMeasurement.notes || undefined,
+      };
+
+      const errors = bodyMeasurementService.validateMeasurement(measurementData);
+      if (errors.length > 0) {
+        errors.forEach(error => toast.error(error));
+        return;
+      }
+
+      const newApiMeasurement = await bodyMeasurementService.createMeasurement(measurementData);
+      
+      console.log('📊 New measurement response:', newApiMeasurement);
+      
+      // Check if response contains the expected data
+      if (!newApiMeasurement || typeof newApiMeasurement !== 'object') {
+        console.error('Invalid API response:', newApiMeasurement);
+        toast.error("Η μέτρηση προστέθηκε αλλά χρειάζεται ανανέωση σελίδας");
+        
+        // Reload measurements from server
+        setTimeout(() => {
+          loadMeasurements();
+        }, 1000);
+        
+        setShowAddDialog(false);
+        return;
+      }
+      
+      // Convert to component format and add to state
+      const convertedMeasurement: Measurement = {
+        id: newApiMeasurement.id ? newApiMeasurement.id.toString() : Date.now().toString(),
+        date: newApiMeasurement.date ? bodyMeasurementService.parseDateFromAPI(newApiMeasurement.date) : newMeasurement.date || new Date(),
+        weight: newApiMeasurement.weight || newMeasurement.weight || "",
+        height: newApiMeasurement.height || newMeasurement.height || "",
+        waist: newApiMeasurement.waist || newMeasurement.waist || "",
+        hips: newApiMeasurement.hips || newMeasurement.hips || "",
+        chest: newApiMeasurement.chest || newMeasurement.chest || "",
+        arm: newApiMeasurement.arm || newMeasurement.arm || "",
+        thigh: newApiMeasurement.thigh || newMeasurement.thigh || "",
+        bodyFat: newApiMeasurement.bodyFat || newMeasurement.bodyFat || "",
+        notes: newApiMeasurement.notes || newMeasurement.notes || "",
+        bmi: newApiMeasurement.bmi || ""
+      };
+
+      // Add to beginning of array (API returns in descending order)
+      setMeasurements([convertedMeasurement, ...measurements]);
+      
+      // Reset form
+      setNewMeasurement({
+        date: new Date(),
+        weight: "",
+        height: "",
+        waist: "",
+        hips: "",
+        chest: "",
+        arm: "",
+        thigh: "",
+        bodyFat: "",
+        notes: "",
+      });
+      
+      setShowAddDialog(false);
+      toast.success("Η μέτρηση προστέθηκε επιτυχώς!");
+    } catch (error: any) {
+      console.error('Error adding measurement:', error);
+      
+      // Handle validation errors from backend
+      if (error.validationErrors) {
+        Object.values(error.validationErrors).flat().forEach((msg: any) => {
+          toast.error(msg);
+        });
+      } else {
+        toast.error(error.message || "Αποτυχία προσθήκης μέτρησης");
+      }
+    }
   };
 
-  const handleEditMeasurement = () => {
+  const handleEditMeasurement = async () => {
     if (!editingMeasurement) return;
     
-    setMeasurements(measurements.map(m => 
-      m.id === editingMeasurement.id ? editingMeasurement : m
-    ));
-    setEditingMeasurement(null);
-    setShowEditDialog(false);
-    toast.success("Η μέτρηση ενημερώθηκε επιτυχώς!");
+    try {
+      const measurementData: CreateMeasurementRequest = {
+        date: bodyMeasurementService.formatDateForAPI(editingMeasurement.date),
+        weight: editingMeasurement.weight || undefined,
+        height: editingMeasurement.height || undefined,
+        waist: editingMeasurement.waist || undefined,
+        hips: editingMeasurement.hips || undefined,
+        chest: editingMeasurement.chest || undefined,
+        arm: editingMeasurement.arm || undefined,
+        thigh: editingMeasurement.thigh || undefined,
+        bodyFat: editingMeasurement.bodyFat || undefined,
+        notes: editingMeasurement.notes || undefined,
+      };
+
+      const errors = bodyMeasurementService.validateMeasurement(measurementData);
+      if (errors.length > 0) {
+        errors.forEach(error => toast.error(error));
+        return;
+      }
+
+      const updatedApiMeasurement = await bodyMeasurementService.updateMeasurement(
+        parseInt(editingMeasurement.id), 
+        measurementData
+      );
+      
+      console.log('📊 Updated measurement response:', updatedApiMeasurement);
+      
+      // Convert to component format and update state
+      const convertedMeasurement: Measurement = {
+        id: updatedApiMeasurement.id ? updatedApiMeasurement.id.toString() : editingMeasurement.id,
+        date: bodyMeasurementService.parseDateFromAPI(updatedApiMeasurement.date),
+        weight: updatedApiMeasurement.weight || "",
+        height: updatedApiMeasurement.height || "",
+        waist: updatedApiMeasurement.waist || "",
+        hips: updatedApiMeasurement.hips || "",
+        chest: updatedApiMeasurement.chest || "",
+        arm: updatedApiMeasurement.arm || "",
+        thigh: updatedApiMeasurement.thigh || "",
+        bodyFat: updatedApiMeasurement.bodyFat || "",
+        notes: updatedApiMeasurement.notes || "",
+        bmi: updatedApiMeasurement.bmi || ""
+      };
+
+      setMeasurements(measurements.map(m => 
+        m.id === editingMeasurement.id ? convertedMeasurement : m
+      ));
+      
+      setEditingMeasurement(null);
+      setShowEditDialog(false);
+      toast.success("Η μέτρηση ενημερώθηκε επιτυχώς!");
+    } catch (error: any) {
+      console.error('Error updating measurement:', error);
+      
+      // Handle validation errors from backend
+      if (error.validationErrors) {
+        Object.values(error.validationErrors).flat().forEach((msg: any) => {
+          toast.error(msg);
+        });
+      } else {
+        toast.error(error.message || "Αποτυχία ενημέρωσης μέτρησης");
+      }
+    }
   };
 
-  const handleDeleteMeasurement = (id: string) => {
-    setMeasurements(measurements.filter(m => m.id !== id));
-    toast.success("Η μέτρηση διαγράφηκε επιτυχώς!");
+  const handleDeleteMeasurement = async (id: string) => {
+    try {
+      await bodyMeasurementService.deleteMeasurement(parseInt(id));
+      setMeasurements(measurements.filter(m => m.id !== id));
+      toast.success("Η μέτρηση διαγράφηκε επιτυχώς!");
+    } catch (error: any) {
+      console.error('Error deleting measurement:', error);
+      toast.error(error.message || "Αποτυχία διαγραφής μέτρησης");
+    }
   };
 
   const getChartData = (field: keyof Measurement) => {
-    return measurements
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
+    // API returns data in descending order, so we reverse for chronological order in charts
+    return [...measurements]
+      .reverse()
+      .filter(m => {
+        // Filter out entries with invalid dates or empty field values
+        return m[field] && m[field] !== "" && 
+               m.date instanceof Date && !isNaN(m.date.getTime());
+      })
       .map(m => ({
         date: format(m.date, 'dd/MM'),
         value: parseFloat(m[field] as string) || 0
@@ -343,6 +332,7 @@ const ProgressPage = () => {
 
   const chartFields = [
     { key: 'weight' as keyof Measurement, label: 'Βάρος (kg)' },
+    { key: 'bmi' as keyof Measurement, label: 'ΔΜΣ' },
     { key: 'waist' as keyof Measurement, label: 'Μέση (cm)' },
     { key: 'hips' as keyof Measurement, label: 'Γοφοί (cm)' },
     { key: 'chest' as keyof Measurement, label: 'Στήθος (cm)' },
@@ -370,194 +360,7 @@ const ProgressPage = () => {
           </TabsList>
           
           <TabsContent value="photos" className="mt-6">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
-              <h2 className="text-2xl font-bold">Φωτογραφίες Προόδου</h2>
-              
-              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowPhotoTips(!showPhotoTips)}
-                  title="Συμβουλές Φωτογραφίας"
-                >
-                  <Info className="h-4 w-4" />
-                </Button>
-                
-                <Select value={photoSortOrder} onValueChange={(value) => {
-                  if (value === "empty") {
-                    setShowPhotosEmptyState(true);
-                  } else {
-                    setShowPhotosEmptyState(false);
-                    setPhotoSortOrder(value as "newest" | "oldest");
-                  }
-                }}>
-                  <SelectTrigger className="w-[140px] sm:w-[180px]">
-                    <SelectValue placeholder="Σειρά ταξινόμησης" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Νεότερες Πρώτα</SelectItem>
-                    <SelectItem value="oldest">Παλαιότερες Πρώτα</SelectItem>
-                    <SelectItem value="empty">Εμφάνιση Άδειας Κατάστασης</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Button onClick={handleUploadPhoto} className="whitespace-nowrap">
-                  <Camera className="h-4 w-4 mr-2" />
-                  Προσθήκη Φωτογραφίας
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleFilesSelected}
-                />
-              </div>
-            </div>
-
-            {hasPhotos ? (
-              <div className="space-y-8">
-                {Object.entries(groupedPhotos).map(([monthYear, photos]) => (
-                  <div key={monthYear}>
-                    <h3 className="text-lg font-semibold mb-4 text-muted-foreground">{monthYear}</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {photos.map((photo) => (
-                        <Card 
-                          key={photo.id} 
-                          className="overflow-hidden cursor-pointer hover:border-primary transition-colors"
-                          onClick={() => handlePhotoClick(photo)}
-                        >
-                          <div className="aspect-square relative">
-                            <img 
-                              src={photo.imageUrl} 
-                              alt={`Πρόοδος ${photo.date}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <CardContent className="p-3">
-                            <p className="text-xs text-muted-foreground mb-1">{photo.date}</p>
-                            {photo.caption && (
-                              <p className="text-xs line-clamp-2">{photo.caption}</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="bg-muted/40 rounded-full p-6 mb-4">
-                  <Camera className="h-12 w-12 text-muted-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Δεν υπάρχουν φωτογραφίες προόδου</h3>
-                <p className="text-muted-foreground max-w-md mb-6">
-                  Αρχίστε να καταγράφετε την πρόοδό σας με φωτογραφίες. Είναι ο καλύτερος τρόπος να παρακολουθήσετε τις αλλαγές στο σώμα σας.
-                </p>
-                <Button onClick={handleUploadPhoto}>
-                  <Camera className="h-4 w-4 mr-2" />
-                  Προσθήκη Πρώτης Φωτογραφίας
-                </Button>
-              </div>
-            )}
-
-            {/* Tips Dialog */}
-            {showPhotoTips && (
-              <Dialog open={showPhotoTips} onOpenChange={setShowPhotoTips}>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Συμβουλές για Φωτογραφίες Προόδου</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">📸 Συνέπεια στη Λήψη</h4>
-                      <p className="text-sm text-muted-foreground">Τραβήξτε φωτογραφίες την ίδια ώρα της ημέρας, κατά προτίμηση το πρωί πριν φάτε.</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">💡 Φωτισμός</h4>
-                      <p className="text-sm text-muted-foreground">Χρησιμοποιήστε φυσικό φως κοντά σε παράθυρο ή σταθερό τεχνητό φωτισμό.</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">🏃‍♂️ Πόζες</h4>
-                      <p className="text-sm text-muted-foreground">Μπροστινή, πλάγια και πίσω όψη με φυσικό στάσιμο και χαλαρούς ώμους.</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">👕 Ρουχισμός</h4>
-                      <p className="text-sm text-muted-foreground">Φοράτε πάντα τα ίδια ή παρόμοια ρούχα για καλύτερη σύγκριση.</p>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={() => setShowPhotoTips(false)}>Κατάλαβα</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-
-            {/* Full Screen Photo Dialog */}
-            {selectedPhoto && (
-              <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-                <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                  <div className="relative">
-                    <img 
-                      src={selectedPhoto.imageUrl} 
-                      alt={`Πρόοδος ${selectedPhoto.date}`}
-                      className="w-full h-auto max-h-[80vh] object-contain"
-                    />
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      <Button 
-                        size="icon" 
-                        variant="secondary"
-                        onClick={() => handleDeletePhoto(selectedPhoto.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="icon" 
-                        variant="secondary"
-                        onClick={() => setSelectedPhoto(null)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    
-                    {/* Navigation arrows */}
-                    {currentPhotoIndex > 0 && (
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2"
-                        onClick={handlePreviousPhoto}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                    )}
-                    
-                    {currentPhotoIndex < flatPhotos.length - 1 && (
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2"
-                        onClick={handleNextPhoto}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-muted-foreground">{selectedPhoto.date}</p>
-                      <Badge variant="outline">{currentPhotoIndex + 1} από {flatPhotos.length}</Badge>
-                    </div>
-                    {selectedPhoto.caption && (
-                      <p className="text-sm">{selectedPhoto.caption}</p>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
+            <ProgressPhotosTab />
           </TabsContent>
           
           <TabsContent value="measurements" className="mt-6">
@@ -569,7 +372,14 @@ const ProgressPage = () => {
               </Button>
             </div>
 
-            {measurements.length > 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Φόρτωση μετρήσεων...</p>
+                </div>
+              </div>
+            ) : measurements.length > 0 ? (
               <>
                 {/* Charts Section */}
                 <div className="mb-8">
@@ -631,10 +441,12 @@ const ProgressPage = () => {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <CardTitle className="text-lg">
-                                    Μέτρηση {format(measurement.date, 'dd/MM/yyyy')}
+                                    Μέτρηση {measurement.date instanceof Date && !isNaN(measurement.date.getTime()) 
+                                      ? format(measurement.date, 'dd/MM/yyyy')
+                                      : 'Άγνωστη ημερομηνία'}
                                   </CardTitle>
                                   <p className="text-sm text-muted-foreground">
-                                    Βάρος: {measurement.weight}kg | Μέση: {measurement.waist}cm | Λίπος: {measurement.bodyFat}%
+                                    Βάρος: {measurement.weight}kg | ΔΜΣ: {measurement.bmi} | Μέση: {measurement.waist}cm | Λίπος: {measurement.bodyFat}%
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -675,6 +487,12 @@ const ProgressPage = () => {
                                   <Label className="text-xs font-medium text-muted-foreground">Ύψος</Label>
                                   <p className="font-medium">{measurement.height} cm</p>
                                 </div>
+                                {measurement.bmi && (
+                                  <div>
+                                    <Label className="text-xs font-medium text-muted-foreground">ΔΜΣ</Label>
+                                    <p className="font-medium">{measurement.bmi}</p>
+                                  </div>
+                                )}
                                 <div>
                                   <Label className="text-xs font-medium text-muted-foreground">Γοφοί</Label>
                                   <p className="font-medium">{measurement.hips} cm</p>

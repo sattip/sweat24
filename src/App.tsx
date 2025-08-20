@@ -18,7 +18,6 @@ import ProfilePage from "./pages/ProfilePage";
 import BookingsPage from "./pages/BookingsPage";
 import WorkoutHistoryPage from "./pages/WorkoutHistoryPage";
 import WorkoutDetailsPage from "./pages/WorkoutDetailsPage";
-import ProgressPhotosPage from "./pages/ProgressPhotosPage";
 import BodyMeasurementsPage from "./pages/BodyMeasurementsPage";
 import ProgressPage from "./pages/ProgressPage";
 import RewardsPage from "./pages/RewardsPage";
