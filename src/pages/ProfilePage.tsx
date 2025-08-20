@@ -102,9 +102,7 @@ const ProfilePage = () => {
     if (!gender) return "Δεν έχει οριστεί";
     const genderMap: { [key: string]: string } = {
       male: "Άνδρας",
-      female: "Γυναίκα", 
-      other: "Άλλο",
-      prefer_not_to_say: "Προτιμώ να μη το πω"
+      female: "Γυναίκα"
     };
     return genderMap[gender] || "Δεν έχει οριστεί";
   };
@@ -319,8 +317,6 @@ const ProfilePage = () => {
                       <SelectContent>
                         <SelectItem value="male">Άνδρας</SelectItem>
                         <SelectItem value="female">Γυναίκα</SelectItem>
-                        <SelectItem value="other">Άλλο</SelectItem>
-                        <SelectItem value="prefer_not_to_say">Προτιμώ να μη το πω</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
