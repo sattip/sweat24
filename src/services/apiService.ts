@@ -713,7 +713,7 @@ export const notificationService = {
       }
 
       const response = await fetch(buildApiUrl(`/notifications/${id}/read`), {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -739,7 +739,7 @@ export const notificationService = {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(buildApiUrl('/notifications/mark-all-read'), {
+      const response = await fetch(buildApiUrl('/notifications/read-all'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

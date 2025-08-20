@@ -42,16 +42,17 @@ interface ServiceData {
   slug: string;
 }
 
+// Generate unique ID compatible with all browsers
+const generateId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
+
 const AppointmentRequestPage = () => {
   const { serviceId } = useParams<{ serviceId: string }>();
   const navigate = useNavigate();
   
   const [service, setService] = useState<ServiceData | null>(null);
   const [serviceLoading, setServiceLoading] = useState(true);
-  const [selectedTrainer, setSelectedTrainer] = useState<string>("");
-  const [trainers, setTrainers] = useState<Array<{id: string, name: string, specialty?: string}>>([]);
   const [dateTimePreferences, setDateTimePreferences] = useState<DateTimePreference[]>([
-    { id: crypto.randomUUID(), date: undefined, timeFrom: "", timeTo: "" }
+    { id: generateId(), date: undefined, timeFrom: "", timeTo: "" }
   ]);
   const [notes, setNotes] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -95,8 +96,6 @@ const AppointmentRequestPage = () => {
         
         if (matchedService) {
           setService(matchedService);
-          // Fetch trainers for this service
-          fetchTrainers(matchedService.slug);
         } else {
           toast.error("Η υπηρεσία δεν βρέθηκε");
           navigate('/services');
@@ -113,28 +112,6 @@ const AppointmentRequestPage = () => {
     fetchServiceData();
   }, [serviceId, navigate]);
 
-  // Fetch trainers for specific service type
-  const fetchTrainers = async (serviceType: string) => {
-    try {
-      const response = await fetch(buildApiUrl(`/booking-requests/instructors?service_type=${serviceType}`), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setTrainers(Array.isArray(data) ? data : []);
-      } else {
-        console.log('Failed to fetch trainers, using empty array');
-        setTrainers([]);
-      }
-    } catch (error) {
-      console.error('Error fetching trainers:', error);
-      setTrainers([]);
-    }
-  };
 
   // Auto-populate user data for logged in users
   useEffect(() => {
@@ -156,7 +133,7 @@ const AppointmentRequestPage = () => {
     if (dateTimePreferences.length < 5) {
       setDateTimePreferences(prev => [
         ...prev,
-        { id: crypto.randomUUID(), date: undefined, timeFrom: "", timeTo: "" }
+        { id: generateId(), date: undefined, timeFrom: "", timeTo: "" }
       ]);
     }
   };
@@ -264,7 +241,6 @@ const AppointmentRequestPage = () => {
       // Prepare booking request data according to API specification
       const bookingRequestData = {
         service_type: service.slug, // Use the slug from database
-        instructor_id: selectedTrainer || null,
         client_name: clientName,
         client_email: clientEmail,
         client_phone: clientPhone,
@@ -413,42 +389,6 @@ const AppointmentRequestPage = () => {
             </CardContent>
           </Card>
 
-          {/* Trainer Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Επιλογή Προτιμώμενου Γυμναστή (Προαιρετικό)
-              </CardTitle>
-              <CardDescription>
-                Επιλέξτε έναν γυμναστή ή αφήστε κενό για οποιονδήποτε διαθέσιμο γυμναστή
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                {trainers.map((trainer) => (
-                  <div 
-                    key={trainer.id} 
-                    className={cn(
-                      "border rounded-lg p-4 cursor-pointer transition-colors",
-                      selectedTrainer === trainer.id ? "border-primary bg-primary/5" : "hover:bg-accent/50"
-                    )}
-                    onClick={() => setSelectedTrainer(selectedTrainer === trainer.id ? "" : trainer.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <User className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{trainer.name}</h3>
-                        <p className="text-sm text-muted-foreground">{trainer.specialty}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
           
           {/* Date and Time Preferences */}
           <Card>
@@ -593,7 +533,7 @@ const AppointmentRequestPage = () => {
             <CardHeader>
               <CardTitle>Επιπλέον Σημειώσεις</CardTitle>
               <CardDescription>
-                Οποιοδήποτε ειδικό αίτημα ή πληροφορία για τον γυμναστή σας (προαιρετικό)
+                Οποιοδήποτε ειδικό αίτημα ή πρόσθετες πληροφορίες (προαιρετικό)
               </CardDescription>
             </CardHeader>
             <CardContent>

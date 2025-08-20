@@ -43,9 +43,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   const formatGender = (gender: string) => {
     const genderMap: { [key: string]: string } = {
       male: "Άνδρας",
-      female: "Γυναίκα", 
-      other: "Άλλο",
-      prefer_not_to_say: "Προτιμώ να μη το πω"
+      female: "Γυναίκα"
     };
     return genderMap[gender] || "Δεν έχει οριστεί";
   };

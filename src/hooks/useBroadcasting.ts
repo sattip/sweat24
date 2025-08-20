@@ -40,8 +40,8 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
     log('Showing notification toast:', notification);
     
     const isPositive = ['order_ready', 'booking_request_status', 'new_event'].includes(notification.type);
-    const duration = notification.priority === 'high' ? 8000 : 
-                     notification.priority === 'medium' ? 6000 : 4000;
+    const duration = notification.priority === 'high' ? 3000 : 
+                     notification.priority === 'medium' ? 2500 : 2000;
 
     if (isPositive && !notification.message.includes('απορρίφθηκε') && !notification.message.includes('Απορρίφθηκε')) {
       toast.success(notification.title, {
@@ -54,7 +54,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
       if (isLastSession) {
         toast.warning(notification.title, {
           description: notification.message,
-          duration: 10000, // Longer for critical warnings
+          duration: 4000, // Shorter duration for critical warnings
         });
       } else {
         toast.info(notification.title, {
@@ -145,7 +145,36 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
     }
 
     try {
-      log('Setting up Laravel Reverb channels...');
+      log('Setting up Pusher channels...');
+      
+      // DEBUG: Log user and token info
+      const token = localStorage.getItem('auth_token');
+      console.log('🔧 useBroadcasting setup:');
+      console.log('- User ID:', user.id);
+      console.log('- Token (first 20 chars):', token?.substring(0, 20) + '...');
+      
+      // DEBUG: Test auth endpoint
+      if (token) {
+        fetch('https://sweat93laravel.obs.com.gr/api/v1/broadcasting/auth', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `channel_name=private-user.${user.id}&socket_id=test`
+        })
+        .then(response => {
+          console.log('🔐 Broadcasting auth test status:', response.status);
+          return response.text();
+        })
+        .then(data => {
+          console.log('🔐 Broadcasting auth response:', data);
+        })
+        .catch(err => {
+          console.error('🔐 Broadcasting auth test failed:', err);
+        });
+      }
       
       // Clean up any existing channels
       channelsRef.current.forEach(channel => {
@@ -258,7 +287,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
       channelsRef.current.push(bookingChannel);
 
       isConnectedRef.current = true;
-      log('✅ Laravel Reverb channels established');
+      log('✅ Pusher channels established');
 
     } catch (error) {
       log('❌ Channel setup failed:', error);

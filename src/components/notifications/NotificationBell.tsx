@@ -64,21 +64,20 @@ export const NotificationBell: React.FC = () => {
       const unread = data.filter((n: Notification) => !n.is_read && !n.read_at).length;
       setUnreadCount(unread);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
       // Don't show error toast for polling - just log
     } finally {
       setLoading(false);
     }
   };
 
-  const handleMarkAsRead = async (notificationId: number) => {
+  const handleMarkAsRead = async (recipientId: number) => {
     try {
-      await notificationService.markAsRead(notificationId);
+      await notificationService.markAsRead(recipientId);
       
       // Update local state
       setNotifications(prev => 
         prev.map(n => 
-          n.id === notificationId 
+          n.id === recipientId 
             ? { ...n, is_read: true, read_at: new Date().toISOString() }
             : n
         )
@@ -88,7 +87,6 @@ export const NotificationBell: React.FC = () => {
       setUnreadCount(prev => Math.max(0, prev - 1));
       
     } catch (error) {
-      console.error('Error marking notification as read:', error);
       toast.error('Σφάλμα κατά την ενημέρωση ειδοποίησης');
     }
   };
@@ -106,7 +104,6 @@ export const NotificationBell: React.FC = () => {
       toast.success('Όλες οι ειδοποιήσεις σημειώθηκαν ως αναγνωσμένες');
       
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
       toast.error('Σφάλμα κατά την ενημέρωση ειδοποιήσεων');
     }
   };
@@ -186,7 +183,7 @@ export const NotificationBell: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <Card className="absolute right-0 top-full mt-2 w-80 max-w-sm z-50 shadow-lg border">
+        <Card className="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto top-20 sm:top-full sm:mt-2 w-auto sm:w-80 max-w-sm z-50 shadow-lg border">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold">
@@ -223,7 +220,7 @@ export const NotificationBell: React.FC = () => {
           <Separator />
           
           <CardContent className="p-0">
-            <ScrollArea className="h-80">
+            <ScrollArea className="h-[50vh] sm:h-80 max-h-96">
               {loading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>

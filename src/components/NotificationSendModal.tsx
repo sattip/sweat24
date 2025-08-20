@@ -286,7 +286,6 @@ export function NotificationSendModal({
                 <SelectItem value="all">Όλα</SelectItem>
                 <SelectItem value="male">Άνδρας</SelectItem>
                 <SelectItem value="female">Γυναίκα</SelectItem>
-                <SelectItem value="other">Άλλο</SelectItem>
               </SelectContent>
             </Select>
           </div>

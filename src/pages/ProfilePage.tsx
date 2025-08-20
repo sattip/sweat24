@@ -70,11 +70,6 @@ const ProfilePage = () => {
     loadPackages();
   }, []);
   
-  // Debug logging - αφαίρεσε μετά τη διόρθωση
-  console.log('User data from AuthContext:', user);
-  console.log('User avatar:', (user as any)?.avatar);
-  console.log('Date of birth:', (user as any)?.date_of_birth);
-  console.log('Gender:', (user as any)?.gender);
 
   // Helper functions
   const isNameLocked = () => {
@@ -107,9 +102,7 @@ const ProfilePage = () => {
     if (!gender) return "Δεν έχει οριστεί";
     const genderMap: { [key: string]: string } = {
       male: "Άνδρας",
-      female: "Γυναίκα", 
-      other: "Άλλο",
-      prefer_not_to_say: "Προτιμώ να μη το πω"
+      female: "Γυναίκα"
     };
     return genderMap[gender] || "Δεν έχει οριστεί";
   };
@@ -143,7 +136,6 @@ const ProfilePage = () => {
       setAvatarUploading(true);
       const result = await userService.uploadAvatar(file);
       
-      console.log('Avatar upload response:', result);
       
       // No need to update localStorage manually, refreshUser will handle it
       
@@ -325,8 +317,6 @@ const ProfilePage = () => {
                       <SelectContent>
                         <SelectItem value="male">Άνδρας</SelectItem>
                         <SelectItem value="female">Γυναίκα</SelectItem>
-                        <SelectItem value="other">Άλλο</SelectItem>
-                        <SelectItem value="prefer_not_to_say">Προτιμώ να μη το πω</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
