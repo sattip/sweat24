@@ -183,7 +183,7 @@ export const NotificationBell: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <Card className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-20 sm:top-full sm:mt-2 w-auto sm:w-80 max-w-sm z-50 shadow-lg border">
+        <Card className="fixed right-4 left-4 sm:absolute sm:left-auto sm:right-0 top-20 sm:top-full sm:mt-2 max-w-sm sm:w-80 z-50 shadow-lg border">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold">
