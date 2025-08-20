@@ -70,13 +70,6 @@ export const API_ENDPOINTS = {
 
 // Helper function to build full URL
 export const buildApiUrl = (endpoint: string): string => {
-  // Fix for Windows WSL localhost issue
-  // If we're on 127.0.0.1, replace it with localhost for API calls
-  const currentHost = window.location.hostname;
-  if (currentHost === '127.0.0.1') {
-    const apiUrl = API_URL.replace('127.0.0.1', 'localhost');
-    return `${apiUrl}${endpoint}`;
-  }
   return `${API_URL}${endpoint}`;
 };
 
