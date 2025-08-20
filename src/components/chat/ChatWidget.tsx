@@ -63,18 +63,19 @@ export function ChatWidget() {
         // Subscribe to chat channel
         channelRef.current = pusherService.subscribeToChat(user.id, (data: any) => {
           // Handle incoming message
-          // Backend sends: { message: {...} }
-          // data.message contains: id, content, sender_id, sender_type, created_at, sender (object)
+          // Backend sends: { message: {...}, unread_count: number, conversation_id: number }
           if (data.message) {
             const incomingMessage = data.message;
+            const unreadCount = data.unread_count || 0;
+            const conversationId = data.conversation_id;
             
             setConversation(prev => {
               // If no conversation exists yet, create one with the new message
               if (!prev) {
                 return {
-                  id: incomingMessage.conversation_id || 0,
+                  id: conversationId || 0,
                   messages: [incomingMessage],
-                  unread_count: incomingMessage.sender_type === 'admin' ? 1 : 0
+                  unread_count: unreadCount
                 };
               }
               
@@ -84,16 +85,19 @@ export function ChatWidget() {
                 return prev;
               }
               
-              // Increase unread count only if chat is closed and message is from admin
-              const shouldIncreaseUnread = !isOpenRef.current && incomingMessage.sender_type === 'admin';
-              const newUnreadCount = shouldIncreaseUnread ? prev.unread_count + 1 : prev.unread_count;
-              
+              // Use the unread_count from backend - don't calculate locally
               return {
                 ...prev,
+                id: conversationId || prev.id,
                 messages: [...prev.messages, incomingMessage],
-                unread_count: newUnreadCount
+                unread_count: unreadCount
               };
             });
+            
+            // If chat is open, mark messages as read
+            if (isOpenRef.current && unreadCount > 0) {
+              markMessagesAsRead();
+            }
             
             // Show toast notification for new admin messages when chat is closed
             if (!isOpenRef.current && incomingMessage.sender_type === 'admin') {
@@ -127,9 +131,23 @@ export function ChatWidget() {
     if (!conversation || conversation.id <= 0) return;
     
     try {
-      await chatService.markAsRead(conversation.id);
-      // Update local state to reset unread count
-      setConversation(prev => prev ? { ...prev, unread_count: 0 } : null);
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+      
+      // Use the backend's specified endpoint for marking messages as read
+      const response = await fetch(`https://sweat93laravel.obs.com.gr/api/v1/chat/conversations/${conversation.id}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        // Update local state to reset unread count
+        setConversation(prev => prev ? { ...prev, unread_count: 0 } : null);
+      }
     } catch (error) {
       console.error('Error marking messages as read:', error);
     }

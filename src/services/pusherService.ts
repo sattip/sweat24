@@ -62,8 +62,8 @@ class PusherService {
     // Subscribe to private channel (Echo automatically adds 'private-' prefix)
     const channel = this.echo.private(channelName);
 
-    // Listen for ChatMessageReceived event (without App\Events prefix)
-    channel.listen('.ChatMessageReceived', (payload: any) => {
+    // Listen for ChatMessageReceived event
+    channel.listen('ChatMessageReceived', (payload: any) => {
       onMessageReceived(payload);
     });
 
