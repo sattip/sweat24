@@ -186,7 +186,7 @@ export const NotificationBell: React.FC = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <Card className="absolute right-0 top-full mt-2 w-80 max-w-sm z-50 shadow-lg border">
+        <Card className="fixed sm:absolute inset-x-4 sm:inset-x-auto sm:right-0 top-20 sm:top-full sm:mt-2 w-auto sm:w-80 max-w-sm z-50 shadow-lg border">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold">
@@ -223,7 +223,7 @@ export const NotificationBell: React.FC = () => {
           <Separator />
           
           <CardContent className="p-0">
-            <ScrollArea className="h-80">
+            <ScrollArea className="h-[50vh] sm:h-80 max-h-96">
               {loading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
