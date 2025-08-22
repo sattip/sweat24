@@ -38,7 +38,7 @@ const getLocalPackageStatus = (remainingSessions: number | undefined, lastVisit:
 };
 
 const DashboardPage = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { 
     isAdminTester, 
     getSimulatedUser, 
@@ -72,6 +72,11 @@ const DashboardPage = () => {
     try {
       setLoading(true);
       
+      // Refresh user data first to ensure we have latest session info
+      if (!isAdminTester && refreshUser) {
+        await refreshUser();
+      }
+      
       // Fetch all data in parallel
       const [statsData, bookingsData, activePkgs] = await Promise.all([
         dashboardService.getStats(),
@@ -82,6 +87,17 @@ const DashboardPage = () => {
       setStats(statsData);
       const bookingsArray = Array.isArray(bookingsData) ? bookingsData : (Array.isArray(bookingsData?.data) ? bookingsData.data : []);
       setRecentBookings(bookingsArray.slice(0, 5));
+      
+      // Debug session data discrepancy
+      console.log('🔍 Dashboard Debug - Active packages from profile API:', activePkgs);
+      console.log('🔍 Dashboard Debug - User from auth context:', displayUser);
+      if (Array.isArray(activePkgs)) {
+        const activePackage = activePkgs.find(p => p?.status === 'active' && p?.is_frozen === false);
+        console.log('🔍 Dashboard Debug - Found active package:', activePackage);
+        console.log('🔍 Dashboard Debug - Remaining sessions:', activePackage?.remaining_sessions);
+        console.log('🔍 Dashboard Debug - Total sessions:', activePackage?.total_sessions);
+      }
+      
       setActivePackages(Array.isArray(activePkgs) ? activePkgs : []);
     } catch (error) {
       toast.error("Σφάλμα κατά τη φόρτωση δεδομένων");
