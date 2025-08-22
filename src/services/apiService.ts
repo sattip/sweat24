@@ -1053,6 +1053,48 @@ export const referralsService = {
 
 // User Profile Service
 export const userService = {
+  async getCurrentUser() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
+    try {
+      const response = await fetch(buildApiUrl('/auth/me'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Clear auth if token is invalid
+          localStorage.removeItem('sweat24_user');
+          localStorage.removeItem('user');
+          localStorage.removeItem('auth_token');
+          throw new Error('Authentication required');
+        }
+        throw new Error('Failed to fetch user');
+      }
+      
+      const data = await response.json();
+      if (data.success && data.user) {
+        // Update local storage with fresh user data
+        localStorage.setItem('sweat24_user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify(data.user));
+        return data.user;
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      throw error;
+    }
+  },
+  
   async updateProfile(userId: number, data: any) {
     try {
       const token = localStorage.getItem('sweat24_token');

@@ -5,7 +5,7 @@ import { echo } from '@/lib/echo';
 
 interface BroadcastNotification {
   id: string;
-  type: 'order_ready' | 'sessions_ending' | 'chat_message' | 'new_event' | 'booking_request_status';
+  type: 'order_ready' | 'warning' | 'chat_message' | 'new_event' | 'booking_request_status';
   title: string;
   message: string;
   data?: any;
@@ -49,7 +49,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
         duration,
         action: getNotificationAction(notification)
       });
-    } else if (notification.type === 'sessions_ending') {
+    } else if (notification.type === 'warning') {
       const isLastSession = notification.message.includes('Τελευταία');
       if (isLastSession) {
         toast.warning(notification.title, {
@@ -205,7 +205,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
             : `Έχετε μόνο ${e.remainingSessions} συνεδρίες ακόμα!`;
           
           handleBroadcastEvent({
-            type: 'sessions_ending',
+            type: 'warning',
             title: e.isLastSession ? 'Τελευταία Συνεδρία! ⚠️' : 'Προτελευταία Συνεδρία! 📅',
             message: message,
             data: { remainingSessions: e.remainingSessions, isLastSession: e.isLastSession },

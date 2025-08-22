@@ -9,7 +9,7 @@ import {
 } from './NotificationComponents';
 
 interface NotificationState {
-  type: 'order_ready' | 'sessions_ending' | 'chat_message' | 'new_event' | 'booking_request_status' | null;
+  type: 'order_ready' | 'warning' | 'chat_message' | 'new_event' | 'booking_request_status' | null;
   open: boolean;
   data?: any;
 }
@@ -28,7 +28,7 @@ export const NotificationManager: React.FC = () => {
       console.log('📢 Real notification from backend:', broadcastNotification);
       
       // Show detailed modal for certain high-priority notifications
-      const detailedTypes = ['order_ready', 'sessions_ending', 'new_event', 'booking_request_status'];
+      const detailedTypes = ['order_ready', 'warning', 'new_event', 'booking_request_status'];
       
       if (detailedTypes.includes(broadcastNotification.type) && broadcastNotification.priority === 'high') {
         setNotification({
@@ -62,7 +62,7 @@ export const NotificationManager: React.FC = () => {
 
       {/* Sessions Ending Notification */}
       <SessionsEndingNotification
-        open={notification.type === 'sessions_ending' && notification.open}
+        open={notification.type === 'warning' && notification.open}
         onOpenChange={closeNotification}
         data={notification.data}
       />
