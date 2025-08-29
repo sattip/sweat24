@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1024">
+    <title>SWEAT Feature Graphic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        .feature-graphic {
+            width: 1024px;
+            height: 500px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .accent-bar {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: #ef4444;
+        }
+        
+        .accent-bar.top {
+            top: 0;
+        }
+        
+        .accent-bar.bottom {
+            bottom: 0;
+        }
+        
+        .diagonal-accent {
+            position: absolute;
+            width: 200%;
+            height: 300px;
+            background: linear-gradient(45deg, transparent 40%, rgba(239, 68, 68, 0.1) 50%, transparent 60%);
+            transform: rotate(-15deg);
+            top: -100px;
+            left: -50%;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+        
+        .logo-container {
+            margin-bottom: 30px;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+        }
+        
+        .logo {
+            height: 180px;
+            width: auto;
+        }
+        
+        .tagline {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .features {
+            font-size: 24px;
+            color: #ef4444;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .separator {
+            display: inline-block;
+            margin: 0 15px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .geometric-shape {
+            position: absolute;
+            border: 2px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .shape1 {
+            width: 100px;
+            height: 100px;
+            top: 50px;
+            right: 100px;
+            transform: rotate(45deg);
+        }
+        
+        .shape2 {
+            width: 80px;
+            height: 80px;
+            bottom: 60px;
+            left: 80px;
+            transform: rotate(30deg);
+            border-radius: 50%;
+        }
+        
+        .shape3 {
+            width: 60px;
+            height: 120px;
+            top: 100px;
+            left: 120px;
+            transform: rotate(-20deg);
+        }
+        
+        .highlight {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="feature-graphic">
+        <div class="accent-bar top"></div>
+        <div class="accent-bar bottom"></div>
+        <div class="diagonal-accent"></div>
+        
+        <div class="geometric-shape shape1"></div>
+        <div class="geometric-shape shape2"></div>
+        <div class="geometric-shape shape3"></div>
+        
+        <div class="content">
+            <div class="logo-container">
+                <img src="public/logo-dark.png" alt="SWEAT" class="logo">
+            </div>
+            <h1 class="tagline">Your Fitness Journey <span class="highlight">Starts Here</span></h1>
+            <p class="features">
+                Personal Training
+                <span class="separator">•</span>
+                Group Classes
+                <span class="separator">•</span>
+                Nutrition
+            </p>
+        </div>
+    </div>
+</body>
+</html>

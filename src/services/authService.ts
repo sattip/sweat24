@@ -180,8 +180,8 @@ class AuthService {
   }
 
   async getCurrentUser(): Promise<User | null> {
-    // First try to get user from localStorage (our new system)
-    const userFromStorage = this.getStoredUser();
+    // First try to get user from storage (our new system)
+    const userFromStorage = await this.getStoredUser();
     if (userFromStorage) {
       return userFromStorage;
     }

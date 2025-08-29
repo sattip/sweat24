@@ -48,6 +48,90 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
     return genderMap[gender] || "Δεν έχει οριστεί";
   };
 
+  const renderMedicalConditions = () => {
+    // Check if there are any medical conditions
+    const hasAnyConditions = data.medicalConditions && 
+      Object.values(data.medicalConditions).some((condition) => 
+        condition.hasCondition === true
+      );
+
+    if (hasAnyConditions) {
+      // Get conditions that are marked as true
+      const activeConditions = Object.entries(data.medicalConditions)
+        .filter(([_, condition]) => condition.hasCondition === true)
+        .map(([name, condition]) => ({
+          name,
+          yearOfOnset: condition.yearOfOnset,
+          details: condition.details
+        }));
+
+      return (
+        <div className="space-y-2">
+          <Badge variant="secondary">Υπάρχουν παθήσεις</Badge>
+          <div className="space-y-2">
+            {activeConditions.map((condition, index) => (
+              <div key={index} className="border rounded-md p-2 bg-muted/30">
+                <Badge variant="outline" className="text-xs mb-1">
+                  {condition.name}
+                </Badge>
+                {condition.yearOfOnset && (
+                  <p className="text-xs text-muted-foreground">
+                    Έτος εμφάνισης: {condition.yearOfOnset}
+                  </p>
+                )}
+                {condition.details && (
+                  <p className="text-xs text-muted-foreground">
+                    Λεπτομέρειες: {condition.details}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <Badge variant="default" className="bg-green-500">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Χωρίς ιατρικές παθήσεις
+        </Badge>
+      );
+    }
+  };
+
+  const renderMedications = () => {
+    const hasAnyMedications = data.prescribedMedications && 
+      data.prescribedMedications.some(med => med.medication && med.medication.trim() !== '');
+    
+    if (hasAnyMedications) {
+      const activeMedications = data.prescribedMedications.filter(med => 
+        med.medication && med.medication.trim() !== ''
+      );
+      
+      return (
+        <div className="space-y-1">
+          {activeMedications.map((medication, index) => (
+            <div key={index} className="text-sm bg-muted/30 p-2 rounded-md">
+              <strong>{medication.medication}</strong>
+              {medication.reason && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Λόγος: {medication.reason}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <Badge variant="default" className="bg-green-500">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Δεν παίρνει φάρμακα
+        </Badge>
+      );
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -121,93 +205,13 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         <CardContent className="space-y-3">
           <div>
             <p className="text-sm text-muted-foreground">Ιατρικές παθήσεις</p>
-            {(() => {
-              // Check if there are any medical conditions
-              const hasAnyConditions = data.medicalConditions && 
-                Object.values(data.medicalConditions).some((condition: any) => 
-                  condition.hasCondition === true
-                );
-
-              if (hasAnyConditions) {
-                // Get conditions that are marked as true
-                const activeConditions = Object.entries(data.medicalConditions)
-                  .filter(([_, condition]: [string, any]) => condition.hasCondition === true)
-                  .map(([name, condition]: [string, any]) => ({
-                    name,
-                    yearOfOnset: condition.yearOfOnset,
-                    details: condition.details
-                  }));
-
-                return (
-                  <div className="space-y-2">
-                    <Badge variant="secondary">Υπάρχουν παθήσεις</Badge>
-                    <div className="space-y-2">
-                      {activeConditions.map((condition, index) => (
-                        <div key={index} className="border rounded-md p-2 bg-muted/30">
-                          <Badge variant="outline" className="text-xs mb-1">
-                            {condition.name}
-                          </Badge>
-                          {condition.yearOfOnset && (
-                            <p className="text-xs text-muted-foreground">
-                              Έτος εμφάνισης: {condition.yearOfOnset}
-                            </p>
-                          )}
-                          {condition.details && (
-                            <p className="text-xs text-muted-foreground">
-                              Λεπτομέρειες: {condition.details}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              } else {
-                return (
-                  <Badge variant="default" className="bg-green-500">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Χωρίς ιατρικές παθήσεις
-                  </Badge>
-                );
-              }
-            })()}
+            {renderMedicalConditions()}
           </div>
 
           {/* Prescribed Medications */}
           <div>
             <p className="text-sm text-muted-foreground">Φάρμακα</p>
-            {(() => {
-              const hasAnyMedications = data.prescribedMedications && 
-                data.prescribedMedications.some(med => med.medication && med.medication.trim() !== '');
-              
-              if (hasAnyMedications) {
-                const activeMedications = data.prescribedMedications.filter(med => 
-                  med.medication && med.medication.trim() !== ''
-                );
-                
-                return (
-                  <div className="space-y-1">
-                    {activeMedications.map((medication, index) => (
-                      <div key={index} className="text-sm bg-muted/30 p-2 rounded-md">
-                        <strong>{medication.medication}</strong>
-                        {medication.reason && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Λόγος: {medication.reason}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                );
-              } else {
-                return (
-                  <Badge variant="default" className="bg-green-500">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Δεν παίρνει φάρμακα
-                  </Badge>
-                );
-              }
-            })()}
+            {renderMedications()}
           </div>
 
           {/* Current Health Problems */}

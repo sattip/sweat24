@@ -17,15 +17,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, Calendar as CalendarIcon, Clock, Info, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import * as API from "@/config/api"; // This seems unused, but let's keep it for now
 import { bookingService } from "@/services/apiService";
 import { buildApiUrl } from "@/config/api";
 import { useToast } from "@/hooks/use-toast";
 
+interface Booking {
+  id: number;
+  date: string;
+  time: string;
+  // Add other booking properties as needed
+}
+
+interface Policy {
+  can_cancel: boolean;
+  can_reschedule: boolean;
+  can_cancel_without_penalty: boolean;
+  penalty_percentage: number;
+  hours_until_class: number;
+  policy: {
+    name: string;
+    description: string;
+    hours_before?: number;
+    reschedule_hours_before?: number;
+    penalty_percentage?: number;
+  };
+}
+
+interface AvailableClass {
+  id: string;
+  date: string;
+  time: string;
+  class_name: string;
+  available_spots: number;
+}
+
 interface CancellationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  booking: any;
+  booking: Booking;
   onSuccess: () => void;
 }
 
@@ -38,10 +67,10 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
   const { toast } = useToast();
   const [action, setAction] = useState<"cancel" | "reschedule" | "cancel_charged">("cancel");
   const [reason, setReason] = useState("");
-  const [policy, setPolicy] = useState<any>(null);
+  const [policy, setPolicy] = useState<Policy | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingPolicy, setCheckingPolicy] = useState(true);
-  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
+  const [availableClasses, setAvailableClasses] = useState<AvailableClass[]>([]);
   const [selectedNewClass, setSelectedNewClass] = useState<string>("");
   const [acceptCharge, setAcceptCharge] = useState(false);
 
@@ -79,11 +108,12 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       
       const data = await response.json();
       setPolicy(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error checking policy:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Σφάλμα",
-        description: `Δεν ήταν δυνατή η ανάκτηση της πολιτικής ακύρωσης. Παρακαλώ δοκιμάστε ξανά. (${error.message})`,
+        description: `Δεν ήταν δυνατή η ανάκτηση της πολιτικής ακύρωσης. Παρακαλώ δοκιμάστε ξανά. (${errorMessage})`,
         variant: "destructive",
       });
       setPolicy(null); // Ensure no stale policy is used
@@ -108,7 +138,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       const bookingDate = new Date(booking.date).toDateString();
       
       // Filter: same day only, not current class, future time, has space
-      const filtered = data.filter((cls: any) => {
+      const filtered = data.filter((cls: AvailableClass & { current_participants: number; max_participants: number; class_id?: string }) => {
         const classDate = new Date(cls.date).toDateString();
         const classDateTime = new Date(cls.date + ' ' + cls.time);
         
@@ -163,7 +193,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || "Σφάλμα κατά την επεξεργασία του αιτήματος");
     } finally {
       setLoading(false);
