@@ -16,7 +16,7 @@ export interface MedicalHistoryPayload {
   emergency_contact: { name: string; phone: string };
   ems_interest: boolean;
   ems_contraindications?: { [key: string]: { has_condition: boolean; year_of_onset?: string | null } };
-  ems_liability_accepted?: boolean;
+  ems_liability_accepted?: boolean; // now required for all users per backend contract
 
   submitted_at: string;
 }
@@ -82,7 +82,7 @@ class MedicalHistoryService {
       },
       ems_interest: signupData.emsInterest || false,
       ems_contraindications: signupData.emsInterest ? transformedEmsContraindications : undefined,
-      ems_liability_accepted: signupData.emsInterest ? signupData.emsLiabilityAccepted || false : undefined,
+      ems_liability_accepted: signupData.emsLiabilityAccepted || false,
 
       submitted_at: new Date().toISOString()
     };

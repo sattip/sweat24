@@ -121,51 +121,163 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         <CardContent className="space-y-3">
           <div>
             <p className="text-sm text-muted-foreground">Ιατρικές παθήσεις</p>
-            {data.hasConditions ? (
-              <div className="space-y-2">
-                <Badge variant="secondary">Υπάρχουν παθήσεις</Badge>
-                {data.conditions.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {data.conditions.map((condition, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {condition}
-                      </Badge>
-                    ))}
+            {(() => {
+              // Check if there are any medical conditions
+              const hasAnyConditions = data.medicalConditions && 
+                Object.values(data.medicalConditions).some((condition: any) => 
+                  condition.hasCondition === true
+                );
+
+              if (hasAnyConditions) {
+                // Get conditions that are marked as true
+                const activeConditions = Object.entries(data.medicalConditions)
+                  .filter(([_, condition]: [string, any]) => condition.hasCondition === true)
+                  .map(([name, condition]: [string, any]) => ({
+                    name,
+                    yearOfOnset: condition.yearOfOnset,
+                    details: condition.details
+                  }));
+
+                return (
+                  <div className="space-y-2">
+                    <Badge variant="secondary">Υπάρχουν παθήσεις</Badge>
+                    <div className="space-y-2">
+                      {activeConditions.map((condition, index) => (
+                        <div key={index} className="border rounded-md p-2 bg-muted/30">
+                          <Badge variant="outline" className="text-xs mb-1">
+                            {condition.name}
+                          </Badge>
+                          {condition.yearOfOnset && (
+                            <p className="text-xs text-muted-foreground">
+                              Έτος εμφάνισης: {condition.yearOfOnset}
+                            </p>
+                          )}
+                          {condition.details && (
+                            <p className="text-xs text-muted-foreground">
+                              Λεπτομέρειες: {condition.details}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
-                {data.otherCondition && (
-                  <p className="text-sm text-muted-foreground">
-                    Άλλο: {data.otherCondition}
-                  </p>
-                )}
-                {data.doctorClearance && (
+                );
+              } else {
+                return (
                   <Badge variant="default" className="bg-green-500">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    Ιατρική έγκριση
+                    Χωρίς ιατρικές παθήσεις
                   </Badge>
+                );
+              }
+            })()}
+          </div>
+
+          {/* Prescribed Medications */}
+          <div>
+            <p className="text-sm text-muted-foreground">Φάρμακα</p>
+            {(() => {
+              const hasAnyMedications = data.prescribedMedications && 
+                data.prescribedMedications.some(med => med.medication && med.medication.trim() !== '');
+              
+              if (hasAnyMedications) {
+                const activeMedications = data.prescribedMedications.filter(med => 
+                  med.medication && med.medication.trim() !== ''
+                );
+                
+                return (
+                  <div className="space-y-1">
+                    {activeMedications.map((medication, index) => (
+                      <div key={index} className="text-sm bg-muted/30 p-2 rounded-md">
+                        <strong>{medication.medication}</strong>
+                        {medication.reason && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Λόγος: {medication.reason}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              } else {
+                return (
+                  <Badge variant="default" className="bg-green-500">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Δεν παίρνει φάρμακα
+                  </Badge>
+                );
+              }
+            })()}
+          </div>
+
+          {/* Current Health Problems */}
+          <div>
+            <p className="text-sm text-muted-foreground">Τρέχοντα προβλήματα υγείας</p>
+            {data.currentHealthProblems?.hasProblems ? (
+              <div className="space-y-1">
+                <Badge variant="secondary">Υπάρχουν προβλήματα</Badge>
+                {data.currentHealthProblems.details && (
+                  <p className="text-sm bg-muted/30 p-2 rounded-md">
+                    {data.currentHealthProblems.details}
+                  </p>
                 )}
               </div>
             ) : (
               <Badge variant="default" className="bg-green-500">
                 <CheckCircle className="h-3 w-3 mr-1" />
-                Χωρίς ιατρικές παθήσεις
+                Δεν υπάρχουν τρέχοντα προβλήματα
               </Badge>
             )}
           </div>
 
-          {data.medications && (
-            <div>
-              <p className="text-sm text-muted-foreground">Φάρμακα</p>
-              <p className="text-sm">{data.medications}</p>
+          {/* Smoking */}
+          <div>
+            <p className="text-sm text-muted-foreground">Κάπνισμα</p>
+            <div className="space-y-1">
+              {data.smoking?.currentlySmoking ? (
+                <Badge variant="destructive">Καπνίζει τώρα</Badge>
+              ) : data.smoking?.everSmoked ? (
+                <Badge variant="secondary">Παλιός καπνιστής</Badge>
+              ) : (
+                <Badge variant="default" className="bg-green-500">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Δεν καπνίζει
+                </Badge>
+              )}
+              {data.smoking?.smokingYears && (
+                <p className="text-xs text-muted-foreground">
+                  Έτη καπνίσματος: {data.smoking.smokingYears}
+                </p>
+              )}
+              {data.smoking?.dailyCigarettes && (
+                <p className="text-xs text-muted-foreground">
+                  Τσιγάρα ημερησίως: {data.smoking.dailyCigarettes}
+                </p>
+              )}
             </div>
-          )}
+          </div>
 
-          {data.injuries && (
-            <div>
-              <p className="text-sm text-muted-foreground">Τραυματισμοί</p>
-              <p className="text-sm">{data.injuries}</p>
-            </div>
-          )}
+          {/* Physical Activity */}
+          <div>
+            <p className="text-sm text-muted-foreground">Φυσική δραστηριότητα</p>
+            {data.physicalActivity && (data.physicalActivity.description || data.physicalActivity.frequency || data.physicalActivity.duration) ? (
+              <div className="text-sm bg-muted/30 p-2 rounded-md">
+                {data.physicalActivity.description && (
+                  <p><strong>Περιγραφή:</strong> {data.physicalActivity.description}</p>
+                )}
+                {data.physicalActivity.frequency && (
+                  <p><strong>Συχνότητα:</strong> {data.physicalActivity.frequency}</p>
+                )}
+                {data.physicalActivity.duration && (
+                  <p><strong>Διάρκεια:</strong> {data.physicalActivity.duration}</p>
+                )}
+              </div>
+            ) : (
+              <Badge variant="secondary">
+                Δεν έχει καταγραφεί δραστηριότητα
+              </Badge>
+            )}
+          </div>
         </CardContent>
       </Card>
 

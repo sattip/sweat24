@@ -59,7 +59,7 @@ const SignupPage: React.FC = () => {
         },
         ems_interest: data.emsInterest || false,
         ems_contraindications: data.emsInterest ? transformedEmsContraindications : undefined,
-        ems_liability_accepted: data.emsInterest ? data.emsLiabilityAccepted || false : undefined,
+        ems_liability_accepted: data.emsLiabilityAccepted || false,
   
         submitted_at: new Date().toISOString()
       };
