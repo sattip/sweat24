@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Calendar, Clock, MapPin, User, BarChart, Loader2, Users, AlertTriangle, Info } from "lucide-react";
 import { classService, bookingService, waitlistService, userService, profileService } from "@/services/apiService";
+
 import { toast } from "sonner";
 
 const ClassDetailsPage = () => {
@@ -16,6 +17,7 @@ const ClassDetailsPage = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [waitlistStatus, setWaitlistStatus] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+
 
   useEffect(() => {
     fetchData();
@@ -28,6 +30,7 @@ const ClassDetailsPage = () => {
       // Fetch class details
       const classData = await classService.getById(classId!);
       setClassDetails(classData);
+      
       
       // Fetch current user
       try {
@@ -50,6 +53,8 @@ const ClassDetailsPage = () => {
       setLoading(false);
     }
   };
+
+
 
   const handleBooking = async () => {
     if (!currentUser) {
@@ -340,10 +345,9 @@ const ClassDetailsPage = () => {
               <div>
                 <h3 className="font-semibold text-blue-800 mb-2">Πολιτική Ακύρωσης & Μετάθεσης</h3>
                 <div className="space-y-1 text-sm text-blue-700">
-                  <p><strong>• Ακύρωση:</strong> Δωρεάν μέχρι 6 ώρες πριν το μάθημα</p>
-                  <p><strong>• Μετάθεση:</strong> Επιτρέπεται μέχρι 3 ώρες πριν (μόνο την ίδια μέρα)</p>
+                  <p>Κάθε μάθημα έχει τη δική του πολιτική ακύρωσης και μετάθεσης.</p>
                   <p className="text-xs text-blue-600 mt-2">
-                    Μετά τις προθεσμίες αυτές δεν επιτρέπονται αλλαγές στην κράτηση.
+                    Οι λεπτομερείς κανόνες θα εμφανιστούν όταν προβείτε σε κράτηση.
                   </p>
                 </div>
               </div>
