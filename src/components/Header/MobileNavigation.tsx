@@ -70,6 +70,23 @@ const MobileNavigation = () => {
         </Link>
         
         <Link 
+          to="/points" 
+          className={cn(
+            "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
+            isActive("/points") 
+              ? "bg-primary text-primary-foreground shadow-sm" 
+              : "hover:bg-muted/50 text-foreground"
+          )}
+        >
+          <div className="flex items-center justify-between w-full">
+            <span>⭐ Οι Πόντοι μου</span>
+            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+              ΝΕΟ
+            </span>
+          </div>
+        </Link>
+        
+        <Link 
           to="/bookings" 
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
@@ -79,6 +96,37 @@ const MobileNavigation = () => {
           )}
         >
           Οι Κρατήσεις μου
+        </Link>
+        
+        <Link 
+          to="/notifications" 
+          className={cn(
+            "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
+            isActive("/notifications") 
+              ? "bg-primary text-primary-foreground shadow-sm" 
+              : "hover:bg-muted/50 text-foreground"
+          )}
+        >
+          <div className="flex items-center justify-between w-full">
+            <span>🔔 Ειδοποιήσεις</span>
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+              ΝΕΟ
+            </span>
+          </div>
+        </Link>
+
+        <Link 
+          to="/questionnaires" 
+          className={cn(
+            "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
+            isActive("/questionnaires") 
+              ? "bg-primary text-primary-foreground shadow-sm" 
+              : "hover:bg-muted/50 text-foreground"
+          )}
+        >
+          <div className="flex items-center justify-between w-full">
+            <span>📋 Ερωτηματολόγια</span>
+          </div>
         </Link>
         
         <Link 

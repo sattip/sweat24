@@ -9,17 +9,28 @@ import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { storeProductService, orderHistoryService } from "@/services/apiService";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import OrderHistoryPage from "./OrderHistoryPage";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const { addItem } = useCart();
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    // TODO: Implement cart functionality
-    console.log("Adding to cart:", product);
-    navigate(`/product/${product.id}`);
+    e.stopPropagation();
+    
+    addItem({
+      id: product.id.toString(),
+      name: product.name,
+      price: Number(product.price),
+      quantity: 1,
+      image: product.image_url || "/logo-light.png",
+      options: {},
+    });
+
+    toast.success(`${product.name} προστέθηκε στο καλάθι σας`);
   };
 
   const discountPercentage = product.original_price 
@@ -30,9 +41,12 @@ const ProductCard = ({ product }) => {
     <Card className="h-full hover:border-primary transition-colors cursor-pointer overflow-hidden" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="aspect-square w-full overflow-hidden bg-muted relative">
         <img 
-          src={product.image_url} 
+          src={product.image_url || "/logo-light.png"} 
           alt={product.name} 
-          className="h-full w-full object-cover transition-all hover:scale-105"
+          className="h-full w-full object-contain transition-all hover:scale-105 p-4"
+          onError={(e) => {
+            e.currentTarget.src = "/logo-light.png";
+          }}
         />
         {discountPercentage > 0 && (
           <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground">

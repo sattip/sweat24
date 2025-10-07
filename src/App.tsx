@@ -42,8 +42,16 @@ import EventsPage from "./pages/EventsPage";
 import EvaluationPage from "./pages/EvaluationPage";
 import { CartProvider } from "./hooks/use-cart";
 import { AuthProvider } from "./contexts/AuthContext";
+import { PointsProvider } from "./contexts/PointsContext";
 import { ChatWidget } from "./components/chat/ChatWidget";
 import { NotificationManager } from "./components/notifications/NotificationManager";
+import PointsDashboard from "./pages/PointsDashboard";
+import RewardsCatalog from "./pages/RewardsCatalog";
+import PointsHistory from "./pages/PointsHistory";
+import HybridFCMNotificationSettings from "./components/notifications/HybridFCMNotificationSettings";
+import { QuestionnairePromptManager } from "./components/questionnaires/QuestionnairePromptManager";
+import QuestionnairesPage from "./pages/QuestionnairesPage";
+import QuestionnaireDetailPage from "./pages/QuestionnaireDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +98,7 @@ const App = () => {
       <TooltipProvider>
       <AuthProvider>
         <CartProvider>
+          <PointsProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -126,6 +135,16 @@ const App = () => {
             {/* New rewards program */}
             <Route path="/rewards" element={<ProtectedRoute><RewardsPage /></ProtectedRoute>} />
             
+            {/* Points system routes */}
+            <Route path="/points" element={<ProtectedRoute><PointsDashboard /></ProtectedRoute>} />
+            <Route path="/points/rewards" element={<ProtectedRoute><RewardsCatalog /></ProtectedRoute>} />
+            <Route path="/points/history" element={<ProtectedRoute><PointsHistory /></ProtectedRoute>} />
+            
+            {/* Notification routes */}
+            <Route path="/notifications" element={<ProtectedRoute><HybridFCMNotificationSettings /></ProtectedRoute>} />
+            <Route path="/questionnaires" element={<ProtectedRoute><QuestionnairesPage /></ProtectedRoute>} />
+            <Route path="/questionnaires/:id" element={<ProtectedRoute><QuestionnaireDetailPage /></ProtectedRoute>} />
+            
             {/* Store routes */}
             <Route path="/store" element={<ProtectedRoute><StorePage /></ProtectedRoute>} />
             <Route path="/product/:productId" element={<ProtectedRoute><ProductDetailsPage /></ProtectedRoute>} />
@@ -151,7 +170,9 @@ const App = () => {
           </Routes>
           <ChatWidget />
           <NotificationManager />
+          <QuestionnairePromptManager />
         </BrowserRouter>
+          </PointsProvider>
         </CartProvider>
       </AuthProvider>
     </TooltipProvider>

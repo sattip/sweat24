@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://sweat93laravel.obs.com.gr';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.sweat93.gr';
 const API_VERSION = '/api/v1';
 
 export const API_URL = `${API_BASE_URL}${API_VERSION}`;
@@ -55,6 +55,10 @@ export const API_ENDPOINTS = {
   // Dashboard
   dashboard: {
     stats: '/dashboard/stats',
+  },
+  // Stores
+  stores: {
+    list: '/stores',
   },
   // Profile
   profile: '/profile',

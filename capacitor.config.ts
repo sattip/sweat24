@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appName: 'sweat93',
   webDir: 'dist',
   server: {
-    allowNavigation: ['sweat93laravel.obs.com.gr'],
+    allowNavigation: ['api.sweat93.gr'],
     cleartext: false
   },
   plugins: {

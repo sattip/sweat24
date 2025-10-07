@@ -21,13 +21,16 @@ import { ChevronLeft } from "lucide-react";
 import Header from "@/components/Header";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePoints } from "@/contexts/PointsContext";
 import * as API from "@/config/api";
 import { toast } from "sonner";
+import { isRewardCartItem } from "@/utils/rewardUtils";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { state: pointsState, actions: pointsActions } = usePoints();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -56,44 +59,104 @@ const CheckoutPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Allow guest checkout - no authentication required
-
     setLoading(true);
 
     try {
-      // Prepare order data
-      const orderData = {
-        user_id: user?.id || 1, // Use logged in user or default to admin user for guest orders
-        customer_name: formData.name,
-        customer_email: formData.email,
-        customer_phone: formData.phone,
-        notes: formData.notes,
-        items: items.map(item => ({
-          product_id: item.id,
-          quantity: item.quantity
-        }))
-      };
-
-      // Submit order
-      const response = await API.apiRequest('/orders', {
-        method: 'POST',
-        body: JSON.stringify(orderData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        clearCart();
-        // Pass order number to confirmation page
-        navigate("/order-confirmation", { 
-          state: { orderNumber: result.order.order_number } 
-        });
-      } else {
-        toast.error(result.message || "Σφάλμα κατά την υποβολή της παραγγελίας");
+      // Separate regular items from reward items
+      const regularItems = items.filter(item => !isRewardCartItem(item));
+      const rewardItems = items.filter(item => isRewardCartItem(item));
+      
+      console.log('🛒 Regular items:', regularItems);
+      console.log('🎁 Reward items:', rewardItems);
+      
+      // Calculate total points needed for rewards
+      const totalPointsNeeded = rewardItems.reduce((sum, item) => {
+        return sum + (parseInt(item.options?.points_cost || '0') * item.quantity);
+      }, 0);
+      
+      console.log('💰 Total points needed:', totalPointsNeeded);
+      console.log('💰 User points balance:', pointsState.balance);
+      
+      // Check if user has enough points for rewards
+      if (rewardItems.length > 0 && totalPointsNeeded > pointsState.balance) {
+        toast.error(`Χρειάζεστε ${totalPointsNeeded} πόντους αλλά έχετε μόνο ${pointsState.balance}`);
+        setLoading(false);
+        return;
       }
+
+      // Process rewards first (redeem points)
+      const rewardResults = [];
+      for (const rewardItem of rewardItems) {
+        try {
+          const rewardId = parseInt(rewardItem.id.replace('reward-', ''));
+          const result = await pointsActions.redeemReward(rewardId);
+          if (result) {
+            rewardResults.push({
+              ...result,
+              quantity: rewardItem.quantity
+            });
+            console.log('🎉 Reward redeemed:', result);
+          }
+        } catch (error) {
+          console.error('❌ Error redeeming reward:', error);
+          toast.error(`Σφάλμα εξαργύρωσης: ${rewardItem.name}`);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // If there are regular items, create a regular order
+      let orderResult = null;
+      if (regularItems.length > 0) {
+        const orderData = {
+          user_id: user?.id || 1,
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone: formData.phone,
+          notes: formData.notes,
+          items: regularItems.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity
+          }))
+        };
+
+        const response = await API.apiRequest('/orders', {
+          method: 'POST',
+          body: JSON.stringify(orderData),
+        });
+
+        orderResult = await response.json();
+        
+        if (!orderResult.success) {
+          toast.error(orderResult.message || "Σφάλμα κατά την υποβολή της παραγγελίας");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Success! Clear cart and navigate
+      clearCart();
+      
+      // Show success message
+      if (rewardResults.length > 0 && regularItems.length > 0) {
+        toast.success(`Παραγγελία και ${rewardResults.length} ανταμοιβές ολοκληρώθηκαν επιτυχώς!`);
+      } else if (rewardResults.length > 0) {
+        toast.success(`${rewardResults.length} ανταμοιβές εξαργυρώθηκαν επιτυχώς!`);
+      } else {
+        toast.success("Παραγγελία ολοκληρώθηκε επιτυχώς!");
+      }
+      
+      // Navigate to confirmation page
+      navigate("/order-confirmation", { 
+        state: { 
+          orderNumber: orderResult?.order?.order_number || 'REWARDS-' + Date.now(),
+          rewardResults: rewardResults
+        } 
+      });
+      
     } catch (error) {
-      console.error("Order submission error:", error);
-      toast.error("Σφάλμα κατά την υποβολή της παραγγελίας");
+      console.error("Checkout error:", error);
+      toast.error("Σφάλμα κατά την ολοκλήρωση της παραγγελίας");
     } finally {
       setLoading(false);
     }
@@ -215,13 +278,15 @@ const CheckoutPage = () => {
                 <CardTitle>Σύνοψη Παραγγελίας</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {items.map((item, index) => (
+                {/* Regular Items */}
+                {items.filter(item => !isRewardCartItem(item)).map((item, index) => (
                   <div key={index} className="flex justify-between text-sm">
                     <span>
                       {item.quantity} x {item.name}
                       {item.options && Object.values(item.options).length > 0 && (
                         <span className="block text-xs text-muted-foreground">
                           {Object.entries(item.options)
+                            .filter(([key]) => key !== 'type')
                             .map(([key, value]) => `${value}`)
                             .join(', ')}
                         </span>
@@ -231,12 +296,46 @@ const CheckoutPage = () => {
                   </div>
                 ))}
                 
+                {/* Reward Items */}
+                {items.filter(item => isRewardCartItem(item)).length > 0 && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm text-purple-700">🎁 Ανταμοιβές με Πόντους</h4>
+                      {items.filter(item => isRewardCartItem(item)).map((item, index) => (
+                        <div key={`reward-${index}`} className="flex justify-between text-sm">
+                          <span>
+                            {item.quantity} x {item.name}
+                            <span className="block text-xs text-purple-600">
+                              {item.options?.points_cost} πόντοι • {item.options?.reward_value}
+                            </span>
+                          </span>
+                          <span className="text-green-600 font-medium">
+                            {item.price < 0 ? `€${item.price.toFixed(2)}` : `${item.options?.points_cost} ⭐`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+                
                 <Separator />
                 
                 <div className="flex justify-between">
                   <span>Υποσύνολο</span>
                   <span>€{subtotal.toFixed(2)}</span>
                 </div>
+                
+                {/* Points Summary */}
+                {items.filter(item => isRewardCartItem(item)).length > 0 && (
+                  <div className="flex justify-between text-purple-600">
+                    <span>Πόντοι προς εξαργύρωση</span>
+                    <span>
+                      {items.filter(item => isRewardCartItem(item))
+                        .reduce((sum, item) => sum + parseInt(item.options?.points_cost || '0'), 0)} ⭐
+                    </span>
+                  </div>
+                )}
                 
                 <div className="flex justify-between text-muted-foreground">
                   <span>Φόροι</span>
@@ -249,6 +348,13 @@ const CheckoutPage = () => {
                   <span>Σύνολο</span>
                   <span>€{subtotal.toFixed(2)}</span>
                 </div>
+                
+                {/* Points Balance Check */}
+                {items.filter(item => isRewardCartItem(item)).length > 0 && (
+                  <div className="text-xs text-muted-foreground text-center">
+                    Υπόλοιπο πόντων: {pointsState.balance} ⭐
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

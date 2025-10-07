@@ -58,8 +58,7 @@ class AuthService {
     // Clear any existing auth data before login
     this.clearAuth();
     
-    // Use direct fetch to the correct backend domain
-    const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/login', {
+    const response = await fetch('https://api.sweat93.gr/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -99,7 +98,7 @@ class AuthService {
 
   async register(data: RegisterData): Promise<AuthResponse> {
     // Always use register-with-consent endpoint for all registrations
-    const endpoint = 'https://sweat93laravel.obs.com.gr/api/v1/auth/register-with-consent';
+    const endpoint = 'https://api.sweat93.gr/api/v1/auth/register-with-consent';
     
     // Build the request payload
     const payload = {

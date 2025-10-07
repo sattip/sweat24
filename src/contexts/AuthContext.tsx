@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService, User } from '@/services/authService';
+import { notificationService } from '@/services/notificationService';
 import { pusherService } from '@/services/pusherService';
 import { PendingUserModal } from '@/components/modals/PendingUserModal';
 import { toast } from 'sonner';
@@ -66,6 +67,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // ΠΑΝΤΑ φέρνουμε φρέσκα στοιχεία από backend στο background
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
+        
+    // NOTIFICATIONS TEMPORARILY DISABLED DUE TO EMULATOR CRASHES
+    // Will be enabled after production deployment
+    console.log('ℹ️ Notification service disabled for emulator stability');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -98,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Make actual API call to get fresh user data from backend
-      const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/me', {
+      const response = await fetch('https://api.sweat93.gr/api/v1/auth/me', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -129,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (needsPackageDerive) {
           try {
-            const detailsResp = await fetch(`https://sweat93laravel.obs.com.gr/api/v1/users/${updatedUser.id}`, {
+            const detailsResp = await fetch(`https://api.sweat93.gr/api/v1/users/${updatedUser.id}`, {
               method: 'GET',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -205,7 +210,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         document_type: requestPayload.document_type
       });
 
-      const response = await fetch('https://sweat93laravel.obs.com.gr/api/v1/signatures', {
+      const response = await fetch('https://api.sweat93.gr/api/v1/signatures', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

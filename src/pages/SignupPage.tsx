@@ -84,7 +84,15 @@ const SignupPage: React.FC = () => {
           referralCodeOrName: data.referralCodeOrName,
           referrerId: data.referrerId,
           socialPlatform: data.socialPlatform
-        }
+        },
+        
+        // Backend expected fields for referral system
+        found_us_via: data.howFoundUs,
+        referral_source: data.howFoundUs === 'referral' ? 'friend' : data.howFoundUs,
+        ...(data.referralCodeOrName && {
+          referral_phone: data.referralCodeOrName,
+          referrer_id: data.referrerId
+        })
       };
 
       // Add parent consent data if user is minor - keep camelCase as backend expects

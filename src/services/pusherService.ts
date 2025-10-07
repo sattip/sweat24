@@ -45,7 +45,7 @@ class PusherService {
           authorize: (socketId: string, callback: any) => {
             console.log('🔐 Custom authorizer called for channel:', channel.name, 'socketId:', socketId);
             
-            fetch('https://sweat93laravel.obs.com.gr/api/v1/broadcasting/auth', {
+            fetch('https://api.sweat93.gr/api/v1/broadcasting/auth', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -137,7 +137,7 @@ class PusherService {
     // DEBUG: Test auth endpoint manually
     const token = localStorage.getItem('auth_token');
     if (token) {
-      fetch('https://sweat93laravel.obs.com.gr/api/v1/broadcasting/auth', {
+      fetch('https://api.sweat93.gr/api/v1/broadcasting/auth', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
