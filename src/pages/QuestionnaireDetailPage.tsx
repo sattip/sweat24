@@ -77,7 +77,7 @@ const QuestionRenderer = ({
       );
 
     case "rating":
-    case "rating_1_10": {
+    case "rating_10": {
       const maxRating = question.type === "rating" ? 5 : 10;
       const currentValue = Number(value) || 0;
 
@@ -223,7 +223,7 @@ const QuestionnaireDetailPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!questionnaire) return;
+    if (!questionnaire || !user?.id) return;
 
     const missing = validateResponses();
     if (missing.length > 0) {
@@ -241,6 +241,7 @@ const QuestionnaireDetailPage: React.FC = () => {
 
       await questionnaireService.submitResponse({
         questionnaire_id: questionnaire.id,
+        user_id: user.id, // REQUIRED as per API docs
         trigger_type: primaryTrigger,
         session_id: `session_${Date.now()}`,
         responses: Object.entries(responses).map(([index, answer]) => ({

@@ -127,11 +127,29 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
         yearOfOnset: hasCondition ? data.emsContraindications[condition]?.yearOfOnset || "" : undefined,
       }
     };
-    
+
     if (!hasCondition) {
       delete updatedConditions[condition];
     }
-    
+
+    // Check if the selected condition is an absolute contraindication
+    if (hasCondition) {
+      const isAbsolute = EMS_ABSOLUTE_CONTRAINDICATIONS.includes(condition);
+      const isRelative = EMS_RELATIVE_CONTRAINDICATIONS.includes(condition);
+
+      if (isAbsolute) {
+        toast.error("Αντένδειξη EMS - Απόλυτη", {
+          description: `Η κατάσταση "${condition}" αποτελεί απόλυτη αντένδειξη για EMS. Δεν μπορείτε να κάνετε προπόνηση με EMS. Παρακαλώ επικοινωνήστε με το γυμναστήριο για εναλλακτικές επιλογές.`,
+          duration: 8000,
+        });
+      } else if (isRelative) {
+        toast.warning("Αντένδειξη EMS - Σχετική", {
+          description: `Η κατάσταση "${condition}" απαιτεί ιατρική συμβουλή πριν την προπόνηση με EMS. Παρακαλώ επικοινωνήστε με το γιατρό σας για έγκριση.`,
+          duration: 8000,
+        });
+      }
+    }
+
     updateData({ emsContraindications: updatedConditions });
   };
 
@@ -224,13 +242,11 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
       return;
     }
 
-
-
     // Validate year fields for medical conditions
     const conditionsWithYears = Object.values(data.medicalConditions).filter(
       condition => condition.hasCondition && condition.yearOfOnset
     );
-    
+
     for (const condition of conditionsWithYears) {
       if (condition.yearOfOnset && (isNaN(Number(condition.yearOfOnset)) || Number(condition.yearOfOnset) < 1900 || Number(condition.yearOfOnset) > new Date().getFullYear())) {
         toast.error("Παρακαλώ εισάγετε έγκυρο έτος έναρξης για τις ιατρικές καταστάσεις");
@@ -238,13 +254,47 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
       }
     }
 
-    // If EMS interest is selected, validate EMS contraindications years
+    // If EMS interest is selected, validate EMS contraindications
     if (data.emsInterest) {
+      // Check for absolute contraindications - these prevent EMS training
+      const hasAbsoluteContraindication = Object.entries(data.emsContraindications).some(
+        ([condition, value]) => value.hasCondition && EMS_ABSOLUTE_CONTRAINDICATIONS.includes(condition)
+      );
+
+      if (hasAbsoluteContraindication) {
+        const absoluteConditions = Object.entries(data.emsContraindications)
+          .filter(([condition, value]) => value.hasCondition && EMS_ABSOLUTE_CONTRAINDICATIONS.includes(condition))
+          .map(([condition]) => condition)
+          .join(", ");
+
+        toast.error("Απόλυτη Αντένδειξη για EMS", {
+          description: `Δεν μπορείτε να συνεχίσετε με EMS λόγω: ${absoluteConditions}. Παρακαλώ αποεπιλέξτε το ενδιαφέρον για EMS ή επικοινωνήστε με το γυμναστήριο.`,
+          duration: 10000,
+        });
+        return;
+      }
+
+      // Check for relative contraindications - require medical approval
+      const hasRelativeContraindication = Object.entries(data.emsContraindications).some(
+        ([condition, value]) => value.hasCondition && EMS_RELATIVE_CONTRAINDICATIONS.includes(condition)
+      );
+
+      if (hasRelativeContraindication) {
+        const relativeConditions = Object.entries(data.emsContraindications)
+          .filter(([condition, value]) => value.hasCondition && EMS_RELATIVE_CONTRAINDICATIONS.includes(condition))
+          .map(([condition]) => condition)
+          .join(", ");
+
+        toast.warning("Σχετική Αντένδειξη για EMS", {
+          description: `Απαιτείται ιατρική έγκριση για: ${relativeConditions}. Παρακαλώ προσκομίστε ιατρική βεβαίωση πριν ξεκινήσετε προπόνηση με EMS.`,
+          duration: 10000,
+        });
+      }
 
       const emsConditionsWithYears = Object.values(data.emsContraindications).filter(
         condition => condition.hasCondition && condition.yearOfOnset
       );
-      
+
       for (const condition of emsConditionsWithYears) {
         if (condition.yearOfOnset && (isNaN(Number(condition.yearOfOnset)) || Number(condition.yearOfOnset) < 1900 || Number(condition.yearOfOnset) > new Date().getFullYear())) {
           toast.error("Παρακαλώ εισάγετε έγκυρο έτος έναρξης για τις αντενδείξεις EMS");

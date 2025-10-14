@@ -101,10 +101,17 @@ const SignupPage: React.FC = () => {
       }
 
       // Register user with basic data and medical history together
-      await authService.register(registerData);
-      
+      const response = await authService.register(registerData);
+
       toast.success("Επιτυχής εγγραφή! Το ιατρικό ιστορικό σας αποθηκεύτηκε.");
-      
+
+      // Trigger after_registration questionnaire
+      if (response?.user?.id) {
+        import('@/utils/triggerQuestionnaire').then(({ triggerQuestionnaireAfterEvent }) => {
+          triggerQuestionnaireAfterEvent(response.user.id, 'after_registration', navigate);
+        });
+      }
+
       // Redirect to success page
       navigate("/signup-success");
     } catch (error) {

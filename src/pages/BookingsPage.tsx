@@ -17,6 +17,7 @@ import GymRulesModal from "@/components/modals/GymRulesModal";
 import PackageAlert from "@/components/notifications/PackageAlert";
 import { CancellationModal } from "@/components/modals/CancellationModal";
 import RateWorkoutDialog from "@/components/workouts/RateWorkoutDialog";
+import MuscleGroupDialog from "@/components/workouts/MuscleGroupDialog";
 import { bookingService } from "@/services/apiService";
 import { toast } from "sonner";
 
@@ -29,6 +30,8 @@ interface Workout {
   instructor: string;
   type: string;
   attended: boolean | number;
+  muscle_groups?: string[] | null;
+  muscle_groups_recorded?: boolean;
 }
 
 // Function to group workouts by month
@@ -63,7 +66,9 @@ const BookingsPage = () => {
   
   // History state
   const [filter, setFilter] = useState("all");
+  const [attendanceFilter, setAttendanceFilter] = useState("all");
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [muscleGroupDialogOpen, setMuscleGroupDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -232,11 +237,23 @@ const BookingsPage = () => {
   const hasWorkouts = workouts.length > 0;
   
   const filteredWorkouts = workouts.filter(workout => {
-    if (filter === "all") return true;
-    if (filter === "yoga") return workout.type.toLowerCase().includes("yoga");
-    if (filter === "hiit") return workout.type.toLowerCase().includes("hiit");
-    if (filter === "strength") return workout.type.toLowerCase().includes("strength");
-    return true;
+    // Type filter
+    let typeMatch = true;
+    if (filter !== "all") {
+      if (filter === "yoga") typeMatch = workout.type.toLowerCase().includes("yoga");
+      else if (filter === "hiit") typeMatch = workout.type.toLowerCase().includes("hiit");
+      else if (filter === "strength") typeMatch = workout.type.toLowerCase().includes("strength");
+    }
+
+    // Attendance filter
+    let attendanceMatch = true;
+    if (attendanceFilter === "attended") {
+      attendanceMatch = workout.attended === true || workout.attended === 1;
+    } else if (attendanceFilter === "missed") {
+      attendanceMatch = workout.attended === false || workout.attended === 0;
+    }
+
+    return typeMatch && attendanceMatch;
   });
   
   const groupedWorkouts = groupWorkoutsByMonth(filteredWorkouts);
@@ -246,6 +263,11 @@ const BookingsPage = () => {
   const handleOpenRatingDialog = (workout: Workout) => {
     setSelectedWorkout(workout);
     setRatingDialogOpen(true);
+  };
+
+  const handleOpenMuscleGroupDialog = (workout: Workout) => {
+    setSelectedWorkout(workout);
+    setMuscleGroupDialogOpen(true);
   };
 
   if (loading && historyLoading) {
@@ -370,20 +392,33 @@ const BookingsPage = () => {
           </TabsContent>
           
           <TabsContent value="history" className="mt-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Ιστορικό Προπονήσεων</h2>
-              
-              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Φίλτρο τύπου" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Όλες οι Προπονήσεις</SelectItem>
-                  <SelectItem value="yoga">Yoga</SelectItem>
-                  <SelectItem value="hiit">HIIT</SelectItem>
-                  <SelectItem value="strength">Strength</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-3">Ιστορικό Προπονήσεων</h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Select value={filter} onValueChange={setFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Φίλτρο τύπου" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Όλοι οι Τύποι</SelectItem>
+                    <SelectItem value="yoga">Yoga</SelectItem>
+                    <SelectItem value="hiit">HIIT</SelectItem>
+                    <SelectItem value="strength">Strength</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={attendanceFilter} onValueChange={setAttendanceFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Φίλτρο παρουσίας" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Όλες οι Προπονήσεις</SelectItem>
+                    <SelectItem value="attended">Με Παρουσία</SelectItem>
+                    <SelectItem value="missed">Με Απουσία</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             {historyLoading ? (
@@ -419,52 +454,68 @@ const BookingsPage = () => {
                         {workouts.map((workout) => (
                           <Card key={workout.id} className="transition-colors">
                             <CardContent className="p-4">
-                              <div className="flex justify-between items-center">
-                                <div className="space-y-1">
-                                  <div className="flex items-center">
-                                    <span className="bg-muted text-xs font-medium rounded-full px-2 py-1 mr-2">
+                              <div className="space-y-3">
+                                {/* Row 1: Title, Category, Attendance Icon */}
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <span className="bg-muted text-xs font-medium rounded-full px-2 py-1">
                                       {workout.type}
                                     </span>
-                                    <h4 className="font-medium text-base">{workout.class_name}</h4>
-                                    {(workout.attended === true || workout.attended === 1) ? (
-                                      <CheckCircle className="h-5 w-5 text-green-600 ml-2" />
-                                    ) : (
-                                      <XCircle className="h-5 w-5 text-red-600 ml-2" />
-                                    )}
+                                    <h4 className="font-semibold text-base">{workout.class_name}</h4>
                                   </div>
-                                  
-                                  <div className="flex flex-wrap items-center text-sm text-muted-foreground gap-y-1">
-                                    <div className="flex items-center mr-4">
-                                      <Calendar className="h-4 w-4 mr-1 text-primary" />
-                                      {new Date(workout.date).toLocaleDateString('el-GR')}
-                                    </div>
-                                    <div className="flex items-center mr-4">
-                                      <Clock className="h-4 w-4 mr-1 text-primary" />
-                                      {workout.time}
-                                    </div>
-                                    <div className="flex items-center mr-4">
-                                      <User className="h-4 w-4 mr-1 text-primary" />
-                                      {workout.instructor}
-                                    </div>
+                                  {(workout.attended === true || workout.attended === 1) ? (
+                                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
+                                  ) : (
+                                    <XCircle className="h-6 w-6 text-red-600 flex-shrink-0" />
+                                  )}
+                                </div>
+
+                                {/* Row 2: Date and Time */}
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>{new Date(workout.date).toLocaleDateString('el-GR')}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-4 w-4" />
+                                    <span>{workout.time}</span>
                                   </div>
                                 </div>
-                                
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-sm font-medium ${
-                                    (workout.attended === true || workout.attended === 1) ? 'text-green-600' : 'text-red-600'
-                                  }`}>
-                                    {(workout.attended === true || workout.attended === 1) ? 'Παρουσία' : 'Απουσία'}
-                                  </span>
-                                  {(workout.attended === true || workout.attended === 1) && (
-                                    <Button 
-                                      size="sm" 
+
+                                {/* Row 3: Instructor */}
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                  <User className="h-4 w-4" />
+                                  <span>{workout.instructor}</span>
+                                </div>
+
+                                {/* Row 4: Action Buttons */}
+                                {(workout.attended === true || workout.attended === 1) && (
+                                  <div className="flex flex-wrap gap-2 pt-2 border-t">
+                                    <Button
+                                      size="sm"
+                                      variant={workout.muscle_groups_recorded ? "default" : "outline"}
+                                      onClick={() => handleOpenMuscleGroupDialog(workout)}
+                                      className="flex-1 sm:flex-none"
+                                    >
+                                      {workout.muscle_groups_recorded ? (
+                                        <>
+                                          <CheckCircle className="h-4 w-4 mr-1" />
+                                          Μυϊκές ομάδες
+                                        </>
+                                      ) : (
+                                        "Καταγραφή μυϊκών"
+                                      )}
+                                    </Button>
+                                    <Button
+                                      size="sm"
                                       variant="outline"
                                       onClick={() => handleOpenRatingDialog(workout)}
+                                      className="flex-1 sm:flex-none"
                                     >
                                       Αξιολόγηση
                                     </Button>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
@@ -511,10 +562,23 @@ const BookingsPage = () => {
       )}
       
       {/* Rating Dialog */}
-      <RateWorkoutDialog 
-        open={ratingDialogOpen} 
-        onOpenChange={setRatingDialogOpen} 
+      <RateWorkoutDialog
+        open={ratingDialogOpen}
+        onOpenChange={setRatingDialogOpen}
         workout={selectedWorkout ? { id: selectedWorkout.id, name: selectedWorkout.class_name, date: selectedWorkout.date } : null}
+      />
+
+      {/* Muscle Group Dialog */}
+      <MuscleGroupDialog
+        open={muscleGroupDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMuscleGroupDialogOpen(false);
+            // Refresh workout history when dialog closes
+            fetchWorkoutHistory();
+          }
+        }}
+        workout={selectedWorkout ? { id: selectedWorkout.id, class_name: selectedWorkout.class_name, date: selectedWorkout.date } : null}
       />
     </div>
   );

@@ -1,7 +1,8 @@
 import { buildApiUrl } from "@/config/api";
 
 export interface QuestionnaireOption {
-  type: "text" | "multiple_choice" | "rating" | "rating_1_10" | "number" | "yes_no";
+  // Question types as per API docs
+  type: "text" | "multiple_choice" | "rating" | "rating_10" | "number" | "yes_no";
   question: string;
   description?: string;
   required: boolean;
@@ -18,6 +19,7 @@ export interface Questionnaire {
 
 export interface QuestionnaireResponsePayload {
   questionnaire_id: number;
+  user_id: number; // REQUIRED as per API docs
   trigger_type: string;
   responses: Array<{
     question_index: number;
@@ -58,25 +60,32 @@ const buildUrl = (path: string, params?: Record<string, string | number | undefi
 };
 
 export const questionnaireService = {
-  async getActiveQuestionnaires(userId?: number, triggerType = "daily"): Promise<Questionnaire[]> {
-    const url = buildUrl("/questionnaires/active", {
-      user_id: userId,
-      trigger_type: triggerType,
-    });
-
-    const headers = buildAuthHeaders();
-    if (!headers) {
-      console.warn("Skipping questionnaire fetch – user not authenticated");
+  async getActiveQuestionnaires(userId: number, triggerType = "daily"): Promise<Questionnaire[]> {
+    // API is now public - user_id is REQUIRED
+    if (!userId) {
+      console.warn("user_id is required for questionnaires API");
       return [];
     }
 
-    const sendRequest = async (targetUrl: string) => {
-      const response = await fetch(targetUrl, {
-        headers,
+    const url = buildUrl("/questionnaires/active", {
+      user_id: userId,
+    });
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.status === 404) {
-        return null;
+        // Only log 404 once to avoid spam
+        if (!sessionStorage.getItem('questionnaire_404_logged')) {
+          console.warn(`📋 Questionnaire endpoint returned 404. Check backend route: ${url}`);
+          sessionStorage.setItem('questionnaire_404_logged', 'true');
+        }
+        return [];
       }
 
       if (!response.ok) {
@@ -86,31 +95,34 @@ export const questionnaireService = {
 
       const data = await response.json().catch(() => ({}));
       const payload = Array.isArray(data) ? data : data?.data;
-      return Array.isArray(payload) ? payload : [];
-    };
+      const questionnaires = Array.isArray(payload) ? payload : [];
 
-    const firstAttempt = await sendRequest(url);
-    if (firstAttempt === null) {
-      const fallbackUrl = buildUrl("/questionnaire/active", {
-        user_id: userId,
-        trigger_type: triggerType,
-      });
-      const fallbackResult = await sendRequest(fallbackUrl);
-      return Array.isArray(fallbackResult) ? fallbackResult : [];
+      // Filter by trigger type on frontend if needed
+      if (triggerType && questionnaires.length > 0) {
+        return questionnaires.filter((q: Questionnaire) =>
+          q.triggers?.includes(triggerType)
+        );
+      }
+
+      return questionnaires;
+    } catch (error) {
+      console.error("Error fetching questionnaires:", error);
+      return [];
     }
-
-    return firstAttempt;
   },
 
   async submitResponse(payload: QuestionnaireResponsePayload) {
-    const headers = buildAuthHeaders();
-    if (!headers) {
-      throw new Error("Not authenticated");
+    // API is now public - user_id is REQUIRED in payload
+    if (!payload.user_id) {
+      throw new Error("user_id is required for questionnaire submission");
     }
 
     const response = await fetch(buildApiUrl("/questionnaire-responses"), {
       method: "POST",
-      headers,
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(payload),
     });
 
@@ -122,29 +134,37 @@ export const questionnaireService = {
     return response.json();
   },
 
-  async getUserResponses(triggerType?: string) {
+  async getUserResponses(userId: number) {
+    // API is now public - user_id is REQUIRED
+    if (!userId) {
+      console.warn("user_id is required for questionnaire responses API");
+      return [];
+    }
+
     const url = buildUrl("/questionnaire-responses/user", {
-      trigger_type: triggerType,
+      user_id: userId,
     });
 
-    const headers = buildAuthHeaders();
-    if (!headers) {
-      console.warn("Skipping questionnaire responses fetch – user not authenticated");
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Failed to fetch questionnaire responses", response.status);
+        return [];
+      }
+
+      const data = await response.json().catch(() => ({}));
+      const payload = Array.isArray(data) ? data : data?.data;
+      return Array.isArray(payload) ? payload : [];
+    } catch (error) {
+      console.error("Error fetching questionnaire responses:", error);
       return [];
     }
-
-    const response = await fetch(url, {
-      headers,
-    });
-
-    if (!response.ok) {
-      console.error("Failed to fetch questionnaire responses", response.status);
-      return [];
-    }
-
-    const data = await response.json().catch(() => ({}));
-    const payload = Array.isArray(data) ? data : data?.data;
-    return Array.isArray(payload) ? payload : [];
   },
 };
 

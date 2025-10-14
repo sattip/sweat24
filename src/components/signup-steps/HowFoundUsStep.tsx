@@ -19,17 +19,13 @@ interface HowFoundUsStepProps {
 
 const HOW_FOUND_OPTIONS = [
   { value: 'referral', label: 'Σύσταση' },
-  { value: 'social', label: 'Social' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'facebook', label: 'Facebook' },
   { value: 'google', label: 'Google' },
   { value: 'site', label: 'Site' },
   { value: 'passing_by', label: 'Πέρναγα απέξω' },
   { value: 'know_owner', label: 'Γνωρίζω τον ιδιοκτήτη' }
-];
-
-const SOCIAL_PLATFORMS = [
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'facebook', label: 'Facebook' }
 ];
 
 export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({ 
@@ -140,11 +136,6 @@ export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({
       return;
     }
 
-    if (data.howFoundUs === 'social' && !data.socialPlatform) {
-      toast.error('Παρακαλώ επιλέξτε την πλατφόρμα social media');
-      return;
-    }
-
     onNext();
   };
 
@@ -164,12 +155,11 @@ export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({
           <RadioGroup
             value={data.howFoundUs || ''}
             onValueChange={(value) => {
-              updateData({ 
+              updateData({
                 howFoundUs: value,
                 // Reset conditional fields
                 referralCodeOrName: '',
-                referralValidated: false,
-                socialPlatform: undefined
+                referralValidated: false
               });
               setReferralInput('');
               setValidationStatus('idle');
@@ -232,28 +222,6 @@ export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({
                   </p>
                 )}
               </div>
-            </div>
-          )}
-
-          {/* Social Platform Selection */}
-          {data.howFoundUs === 'social' && (
-            <div className="mt-4 space-y-4 pl-6 border-l-2 border-blue-200">
-              <Label>Επιλέξτε πλατφόρμα *</Label>
-              <RadioGroup
-                value={data.socialPlatform || ''}
-                onValueChange={(value) => updateData({ socialPlatform: value })}
-              >
-                <div className="space-y-2">
-                  {SOCIAL_PLATFORMS.map((platform) => (
-                    <div key={platform.value} className="flex items-center space-x-2">
-                      <RadioGroupItem value={platform.value} id={`social-${platform.value}`} />
-                      <Label htmlFor={`social-${platform.value}`} className="cursor-pointer">
-                        {platform.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
             </div>
           )}
         </CardContent>

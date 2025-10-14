@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/olive/Desktop/**)",
+      "Bash(clip)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

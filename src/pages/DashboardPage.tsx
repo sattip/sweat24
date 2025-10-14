@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Dumbbell, ShoppingCart, Gift, Loader2, Package, CheckCircle } from "lucide-react";
+import { ArrowRight, User, Dumbbell, ShoppingCart, Gift, Loader2, Package, CheckCircle, ClipboardList, History, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import PackageAlert from "@/components/notifications/PackageAlert";
@@ -9,7 +9,7 @@ import { DashboardAlert } from "@/components/notifications/DashboardAlert";
 import SessionCountIndicator from "@/components/SessionCountIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSimulation } from "@/hooks/useSimulation";
-import { dashboardService, bookingService, profileService } from "@/services/apiService";
+import { dashboardService, bookingService, profileService, packageService } from "@/services/apiService";
 import { toast } from "sonner";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { UpcomingBookings } from "@/components/UpcomingBookings";
@@ -51,6 +51,7 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [showBookingWizard, setShowBookingWizard] = useState(false);
   const [activePackages, setActivePackages] = useState<any[]>([]);
+  const [availablePackages, setAvailablePackages] = useState<any[]>([]);
   
   useEffect(() => {
     fetchDashboardData();
@@ -80,10 +81,11 @@ const DashboardPage = () => {
       }
       
       // Fetch all data in parallel
-      const [statsData, bookingsData, activePkgs] = await Promise.all([
+      const [statsData, bookingsData, activePkgs, packagesData] = await Promise.all([
         dashboardService.getStats(),
         bookingService.getAll(),
-        profileService.getActivePackages()
+        profileService.getActivePackages(),
+        packageService.getAll()
       ]);
       
       setStats(statsData);
@@ -101,6 +103,10 @@ const DashboardPage = () => {
       }
       
       setActivePackages(Array.isArray(activePkgs) ? activePkgs : []);
+
+      // Process and set available packages
+      const packages = Array.isArray(packagesData) ? packagesData : (packagesData?.data || []);
+      setAvailablePackages(packages);
     } catch (error) {
       toast.error("Σφάλμα κατά τη φόρτωση δεδομένων");
       console.error(error);
@@ -298,6 +304,95 @@ const DashboardPage = () => {
                   Τελευταία επίσκεψη: {new Date(displayUser.last_visit).toLocaleDateString()}
                 </p>
               )}
+
+              {/* Package renewal suggestions when expiring */}
+              {(packageStatus === "expiring-soon" || packageStatus === "last-session") && (() => {
+                // Get current package total sessions for comparison
+                const currentTotalSessions = apiActivePackage?.total_sessions ?? displayUser?.total_sessions ?? 0;
+
+                // Filter packages that are larger than current package and sort by sessions
+                const suggestedPackages = availablePackages
+                  .filter(pkg => {
+                    const pkgSessions = pkg.total_sessions || pkg.sessions || 0;
+                    // Show packages with more sessions than current, or unlimited packages
+                    return pkgSessions > currentTotalSessions || pkg.is_unlimited || pkgSessions === 0;
+                  })
+                  .sort((a, b) => {
+                    const aVal = a.total_sessions || a.sessions || 0;
+                    const bVal = b.total_sessions || b.sessions || 0;
+                    // Unlimited packages go last
+                    if (a.is_unlimited) return 1;
+                    if (b.is_unlimited) return -1;
+                    return aVal - bVal;
+                  })
+                  .slice(0, 3); // Show top 3
+
+                if (suggestedPackages.length === 0) return null;
+
+                return (
+                  <div className="mt-6 pt-6 border-t">
+                    <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-4">
+                      <div className="flex items-start gap-3 mb-4">
+                        <Package className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                        <div>
+                          <h4 className="font-semibold text-lg mb-1">
+                            {packageStatus === "last-session" ? "Τελευταία προπόνηση!" : "Η συνδρομή σας λήγει σύντομα"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            Ανανεώστε τώρα με ένα μεγαλύτερο πακέτο και συνεχίστε την πρόοδό σας!
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className={`grid grid-cols-1 ${suggestedPackages.length >= 3 ? 'sm:grid-cols-3' : suggestedPackages.length === 2 ? 'sm:grid-cols-2' : ''} gap-3`}>
+                        {suggestedPackages.map((pkg, index) => {
+                          const isPopular = index === 1 && suggestedPackages.length >= 3; // Middle one is popular
+                          const sessions = pkg.total_sessions || pkg.sessions || 0;
+                          const isUnlimited = pkg.is_unlimited || sessions === 0;
+
+                          return (
+                            <div
+                              key={pkg.id}
+                              className={`bg-white/80 dark:bg-gray-800/80 rounded-lg p-3 border-2 ${isPopular ? 'border-primary' : 'border-transparent hover:border-primary'} transition-colors`}
+                            >
+                              {isPopular && (
+                                <div className="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full inline-block mb-2">
+                                  ΔΗΜΟΦΙΛΕΣ
+                                </div>
+                              )}
+                              <div className="text-center">
+                                <p className="font-bold text-2xl text-primary">
+                                  {isUnlimited ? '∞' : sessions}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {isUnlimited ? 'Απεριόριστα' : 'Μαθήματα'}
+                                </p>
+                                <p className="text-xs font-medium mt-1">
+                                  {pkg.name || pkg.title || `Πακέτο ${sessions} μαθημάτων`}
+                                </p>
+                                {pkg.price && (
+                                  <p className="text-sm font-bold text-primary mt-2">
+                                    €{pkg.price}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-4 flex justify-center">
+                        <Link to="/contact">
+                          <Button className="w-full sm:w-auto">
+                            <Package className="h-4 w-4 mr-2" />
+                            Επικοινωνήστε για Ανανέωση
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </CardContent>
             <CardFooter className="border-t pt-4 flex justify-end">
               {/* Package purchase button removed per user request */}
@@ -327,7 +422,7 @@ const DashboardPage = () => {
           )}
           
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-6">
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">Κλείσε Μάθημα</CardTitle>
@@ -349,6 +444,29 @@ const DashboardPage = () => {
                   Κλείσε Μάθημα Βήμα-Βήμα
                   <ArrowRight className="h-4 w-4" />
                 </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="hover:border-primary transition-colors">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Ιστορικό Προπονήσεων</CardTitle>
+                <CardDescription>Δες όλες τις προπονήσεις που έχεις κάνει</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-4">
+                    <History className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Παρακολούθησε την πρόοδό σου και καταγράψε τις μυϊκές ομάδες</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link to="/workout-history" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
+                    Προβολή Ιστορικού
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
             
@@ -415,6 +533,52 @@ const DashboardPage = () => {
                 <Link to="/store?tab=orders" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
                     Προβολή Παραγγελιών
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+
+            <Card className="hover:border-primary transition-colors">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Ερωτηματολόγια</CardTitle>
+                <CardDescription>Συμπλήρωσε τα ερωτηματολόγιά σου</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-4">
+                    <ClipboardList className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Βοήθησέ μας να βελτιώσουμε την εμπειρία σου συμπληρώνοντας ερωτηματολόγια</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link to="/questionnaires" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
+                    Προβολή Ερωτηματολογίων
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+
+            <Card className="hover:border-primary transition-colors">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Οδηγός Νέου Μέλους</CardTitle>
+                <CardDescription>Όλα όσα πρέπει να γνωρίζεις</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-4">
+                    <Sparkles className="h-12 w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-sm">Κανόνες, οφέλη, πρόγραμμα και όλες οι πληροφορίες που χρειάζεσαι</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link to="/new-member-info" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
+                    Προβολή Οδηγού
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

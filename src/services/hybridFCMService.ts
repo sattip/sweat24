@@ -218,6 +218,11 @@ class HybridFCMService {
       type: 'native'
     };
 
+    // Handle questionnaire notifications
+    if (notification.data?.type === 'questionnaire' || notification.data?.questionnaire_id) {
+      this.handleQuestionnaireNotification(notification.data);
+    }
+
     this.messageHandlers.forEach(handler => {
       try {
         handler(payload);
@@ -236,6 +241,11 @@ class HybridFCMService {
       type: 'web'
     };
 
+    // Handle questionnaire notifications
+    if (payload.data?.type === 'questionnaire' || payload.data?.questionnaire_id) {
+      this.handleQuestionnaireNotification(payload.data);
+    }
+
     this.messageHandlers.forEach(handler => {
       try {
         handler(formattedPayload);
@@ -243,6 +253,39 @@ class HybridFCMService {
         console.error('⚠️ Message handler error:', error);
       }
     });
+  }
+
+  /**
+   * Handle questionnaire notification - route user to questionnaire
+   */
+  private handleQuestionnaireNotification(data: any): void {
+    try {
+      const questionnaireId = data.questionnaire_id;
+      const title = data.title || 'Νέο Ερωτηματολόγιο';
+      const body = data.body || 'Έχετε ένα νέο ερωτηματολόγιο προς συμπλήρωση';
+
+      // Dynamically import toast to avoid issues if sonner isn't loaded yet
+      import('sonner').then(({ toast }) => {
+        toast.success(title, {
+          description: body,
+          duration: 10000,
+          action: questionnaireId ? {
+            label: 'Συμπλήρωση',
+            onClick: () => {
+              window.location.href = `/questionnaires/${questionnaireId}`;
+            },
+          } : undefined,
+        });
+      }).catch(err => {
+        console.error('⚠️ Failed to show questionnaire toast:', err);
+        // Fallback to direct navigation if toast fails
+        if (questionnaireId) {
+          window.location.href = `/questionnaires/${questionnaireId}`;
+        }
+      });
+    } catch (error) {
+      console.error('⚠️ Failed to handle questionnaire notification:', error);
+    }
   }
 
   /**

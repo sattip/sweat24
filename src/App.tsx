@@ -52,6 +52,7 @@ import HybridFCMNotificationSettings from "./components/notifications/HybridFCMN
 import { QuestionnairePromptManager } from "./components/questionnaires/QuestionnairePromptManager";
 import QuestionnairesPage from "./pages/QuestionnairesPage";
 import QuestionnaireDetailPage from "./pages/QuestionnaireDetailPage";
+import NewMemberInfoPage from "./pages/NewMemberInfoPage";
 
 const queryClient = new QueryClient();
 
@@ -108,6 +109,7 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/signup-success" element={<SignupSuccessPage />} />
+            <Route path="/new-member-info" element={<ProtectedRoute><NewMemberInfoPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
             <Route path="/class/:classId" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />
@@ -118,6 +120,7 @@ const App = () => {
             
             {/* Legacy routes for backward compatibility */}
             <Route path="/history" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+            <Route path="/workout-history" element={<ProtectedRoute><WorkoutHistoryPage /></ProtectedRoute>} />
             <Route path="/workout/:workoutId" element={<ProtectedRoute><WorkoutDetailsPage /></ProtectedRoute>} />
             
             {/* New unified progress route */}

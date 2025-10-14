@@ -136,7 +136,7 @@ const CheckoutPage = () => {
 
       // Success! Clear cart and navigate
       clearCart();
-      
+
       // Show success message
       if (rewardResults.length > 0 && regularItems.length > 0) {
         toast.success(`Παραγγελία και ${rewardResults.length} ανταμοιβές ολοκληρώθηκαν επιτυχώς!`);
@@ -145,13 +145,20 @@ const CheckoutPage = () => {
       } else {
         toast.success("Παραγγελία ολοκληρώθηκε επιτυχώς!");
       }
-      
+
+      // Trigger after_purchase questionnaire
+      if (user?.id) {
+        import('@/utils/triggerQuestionnaire').then(({ triggerQuestionnaireAfterEvent }) => {
+          triggerQuestionnaireAfterEvent(user.id, 'after_purchase', navigate);
+        });
+      }
+
       // Navigate to confirmation page
-      navigate("/order-confirmation", { 
-        state: { 
+      navigate("/order-confirmation", {
+        state: {
           orderNumber: orderResult?.order?.order_number || 'REWARDS-' + Date.now(),
           rewardResults: rewardResults
-        } 
+        }
       });
       
     } catch (error) {

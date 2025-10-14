@@ -209,7 +209,19 @@ export const bookingService = {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to check in');
-    return response.json();
+
+    const data = await response.json();
+
+    // Trigger after_lesson questionnaire
+    const userStr = localStorage.getItem('sweat24_user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      import('@/utils/triggerQuestionnaire').then(({ triggerQuestionnaireAfterEvent }) => {
+        triggerQuestionnaireAfterEvent(user.id, 'after_lesson');
+      });
+    }
+
+    return data;
   },
 
   async cancel(id: string | number, reason?: string) {
@@ -1222,6 +1234,153 @@ export const userService = {
     } catch (error) {
       console.error('Error uploading avatar:', error);
       throw error;
+    }
+  }
+};
+
+// New Member Info Service
+export const newMemberInfoService = {
+  async getAll(activeOnly = false) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.log('No auth token found for new member info');
+        return [];
+      }
+
+      const url = activeOnly
+        ? buildApiUrl('/new-member-info?active=true')
+        : buildApiUrl('/new-member-info');
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error('Unauthorized access to new member info');
+          return [];
+        }
+        throw new Error('Failed to fetch new member info');
+      }
+
+      const data = await response.json();
+
+      // Handle different response formats
+      if (data.data && Array.isArray(data.data)) {
+        return data.data;
+      }
+
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching new member info:', error);
+      return [];
+    }
+  },
+
+  async getByCategory(category: string) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        console.log('No auth token found for category info');
+        return [];
+      }
+
+      const response = await fetch(buildApiUrl(`/new-member-info/category/${category}`), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error('Unauthorized access to category info');
+          return [];
+        }
+        throw new Error('Failed to fetch category info');
+      }
+
+      const data = await response.json();
+
+      // Handle different response formats
+      if (data.data && Array.isArray(data.data)) {
+        return data.data;
+      }
+
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching category info:', error);
+      return [];
+    }
+  }
+};
+
+// Muscle Groups Service
+export const muscleGroupService = {
+  async saveMuscleGroups(bookingId: number, muscleGroups: string[]) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl(`/workouts/${bookingId}/muscle-groups`), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ muscle_groups: muscleGroups }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save muscle groups');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error saving muscle groups:', error);
+      throw error;
+    }
+  },
+
+  async getMuscleGroups(bookingId: number) {
+    // Completely silent - no logging, no errors
+    // Returns null if endpoint doesn't exist or any error occurs
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        return null;
+      }
+
+      const response = await fetch(buildApiUrl(`/workouts/${bookingId}/muscle-groups`), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      return data.data || null;
+    } catch {
+      // Silently return null on any error
+      return null;
     }
   }
 };

@@ -55,19 +55,26 @@ class PusherService {
               body: `socket_id=${socketId}&channel_name=${channel.name}`
             })
             .then(response => {
-              console.log('🔐 Custom auth response status:', response.status);
               if (response.status === 200) {
                 return response.json();
               } else {
+                // Only log auth failures once, not repeatedly
+                if (!sessionStorage.getItem(`auth_failed_${channel.name}`)) {
+                  console.log(`🔐 Broadcasting auth failed for ${channel.name} (status: ${response.status})`);
+                  sessionStorage.setItem(`auth_failed_${channel.name}`, 'true');
+                }
                 throw new Error(`Auth failed with status: ${response.status}`);
               }
             })
             .then(data => {
-              console.log('🔐 Custom auth success:', data);
+              // Only log successes in debug mode
+              if (import.meta.env.DEV) {
+                console.log('🔐 Custom auth success:', data);
+              }
               callback(false, data);
             })
             .catch(error => {
-              console.error('🔐 Custom auth error:', error);
+              // Silently fail for private channels - they spam the console
               callback(true, error);
             });
           }
@@ -86,7 +93,11 @@ class PusherService {
       });
 
       pusher.connection.bind('error', (err: any) => {
-        console.error('❌ Pusher connection error:', err);
+        // Only log connection errors once to avoid spam
+        if (!sessionStorage.getItem('pusher_error_logged')) {
+          console.error('❌ Pusher connection error:', err);
+          sessionStorage.setItem('pusher_error_logged', 'true');
+        }
       });
 
       pusher.connection.bind('state_change', (states: any) => {

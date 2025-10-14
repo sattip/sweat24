@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import RateWorkoutDialog from "@/components/workouts/RateWorkoutDialog";
+import MuscleGroupDialog from "@/components/workouts/MuscleGroupDialog";
 import { bookingService } from "@/services/apiService";
 import { toast } from "sonner";
 
@@ -32,6 +33,8 @@ interface Workout {
   instructor: string;
   type: string;
   attended: boolean | number;
+  muscle_groups?: string[] | null;
+  muscle_groups_recorded?: boolean;
 }
 
 
@@ -61,6 +64,7 @@ const groupWorkoutsByMonth = (workouts: Workout[]): GroupedWorkouts => {
 const WorkoutHistoryPage = () => {
   const [filter, setFilter] = useState("all");
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [muscleGroupDialogOpen, setMuscleGroupDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,6 +107,19 @@ const WorkoutHistoryPage = () => {
   const handleOpenRatingDialog = (workout: Workout) => {
     setSelectedWorkout(workout);
     setRatingDialogOpen(true);
+  };
+
+  const handleOpenMuscleGroupDialog = (workout: Workout) => {
+    setSelectedWorkout(workout);
+    setMuscleGroupDialogOpen(true);
+  };
+
+  const handleMuscleGroupDialogClose = (saved: boolean) => {
+    setMuscleGroupDialogOpen(false);
+    // If muscle groups were saved, refresh the workout history
+    if (saved) {
+      fetchWorkoutHistory();
+    }
   };
   
   return (
@@ -197,13 +214,29 @@ const WorkoutHistoryPage = () => {
                                 {(workout.attended === true || workout.attended === 1) ? 'Παρουσία' : 'Απουσία'}
                               </span>
                               {(workout.attended === true || workout.attended === 1) && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => handleOpenRatingDialog(workout)}
-                                >
-                                  Αξιολόγηση
-                                </Button>
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant={workout.muscle_groups_recorded ? "default" : "outline"}
+                                    onClick={() => handleOpenMuscleGroupDialog(workout)}
+                                  >
+                                    {workout.muscle_groups_recorded ? (
+                                      <>
+                                        <CheckCircle className="h-4 w-4 mr-1" />
+                                        Επεξεργασία μυϊκών ομάδων
+                                      </>
+                                    ) : (
+                                      "Καταγραφή μυϊκών ομάδων"
+                                    )}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleOpenRatingDialog(workout)}
+                                  >
+                                    Αξιολόγηση
+                                  </Button>
+                                </>
                               )}
                             </div>
                           </div>
@@ -233,10 +266,23 @@ const WorkoutHistoryPage = () => {
       </main>
       
       {/* Rating Dialog */}
-      <RateWorkoutDialog 
-        open={ratingDialogOpen} 
-        onOpenChange={setRatingDialogOpen} 
+      <RateWorkoutDialog
+        open={ratingDialogOpen}
+        onOpenChange={setRatingDialogOpen}
         workout={selectedWorkout ? { id: selectedWorkout.id, name: selectedWorkout.class_name, date: selectedWorkout.date } : null}
+      />
+
+      {/* Muscle Group Dialog */}
+      <MuscleGroupDialog
+        open={muscleGroupDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMuscleGroupDialogOpen(false);
+            // Refresh workout history when dialog closes
+            fetchWorkoutHistory();
+          }
+        }}
+        workout={selectedWorkout ? { id: selectedWorkout.id, class_name: selectedWorkout.class_name, date: selectedWorkout.date } : null}
       />
     </div>
   );

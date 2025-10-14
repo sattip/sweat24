@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
 import {
   ChevronLeft,
   ChevronRight,
@@ -87,6 +88,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   // Step 4: Time slot selection
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
+  const [bulkBookingMode, setBulkBookingMode] = useState(false);
+  const [selectedDaysOfWeek, setSelectedDaysOfWeek] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]); // 0=Sunday, 6=Saturday
 
   // Booking state
   const [bookingInProgress, setBookingInProgress] = useState(false);
@@ -104,8 +108,57 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
     setSelectedCategory(null);
     setSelectedClass(null);
     setSelectedTimeSlot(null);
+    setSelectedTimeSlots([]);
+    setBulkBookingMode(false);
+    setSelectedDaysOfWeek([0, 1, 2, 3, 4, 5, 6]);
     setClasses([]);
     setTimeSlots([]);
+  };
+
+  // Quick selection functions for bulk bookings with day filter
+  const handleQuickSelect = (days: number) => {
+    const today = new Date();
+    const endDate = new Date();
+    endDate.setDate(today.getDate() + days);
+
+    const slotsInRange = timeSlots.filter(slot => {
+      const slotDate = new Date(slot.date);
+      const dayOfWeek = slotDate.getDay();
+      return slotDate >= today &&
+             slotDate <= endDate &&
+             selectedDaysOfWeek.includes(dayOfWeek);
+    });
+
+    setSelectedTimeSlots(slotsInRange);
+    setBulkBookingMode(true);
+    toast.success(`Επιλέχθηκαν ${slotsInRange.length} διαθέσιμες ώρες`);
+  };
+
+  const toggleDayOfWeek = (day: number) => {
+    setSelectedDaysOfWeek(prev => {
+      if (prev.includes(day)) {
+        return prev.filter(d => d !== day);
+      } else {
+        return [...prev, day].sort();
+      }
+    });
+  };
+
+  const toggleTimeSlotSelection = (slot: TimeSlot) => {
+    if (!bulkBookingMode) {
+      // Single booking mode
+      setSelectedTimeSlot(slot);
+      setSelectedTimeSlots([]);
+    } else {
+      // Bulk booking mode
+      const isSelected = selectedTimeSlots.some(s => s.id === slot.id);
+      if (isSelected) {
+        setSelectedTimeSlots(selectedTimeSlots.filter(s => s.id !== slot.id));
+      } else {
+        setSelectedTimeSlots([...selectedTimeSlots, slot]);
+      }
+      setSelectedTimeSlot(null);
+    }
   };
 
   const loadGyms = async () => {
@@ -413,8 +466,8 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       return;
     }
 
-    if (currentStep === 4 && !selectedTimeSlot) {
-      toast.error('Παρακαλώ επιλέξτε ημερομηνία και ώρα');
+    if (currentStep === 4 && !selectedTimeSlot && selectedTimeSlots.length === 0) {
+      toast.error('Παρακαλώ επιλέξτε τουλάχιστον μία ημερομηνία και ώρα');
       return;
     }
 
@@ -443,9 +496,23 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   };
 
   const handleBooking = async () => {
-    if (!selectedClass || !selectedTimeSlot || !selectedGym) return;
+    if (!selectedClass || !selectedGym) return;
+    if (!selectedTimeSlot && selectedTimeSlots.length === 0) return;
 
     setBookingInProgress(true);
+
+    // Determine which slots to book
+    const slotsToBook = bulkBookingMode && selectedTimeSlots.length > 0
+      ? selectedTimeSlots
+      : selectedTimeSlot
+      ? [selectedTimeSlot]
+      : [];
+
+    if (slotsToBook.length === 0) {
+      toast.error('Δεν επιλέχθηκαν ώρες για κράτηση');
+      setBookingInProgress(false);
+      return;
+    }
 
     let user: any = null;
     let token: string = '';
@@ -549,67 +616,84 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       }
 
       const classesData = await classesResponse.json();
-      const selectedClassDetails = Array.isArray(classesData)
-        ? classesData.find((classItem: any) => classItem.id.toString() === selectedTimeSlot.id)
-        : null;
 
-      if (!selectedClassDetails) {
-        throw new Error('Δεν βρέθηκαν οι λεπτομέρειες του μαθήματος');
+      // Process all bookings
+      let successCount = 0;
+      let failCount = 0;
+      let duplicateCount = 0;
+
+      for (const slot of slotsToBook) {
+        try {
+          const selectedClassDetails = Array.isArray(classesData)
+            ? classesData.find((classItem: any) => classItem.id.toString() === slot.id)
+            : null;
+
+          if (!selectedClassDetails) {
+            console.warn(`Skipping slot ${slot.id} - class details not found`);
+            failCount++;
+            continue;
+          }
+
+          // Prepare booking data with all required fields
+          const bookingData = {
+            class_id: parseInt(slot.id, 10),
+            store_id: selectedGym.id,
+            class_name: selectedClassDetails.name,
+            instructor: selectedClassDetails.instructor_name || selectedClassDetails.trainer_name || selectedClassDetails.instructor,
+            date: selectedClassDetails.date,
+            time: selectedClassDetails.time,
+            type: selectedClassDetails.type,
+            location: selectedClassDetails.location || selectedGym.address || 'Main Studio',
+            service_id: selectedClassDetails.service_id || selectedClassDetails.service?.id,
+            user_id: user.id,
+            customer_name: user.name,
+            customer_email: user.email,
+            status: 'confirmed',
+            attended: 0,
+            notes: `Κράτηση μέσω wizard - ${selectedClass.name} με ${selectedClass.instructor}`
+          };
+
+          const response = await bookingService.create(bookingData);
+
+          if (response.success) {
+            successCount++;
+          } else {
+            const errorMessage = response.message || '';
+            if (errorMessage.toLowerCase().includes('duplicate') ||
+                errorMessage.toLowerCase().includes('already') ||
+                errorMessage.toLowerCase().includes('ήδη')) {
+              duplicateCount++;
+            } else {
+              failCount++;
+              console.error('Booking failed for slot:', slot.id, errorMessage);
+            }
+          }
+        } catch (slotError: any) {
+          failCount++;
+          console.error('Error booking slot:', slot.id, slotError);
+        }
       }
 
-      // Prepare booking data with all required fields
-      const bookingData = {
-        class_id: parseInt(selectedTimeSlot.id, 10),
-        store_id: selectedGym.id,
-        class_name: selectedClassDetails.name,
-        instructor: selectedClassDetails.instructor_name || selectedClassDetails.trainer_name || selectedClassDetails.instructor,
-        date: selectedClassDetails.date,
-        time: selectedClassDetails.time,
-        type: selectedClassDetails.type,
-        location: selectedClassDetails.location || selectedGym.address || 'Main Studio',
-        service_id: selectedClassDetails.service_id || selectedClassDetails.service?.id,
-        user_id: user.id,
-        customer_name: user.name,
-        customer_email: user.email,
-        status: 'confirmed',
-        attended: 0,
-        notes: `Κράτηση μέσω wizard - ${selectedClass.name} με ${selectedClass.instructor}`
-      };
+      // Show results
+      console.log('📊 Booking results:', { successCount, failCount, duplicateCount, total: slotsToBook.length });
 
-      console.log('📝 Creating booking with data:', bookingData);
-      console.log('📝 User data from localStorage:', {
-        userStr: localStorage.getItem('sweat24_user'),
-        token: localStorage.getItem('auth_token')?.substring(0, 20) + '...'
-      });
-
-      const response = await bookingService.create(bookingData);
-
-      console.log('📝 Booking response:', response);
-      console.log('📝 Full response details:', {
-        ok: response.ok,
-        status: response.status,
-        statusText: response.statusText,
-        response
-      });
-
-      if (response.success) {
-        toast.success('Η κράτησή σας ολοκληρώθηκε επιτυχώς! 🎉');
+      if (successCount > 0) {
+        if (slotsToBook.length === 1) {
+          toast.success('Η κράτησή σας ολοκληρώθηκε επιτυχώς! 🎉');
+        } else {
+          toast.success(`${successCount} κρατήσεις ολοκληρώθηκαν επιτυχώς! 🎉`, {
+            description: duplicateCount > 0 ? `${duplicateCount} ήταν ήδη κρατημένες` : undefined,
+            duration: 5000,
+          });
+        }
+        onClose();
+        navigate('/bookings');
+      } else if (duplicateCount > 0 && failCount === 0) {
+        toast.warning('Όλες οι κρατήσεις είχαν ήδη γίνει.');
         onClose();
         navigate('/bookings');
       } else {
-        // Handle specific error cases
-        const errorMessage = response.message || 'Σφάλμα κατά την κράτηση';
-
-        if (errorMessage.toLowerCase().includes('duplicate') ||
-            errorMessage.toLowerCase().includes('already') ||
-            errorMessage.toLowerCase().includes('ήδη')) {
-          toast.warning('Έχετε ήδη κράτηση για αυτό το μάθημα.');
-          onClose();
-          navigate('/bookings');
-          return;
-        }
-
-        throw new Error(errorMessage);
+        throw new Error(`Αποτυχία δημιουργίας κρατήσεων. Επιτυχείς: ${successCount}, Αποτυχίες: ${failCount}`);
       }
     } catch (error: any) {
       console.error('Booking failed:', error);
@@ -761,54 +845,131 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         );
 
       case 4:
+        const daysOfWeek = [
+          { value: 1, label: 'Δευ', fullLabel: 'Δευτέρα' },
+          { value: 2, label: 'Τρί', fullLabel: 'Τρίτη' },
+          { value: 3, label: 'Τετ', fullLabel: 'Τετάρτη' },
+          { value: 4, label: 'Πέμ', fullLabel: 'Πέμπτη' },
+          { value: 5, label: 'Παρ', fullLabel: 'Παρασκευή' },
+          { value: 6, label: 'Σάβ', fullLabel: 'Σάββατο' },
+          { value: 0, label: 'Κυρ', fullLabel: 'Κυριακή' }
+        ];
+
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h3 className="text-lg font-semibold">Επιλέξτε Ημερομηνία & Ώρα</h3>
+
+            {/* Quick Select Buttons */}
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2 pt-3 px-3">
+                <CardTitle className="text-xs font-medium">Γρήγορες Επιλογές</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 pb-3 px-3">
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickSelect(7)}
+                    className="flex-1 h-7 text-xs px-2"
+                  >
+                    1 Εβδομάδα
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickSelect(15)}
+                    className="flex-1 h-7 text-xs px-2"
+                  >
+                    15 Ημέρες
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickSelect(30)}
+                    className="flex-1 h-7 text-xs px-2"
+                  >
+                    1 Μήνας
+                  </Button>
+                </div>
+
+                {/* Days of Week Filter */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Μέρες της εβδομάδας:</Label>
+                  <div className="flex gap-1">
+                    {daysOfWeek.map((day) => (
+                      <Button
+                        key={day.value}
+                        variant={selectedDaysOfWeek.includes(day.value) ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleDayOfWeek(day.value)}
+                        className="flex-1 h-7 text-xs px-1 min-w-0"
+                        title={day.fullLabel}
+                      >
+                        {day.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {bulkBookingMode && selectedTimeSlots.length > 0 && (
+              <div className="flex items-center justify-center py-1.5 px-3 bg-secondary rounded-md">
+                <span className="text-xs font-medium">Επιλέχθηκαν {selectedTimeSlots.length} ώρες</span>
+              </div>
+            )}
+
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : (
-              <div className="space-y-3">
-                {timeSlots.map((slot) => (
-                  <Card
-                    key={slot.id}
-                    className={`cursor-pointer transition-all ${
-                      selectedTimeSlot?.id === slot.id
-                        ? 'border-primary bg-primary/5'
-                        : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => setSelectedTimeSlot(slot)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium">
-                              {new Date(slot.date).toLocaleDateString('el-GR', {
-                                weekday: 'long',
-                                day: 'numeric',
-                                month: 'long'
-                              })}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {slot.time}
-                            </p>
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {timeSlots.map((slot) => {
+                  const isSelected = bulkBookingMode
+                    ? selectedTimeSlots.some(s => s.id === slot.id)
+                    : selectedTimeSlot?.id === slot.id;
+
+                  return (
+                    <Card
+                      key={slot.id}
+                      className={`cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:border-primary/50'
+                      }`}
+                      onClick={() => toggleTimeSlotSelection(slot)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-primary" />
+                            <div>
+                              <p className="font-medium">
+                                {new Date(slot.date).toLocaleDateString('el-GR', {
+                                  weekday: 'long',
+                                  day: 'numeric',
+                                  month: 'long'
+                                })}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {slot.time}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={slot.available_spots > 5 ? "default" : "secondary"}>
+                              {slot.available_spots} θέσεις
+                            </Badge>
+                            {isSelected && (
+                              <CheckCircle className="h-5 w-5 text-primary" />
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={slot.available_spots > 5 ? "default" : "secondary"}>
-                            {slot.available_spots} θέσεις
-                          </Badge>
-                          {selectedTimeSlot?.id === slot.id && (
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -821,58 +982,60 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Dumbbell className="h-5 w-5" />
-            Κράτηση Μαθήματος
-          </DialogTitle>
-          <DialogDescription>
-            Ακολουθήστε τα βήματα για να κλείσετε το μάθημά σας
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-xl max-h-[90vh] flex flex-col rounded-xl p-0 overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-6 pt-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Dumbbell className="h-5 w-5" />
+              Κράτηση Μαθήματος
+            </DialogTitle>
+            <DialogDescription>
+              Ακολουθήστε τα βήματα για να κλείσετε το μάθημά σας
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Βήμα {currentStep} από {STEPS.length}</span>
-            <span>{Math.round(getProgress())}% ολοκληρώθηκε</span>
-          </div>
-          <Progress value={getProgress()} className="h-2" />
-        </div>
-
-        {/* Step Indicator */}
-        <div className="flex justify-between mb-6">
-          {STEPS.map((step) => (
-            <div
-              key={step.id}
-              className={`flex flex-col items-center ${
-                step.id <= currentStep ? 'text-primary' : 'text-muted-foreground'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-1 ${
-                step.id < currentStep
-                  ? 'bg-primary text-primary-foreground'
-                  : step.id === currentStep
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground'
-              }`}>
-                {step.id < currentStep ? <CheckCircle className="h-4 w-4" /> : step.id}
-              </div>
-              <span className="text-xs text-center max-w-[80px] leading-tight">
-                {step.title}
-              </span>
+          {/* Progress Bar */}
+          <div className="space-y-2 mt-6">
+            <div className="flex justify-between text-sm">
+              <span>Βήμα {currentStep} από {STEPS.length}</span>
+              <span>{Math.round(getProgress())}% ολοκληρώθηκε</span>
             </div>
-          ))}
+            <Progress value={getProgress()} className="h-2" />
+          </div>
+
+          {/* Step Indicator */}
+          <div className="flex justify-between my-6">
+            {STEPS.map((step) => (
+              <div
+                key={step.id}
+                className={`flex flex-col items-center ${
+                  step.id <= currentStep ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-1 ${
+                  step.id < currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : step.id === currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}>
+                  {step.id < currentStep ? <CheckCircle className="h-4 w-4" /> : step.id}
+                </div>
+                <span className="text-xs text-center max-w-[80px] leading-tight">
+                  {step.title}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Step Content */}
+          <div className="min-h-[300px] pb-6">
+            {renderStepContent()}
+          </div>
         </div>
 
-        {/* Step Content */}
-        <div className="min-h-[300px]">
-          {renderStepContent()}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 border-t">
+        {/* Navigation Buttons - Sticky at bottom */}
+        <div className="sticky bottom-0 flex justify-between px-6 py-4 border-t bg-white">
           <Button
             variant="outline"
             onClick={handleBack}
@@ -889,7 +1052,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
             className="flex items-center gap-2"
           >
             {bookingInProgress && <Loader2 className="h-4 w-4 animate-spin" />}
-            {currentStep === STEPS.length ? 'Ολοκλήρωση Κράτησης' : 'Επόμενο'}
+            {currentStep === STEPS.length
+              ? (bulkBookingMode && selectedTimeSlots.length > 1
+                  ? `Κράτηση ${selectedTimeSlots.length} Μαθημάτων`
+                  : 'Ολοκλήρωση Κράτησης')
+              : 'Επόμενο'}
             {currentStep < STEPS.length && <ChevronRight className="h-4 w-4" />}
           </Button>
         </div>
