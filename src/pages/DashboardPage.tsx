@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { UpcomingBookings } from "@/components/UpcomingBookings";
 import { ApprovedAppointments } from "@/components/ApprovedAppointments";
+import { BookingWizard } from "@/components/BookingWizard";
 import { updateLocalStorageUserStatus } from "@/utils/updateUserStatus";
 
 // Function to check if it's the user's birthday week
@@ -48,6 +49,7 @@ const DashboardPage = () => {
   const [stats, setStats] = useState<any>(null);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showBookingWizard, setShowBookingWizard] = useState(false);
   const [activePackages, setActivePackages] = useState<any[]>([]);
   
   useEffect(() => {
@@ -340,12 +342,13 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/schedule" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2">
-                    Προβολή Προγράμματος
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                <Button
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={() => setShowBookingWizard(true)}
+                >
+                  Κλείσε Μάθημα Βήμα-Βήμα
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </CardFooter>
             </Card>
             
@@ -435,6 +438,12 @@ const DashboardPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Booking Wizard */}
+      <BookingWizard
+        isOpen={showBookingWizard}
+        onClose={() => setShowBookingWizard(false)}
+      />
     </div>
   );
 };

@@ -66,7 +66,7 @@ const ProductDetailsPage = () => {
       name: product.name,
       price: Number(product.price),
       quantity,
-      image: product.image_url || "/placeholder.svg",
+      image: product.image_url || "/logo-light.png",
       options: selectedOptions,
     });
 
@@ -130,11 +130,11 @@ const ProductDetailsPage = () => {
           {/* Product Image */}
           <Card className="overflow-hidden">
             <img 
-              src={product.image_url || "/placeholder.svg"} 
+              src={product.image_url || "/logo-light.png"} 
               alt={product.name}
-              className="w-full h-[500px] object-cover"
+              className="w-full h-[500px] object-contain p-8 bg-muted"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "/placeholder.svg";
+                (e.target as HTMLImageElement).src = "/logo-light.png";
               }}
             />
           </Card>

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Logo from "../Logo";
 import { Button } from "../ui/button";
-import { Menu, User, MessageCircle, ShoppingCart, ChevronLeft } from "lucide-react";
+import { Menu, User, MessageCircle, ShoppingCart, ChevronLeft, ClipboardList } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
 import { NotificationBell } from "../notifications/NotificationBell";
@@ -67,14 +67,19 @@ const Header: React.FC = () => {
               <SheetClose className="absolute right-4 top-4" />
             </SheetContent>
           </Sheet>
-          <Link to="/dashboard" className="flex items-center shrink-0">
-            <Logo />
-          </Link>
+          <Logo to="/dashboard" className="shrink-0" />
         </div>
         
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
           <NotificationBell />
-          
+
+          <Link to="/questionnaires">
+            <Button variant="ghost" size="icon" className="h-12 w-12 md:h-10 md:w-10 touch-manipulation">
+              <ClipboardList className="h-6 w-6 md:h-5 md:w-5" />
+              <span className="sr-only">Ερωτηματολόγια</span>
+            </Button>
+          </Link>
+
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative h-12 w-12 md:h-10 md:w-10 touch-manipulation">
               <ShoppingCart className="h-6 w-6 md:h-5 md:w-5" />

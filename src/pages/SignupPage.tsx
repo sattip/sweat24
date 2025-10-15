@@ -59,7 +59,7 @@ const SignupPage: React.FC = () => {
         },
         ems_interest: data.emsInterest || false,
         ems_contraindications: data.emsInterest ? transformedEmsContraindications : undefined,
-        ems_liability_accepted: data.emsInterest ? data.emsLiabilityAccepted || false : undefined,
+        ems_liability_accepted: data.emsLiabilityAccepted || false,
   
         submitted_at: new Date().toISOString()
       };
@@ -84,7 +84,15 @@ const SignupPage: React.FC = () => {
           referralCodeOrName: data.referralCodeOrName,
           referrerId: data.referrerId,
           socialPlatform: data.socialPlatform
-        }
+        },
+        
+        // Backend expected fields for referral system
+        found_us_via: data.howFoundUs,
+        referral_source: data.howFoundUs === 'referral' ? 'friend' : data.howFoundUs,
+        ...(data.referralCodeOrName && {
+          referral_phone: data.referralCodeOrName,
+          referrer_id: data.referrerId
+        })
       };
 
       // Add parent consent data if user is minor - keep camelCase as backend expects

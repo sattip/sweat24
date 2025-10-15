@@ -131,12 +131,12 @@ export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({
     }
 
     if (data.howFoundUs === 'referral' && !referralInput.trim()) {
-      toast.error('Παρακαλώ εισάγετε το όνομα ή τον κωδικό του φίλου που σας σύστησε');
+      toast.error('Παρακαλώ εισάγετε το κινητό τηλέφωνο του φίλου που σας σύστησε');
       return;
     }
 
     if (data.howFoundUs === 'referral' && validationStatus !== 'valid') {
-      toast.error('Παρακαλώ εισάγετε έγκυρο όνομα ή κωδικό');
+      toast.error('Παρακαλώ εισάγετε έγκυρο κινητό τηλέφωνο');
       return;
     }
 
@@ -192,20 +192,21 @@ export const HowFoundUsStep: React.FC<HowFoundUsStepProps> = ({
             <div className="mt-4 space-y-4 pl-6 border-l-2 border-blue-200">
               <div className="space-y-2">
                 <Label htmlFor="referralCode">
-                  Όνομα ή Κωδικός Κουπονιού του φίλου που σας σύστησε *
+                  Κινητό τηλέφωνο του φίλου που σας σύστησε *
                 </Label>
                 <div className="relative">
                   <Input
                     id="referralCode"
-                    type="text"
+                    type="tel"
                     value={referralInput}
                     onChange={(e) => handleReferralChange(e.target.value)}
-                    placeholder="π.χ. Όνομα προσώπου ή κωδικός παραπομπής"
+                    placeholder="π.χ. 6912345678"
                     className={
                       validationStatus === 'valid' ? 'border-green-500' :
                       validationStatus === 'invalid' ? 'border-red-500' :
                       ''
                     }
+                    maxLength={10}
                   />
                   {isValidating && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">

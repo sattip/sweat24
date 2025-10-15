@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "367901918033",
+    "project_id": "sweat93-89bb8",
+    "storage_bucket": "sweat93-89bb8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:367901918033:android:4129084f1c5d406690c970",
+        "android_client_info": {
+          "package_name": "com.sweat93.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC21llc4D5_vh25qZ5dIr9etl_yivjoWRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

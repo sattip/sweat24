@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, Minus, Plus, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
 import { useCart } from "@/hooks/use-cart";
+import { isRewardCartItem } from "@/utils/rewardUtils";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -76,9 +77,20 @@ const CartPage = () => {
                       <div className="flex justify-between">
                         <div>
                           <h3 className="font-medium">{item.name}</h3>
-                          <div className="flex flex-col mt-1 space-y-1">
-                            {formatOptions(item.options)}
-                          </div>
+                          {/* Hide technical info for rewards */}
+                          {!isRewardCartItem(item) && (
+                            <div className="flex flex-col mt-1 space-y-1">
+                              {formatOptions(item.options)}
+                            </div>
+                          )}
+                          {/* Show reward info in a cleaner way */}
+                          {isRewardCartItem(item) && (
+                            <div className="mt-1">
+                              <span className="text-sm text-purple-600">
+                                🎁 Ανταμοιβή με {item.options?.points_cost} πόντους
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <Button 
                           variant="ghost" 
@@ -91,28 +103,45 @@ const CartPage = () => {
                       </div>
                       
                       <div className="flex justify-between items-center mt-4">
-                        <div className="flex items-center">
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => handleDecrementQuantity(item.id, item.quantity, item.options)}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="mx-3 text-center w-6">{item.quantity}</span>
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8"
-                            onClick={() => handleIncrementQuantity(item.id, item.quantity, item.options)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        {/* Hide quantity controls for rewards */}
+                        {!isRewardCartItem(item) ? (
+                          <div className="flex items-center">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={() => handleDecrementQuantity(item.id, item.quantity, item.options)}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="mx-3 text-center w-6">{item.quantity}</span>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-8 w-8"
+                              onClick={() => handleIncrementQuantity(item.id, item.quantity, item.options)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <span className="text-sm text-muted-foreground">
+                              Ποσότητα: {item.quantity}
+                            </span>
+                          </div>
+                        )}
                         <div className="text-right">
-                          <div className="font-medium">€{(item.price * item.quantity).toFixed(2)}</div>
-                          <div className="text-sm text-muted-foreground">€{item.price.toFixed(2)} το κάθε ένα</div>
+                          <div className="font-medium">
+                            {item.price < 0 ? (
+                              <span className="text-green-600">€{(item.price * item.quantity).toFixed(2)}</span>
+                            ) : (
+                              <span>€{(item.price * item.quantity).toFixed(2)}</span>
+                            )}
+                          </div>
+                          {!isRewardCartItem(item) && (
+                            <div className="text-sm text-muted-foreground">€{item.price.toFixed(2)} το κάθε ένα</div>
+                          )}
                         </div>
                       </div>
                     </div>

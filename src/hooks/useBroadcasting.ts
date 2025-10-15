@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { echo } from '@/lib/echo';
+import { echo, refreshEchoAuthHeaders } from '@/lib/echo';
 
 interface BroadcastNotification {
   id: string;
@@ -146,34 +146,15 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
 
     try {
       log('Setting up Pusher channels...');
+
+      refreshEchoAuthHeaders();
       
-      // DEBUG: Log user and token info
+      // DEBUG: Log user and token info (without triggering network calls)
       const token = localStorage.getItem('auth_token');
-      console.log('🔧 useBroadcasting setup:');
-      console.log('- User ID:', user.id);
-      console.log('- Token (first 20 chars):', token?.substring(0, 20) + '...');
-      
-      // DEBUG: Test auth endpoint
-      if (token) {
-        fetch('https://sweat93laravel.obs.com.gr/api/v1/broadcasting/auth', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `channel_name=private-user.${user.id}&socket_id=test`
-        })
-        .then(response => {
-          console.log('🔐 Broadcasting auth test status:', response.status);
-          return response.text();
-        })
-        .then(data => {
-          console.log('🔐 Broadcasting auth response:', data);
-        })
-        .catch(err => {
-          console.error('🔐 Broadcasting auth test failed:', err);
-        });
+      if (debug) {
+        console.log('🔧 useBroadcasting setup:');
+        console.log('- User ID:', user.id);
+        console.log('- Token (first 20 chars):', token?.substring(0, 20) + '...');
       }
       
       // Clean up any existing channels

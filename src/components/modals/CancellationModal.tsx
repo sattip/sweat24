@@ -17,13 +17,43 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, Calendar as CalendarIcon, Clock, Info, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import * as API from "@/config/api";
 import { bookingService } from "@/services/apiService";
+import { buildApiUrl } from "@/config/api";
+
+interface Booking {
+  id: number;
+  date: string;
+  time: string;
+  // Add other booking properties as needed
+}
+
+interface Policy {
+  can_cancel: boolean;
+  can_reschedule: boolean;
+  can_cancel_without_penalty: boolean;
+  penalty_percentage: number;
+  hours_until_class: number;
+  policy: {
+    name: string;
+    description: string;
+    hours_before?: number;
+    reschedule_hours_before?: number;
+    penalty_percentage?: number;
+  };
+}
+
+interface AvailableClass {
+  id: string;
+  date: string;
+  time: string;
+  class_name: string;
+  available_spots: number;
+}
 
 interface CancellationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  booking: any;
+  booking: Booking;
   onSuccess: () => void;
 }
 
@@ -35,10 +65,10 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
 }) => {
   const [action, setAction] = useState<"cancel" | "reschedule" | "cancel_charged">("cancel");
   const [reason, setReason] = useState("");
-  const [policy, setPolicy] = useState<any>(null);
+  const [policy, setPolicy] = useState<Policy | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingPolicy, setCheckingPolicy] = useState(true);
-  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
+  const [availableClasses, setAvailableClasses] = useState<AvailableClass[]>([]);
   const [selectedNewClass, setSelectedNewClass] = useState<string>("");
   const [acceptCharge, setAcceptCharge] = useState(false);
 
@@ -54,46 +84,68 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
   const checkPolicy = async () => {
     try {
       setCheckingPolicy(true);
-      // Get current user for authorization
+      // Get current user and auth token for authorization
       const userStr = localStorage.getItem('sweat24_user');
-      if (!userStr) {
+      const token = localStorage.getItem('auth_token');
+      if (!userStr || !token) {
         throw new Error('Not authenticated');
       }
-      const user = JSON.parse(userStr);
       
       const response = await fetch(buildApiUrl(`/bookings/${booking.id}/policy-check`), {
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
       });
       
       if (!response.ok) {
-        throw new Error('Failed to check policy');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to check policy' }));
+        throw new Error(errorData.message || 'Failed to check policy');
       }
       
       const data = await response.json();
       setPolicy(data);
+
+      // Set default action based on policy
+      if (data.hours_until_class >= (data.policy?.hours_before || 6)) {
+        setAction("cancel");
+      } else {
+        setAction("cancel_charged");
+      }
     } catch (error) {
       console.error("Error checking policy:", error);
-      
-      // Calculate hours until class for fallback
-      const classDateTime = new Date(booking.date + ' ' + booking.time);
+
+      // Fallback mock policy for development/testing
+      const bookingDate = new Date(booking.date + ' ' + booking.time);
       const now = new Date();
-      const hoursUntilClass = (classDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-      
-      // Fallback to basic policy with correct hours calculation
-      setPolicy({
-        can_cancel: hoursUntilClass >= 6,
-        can_reschedule: hoursUntilClass >= 3,
-        can_cancel_without_penalty: hoursUntilClass >= 6,
-        penalty_percentage: 0,
-        hours_until_class: hoursUntilClass,
+      const hoursUntilBooking = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      const mockPolicy = {
+        can_cancel: true,
+        can_reschedule: true,
+        can_cancel_without_penalty: hoursUntilBooking >= 6,
+        penalty_percentage: 100,
+        hours_until_class: Math.max(0, hoursUntilBooking),
         policy: {
-          name: "Βασική Πολιτική (Fallback)",
-          description: "Βασική πολιτική ακύρωσης και μετάθεσης"
+          name: "Πολιτική Ακύρωσης",
+          description: "Δωρεάν ακύρωση μέχρι 6 ώρες πριν. Εκπρόθεσμη ακύρωση με πλήρη χρέωση.",
+          hours_before: 6,
+          reschedule_hours_before: 3,
+          penalty_percentage: 100,
         }
-      });
+      };
+
+      setPolicy(mockPolicy);
+
+      // Set default action based on mock policy
+      if (mockPolicy.hours_until_class >= (mockPolicy.policy?.hours_before || 6)) {
+        setAction("cancel");
+      } else {
+        setAction("cancel_charged");
+      }
+
+      console.log("Using mock policy:", mockPolicy);
     } finally {
       setCheckingPolicy(false);
     }
@@ -114,7 +166,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
       const bookingDate = new Date(booking.date).toDateString();
       
       // Filter: same day only, not current class, future time, has space
-      const filtered = data.filter((cls: any) => {
+      const filtered = data.filter((cls: AvailableClass & { current_participants: number; max_participants: number; class_id?: string }) => {
         const classDate = new Date(cls.date).toDateString();
         const classDateTime = new Date(cls.date + ' ' + cls.time);
         
@@ -131,44 +183,77 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    console.log("🔥 DEBUG: handleSubmit called - NEW CODE VERSION 2");
+    toast.info("🔍 Ξεκινά η διαδικασία ακύρωσης...");
+    toast.info(`🔍 Action: ${action}, Booking ID: ${booking?.id}`);
+
+    // Check if booking exists
+    if (!booking || !booking.id) {
+      toast.error("❌ Σφάλμα: Δεν βρέθηκε η κράτηση!");
+      return;
+    }
+
+    // Check policy
+    if (!policy) {
+      toast.error("❌ Σφάλμα: Δεν βρέθηκε πολιτική ακύρωσης!");
+      return;
+    }
+
+    toast.info(`🔍 Policy: ${policy.hours_until_class} ώρες μέχρι το μάθημα`);
+
     // Enforce policy restrictions
-    if (action === "cancel" && policy?.hours_until_class < 6) {
-      toast.error("Η ακύρωση δεν επιτρέπεται - απαιτούνται τουλάχιστον 6 ώρες πριν το μάθημα");
+    const requiredHoursForCancel = policy?.policy?.hours_before || 6;
+    const requiredHoursForReschedule = policy?.policy?.reschedule_hours_before || 3;
+
+    toast.info(`🔍 Απαιτούνται ${requiredHoursForCancel} ώρες για ακύρωση`);
+
+    if (action === "cancel" && policy?.hours_until_class < requiredHoursForCancel) {
+      toast.error(`❌ Η ακύρωση δεν επιτρέπεται - απαιτούνται τουλάχιστον ${requiredHoursForCancel} ώρες πριν το μάθημα`);
       return;
     }
-    
-    if (action === "reschedule" && policy?.hours_until_class < 3) {
-      toast.error("Η μετάθεση δεν επιτρέπεται - απαιτούνται τουλάχιστον 3 ώρες πριν το μάθημα");
+
+    if (action === "reschedule" && policy?.hours_until_class < requiredHoursForReschedule) {
+      toast.error(`❌ Η μετάθεση δεν επιτρέπεται - απαιτούνται τουλάχιστον ${requiredHoursForReschedule} ώρες πριν το μάθημα`);
       return;
     }
-    
+
+    toast.info("✅ Ελέγχοι περάστηκαν - κάνω κλήση στο API...");
     setLoading(true);
     try {
       if (action === "cancel" || action === "cancel_charged") {
+        toast.info("🔍 Ακυρώνω την κράτηση...");
         const data = await bookingService.cancel(booking.id, reason);
-        
+        toast.info("✅ Η κλήση στο API ολοκληρώθηκε!");
+
         if (action === "cancel_charged") {
-          toast.warning("Η κράτηση ακυρώθηκε με χρέωση");
+          toast.warning("💰 Η κράτηση ακυρώθηκε με χρέωση");
         } else if (data.penalty_percentage > 0) {
-          toast.warning(`Η κράτηση ακυρώθηκε με χρέωση ${data.penalty_percentage}%`);
+          toast.warning(`💰 Η κράτηση ακυρώθηκε με χρέωση ${data.penalty_percentage}%`);
         } else {
-          toast.success("Η κράτηση ακυρώθηκε επιτυχώς");
+          toast.success("✅ Η κράτηση ακυρώθηκε επιτυχώς");
         }
       } else {
         if (!selectedNewClass) {
-          toast.error("Παρακαλώ επιλέξτε νέο μάθημα");
+          toast.error("❌ Παρακαλώ επιλέξτε νέο μάθημα");
           return;
         }
-        
+
         const data = await bookingService.reschedule(booking.id, selectedNewClass, reason);
-        toast.success(data.message || "Η κράτηση μετατέθηκε επιτυχώς");
+        toast.success("✅ Η κράτηση μετατέθηκε επιτυχώς");
       }
-      
+
+      toast.info("🔄 Ανανέωση λίστας...");
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || "Σφάλμα κατά την επεξεργασία του αιτήματος");
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "Σφάλμα κατά την επεξεργασία του αιτήματος";
+
+      toast.error(`❌ ${message}`);
+      console.error('Cancellation error details:', error);
     } finally {
+      toast.info("🔚 Τέλος διαδικασίας");
       setLoading(false);
     }
   };
@@ -207,12 +292,25 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
                 <div className="space-y-2">
                   <p className="font-medium">{policy.policy?.name}</p>
                   <p className="text-sm">{policy.policy?.description}</p>
-                  {policy.hours_until_class > 0 && (
-                    <p className="text-sm">
+                  <div className="space-y-1 text-sm">
+                    <p>
+                      <strong>• Ακύρωση:</strong> Επιτρέπεται μέχρι {policy.policy?.hours_before || 6} ώρες πριν το μάθημα
+                    </p>
+                    {policy.policy?.reschedule_hours_before && (
+                      <p>
+                        <strong>• Μετάθεση:</strong> Επιτρέπεται μέχρι {policy.policy.reschedule_hours_before} ώρες πριν το μάθημα
+                      </p>
+                    )}
+                    {policy.policy?.penalty_percentage && (
+                      <p>
+                        <strong>• Εκπρόθεσμη ακύρωση:</strong> Χρέωση {policy.policy.penalty_percentage}% της αξίας
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">
                       <Clock className="inline h-3 w-3 mr-1" />
                       {Math.floor(policy.hours_until_class)} ώρες μέχρι το μάθημα
                     </p>
-                  )}
+                  </div>
                   {policy.policy?.reschedules_used !== undefined && (
                     <p className="text-sm">
                       <RefreshCw className="inline h-3 w-3 mr-1" />
@@ -232,16 +330,16 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
                 <RadioGroupItem 
                   value="cancel" 
                   id="cancel" 
-                  disabled={policy?.hours_until_class < 6}
+                  disabled={policy?.hours_until_class < (policy?.policy?.hours_before || 6)}
                 />
                 <Label 
                   htmlFor="cancel" 
-                  className={`font-normal cursor-pointer ${policy?.hours_until_class < 6 ? 'opacity-50' : ''}`}
+                  className={`font-normal cursor-pointer ${policy?.hours_until_class < (policy?.policy?.hours_before || 6) ? 'opacity-50' : ''}`}
                 >
                   Ακύρωση κράτησης (δωρεάν)
-                  {policy?.hours_until_class < 6 && (
+                  {policy?.hours_until_class < (policy?.policy?.hours_before || 6) && (
                     <span className="text-sm text-red-600 ml-2">
-                      (Δεν επιτρέπεται - απαιτούνται τουλάχιστον 6 ώρες πριν το μάθημα)
+                      (Δεν επιτρέπεται - απαιτούνται τουλάχιστον {policy?.policy?.hours_before || 6} ώρες πριν το μάθημα)
                     </span>
                   )}
                 </Label>
@@ -250,48 +348,54 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
                 <RadioGroupItem 
                   value="reschedule" 
                   id="reschedule"
-                  disabled={policy?.hours_until_class < 3}
+                  disabled={policy?.hours_until_class < (policy?.policy?.reschedule_hours_before || 3)}
                 />
                 <Label 
                   htmlFor="reschedule" 
-                  className={`font-normal cursor-pointer ${policy?.hours_until_class < 3 ? 'opacity-50' : ''}`}
+                  className={`font-normal cursor-pointer ${policy?.hours_until_class < (policy?.policy?.reschedule_hours_before || 3) ? 'opacity-50' : ''}`}
                 >
                   Μετάθεση σε άλλο μάθημα (ίδια μέρα)
-                  {policy?.hours_until_class >= 3 && (
+                  {policy?.hours_until_class >= (policy?.policy?.reschedule_hours_before || 3) && (
                     <span className="text-sm text-green-600 ml-2">
                       (Επιτρέπεται)
                     </span>
                   )}
-                  {policy?.hours_until_class < 3 && (
+                  {policy?.hours_until_class < (policy?.policy?.reschedule_hours_before || 3) && (
                     <span className="text-sm text-red-600 ml-2">
-                      (Δεν επιτρέπεται - απαιτούνται τουλάχιστον 3 ώρες πριν το μάθημα)
+                      (Δεν επιτρέπεται - απαιτούνται τουλάχιστον {policy?.policy?.reschedule_hours_before || 3} ώρες πριν το μάθημα)
                     </span>
                   )}
                 </Label>
               </div>
-              {/* Charged cancellation option for valid cancellations */}
-              {policy?.hours_until_class >= 6 && (
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem 
-                    value="cancel_charged" 
-                    id="cancel_charged"
-                  />
-                  <Label 
-                    htmlFor="cancel_charged" 
-                    className="font-normal cursor-pointer"
-                  >
-                    Ακύρωση με πληρωμή
-                    <span className="text-sm text-blue-600 ml-2">
-                      (Θα πληρώσετε το μάθημα παρότι το ακυρώνετε)
-                    </span>
-                  </Label>
-                </div>
-              )}
+              {/* Charged cancellation option - available in both cases */}
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value="cancel_charged"
+                  id="cancel_charged"
+                />
+                <Label
+                  htmlFor="cancel_charged"
+                  className="font-normal cursor-pointer"
+                >
+                  Ακύρωση με πληρωμή
+                  <span className="text-sm ml-2">
+                    {policy?.hours_until_class < (policy?.policy?.hours_before || 6) ? (
+                      <span className="text-orange-600">
+                        (Επιβάλλεται χρέωση {policy?.policy?.penalty_percentage || 100}% - η δωρεάν ακύρωση δεν επιτρέπεται)
+                      </span>
+                    ) : (
+                      <span className="text-blue-600">
+                        (Θα χρεωθείτε {policy?.policy?.penalty_percentage || 100}% της αξίας του μαθήματος)
+                      </span>
+                    )}
+                  </span>
+                </Label>
+              </div>
             </RadioGroup>
           </div>
 
           {/* New Class Selection (for reschedule) */}
-          {action === "reschedule" && policy?.can_reschedule && policy?.hours_until_class >= 3 && (
+          {action === "reschedule" && policy?.can_reschedule && policy?.hours_until_class >= (policy?.policy?.reschedule_hours_before || 3) && (
             <div>
               <Label htmlFor="newClass">Επιλογή νέου μαθήματος (μόνο την ίδια μέρα)</Label>
               {availableClasses.length > 0 ? (
@@ -366,8 +470,8 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
           <Button 
             onClick={handleSubmit} 
             disabled={loading || 
-              (action === "cancel" && policy?.hours_until_class < 6) ||
-              (action === "reschedule" && (policy?.hours_until_class < 3 || !selectedNewClass)) ||
+              (action === "cancel" && policy?.hours_until_class < (policy?.policy?.hours_before || 6)) ||
+              (action === "reschedule" && (policy?.hours_until_class < (policy?.policy?.reschedule_hours_before || 3) || !selectedNewClass)) ||
               (action === "cancel_charged" && !acceptCharge)
             }
             variant={action === "cancel_charged" ? "secondary" : "default"}

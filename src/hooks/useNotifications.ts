@@ -1,147 +1,184 @@
 import { useState, useEffect } from 'react';
+import { notificationService, ScheduledNotification } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
-import * as API from '@/config/api';
 import { toast } from 'sonner';
 
-interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  type: string;
-  priority: string;
-  read_at: string | null;
-  created_at: string;
-  data?: any;
+export interface NotificationHook {
+  isInitialized: boolean;
+  permissionsGranted: boolean;
+  userNotifications: ScheduledNotification[];
+  loading: boolean;
+  error: string | null;
+  
+  // Actions
+  initialize: () => Promise<boolean>;
+  requestPermissions: () => Promise<boolean>;
+  schedulePackageExpiry: (packageEndDate: Date, packageId: number) => Promise<void>;
+  scheduleAppointmentReminder: (appointmentDate: Date, appointmentId: number, title: string) => Promise<void>;
+  cancelNotification: (notificationId: string) => Promise<void>;
+  refreshNotifications: () => Promise<void>;
+  sendTestNotification: (title: string, body: string) => Promise<void>;
 }
 
-export function useNotifications() {
+export const useNotifications = (): NotificationHook => {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [userNotifications, setUserNotifications] = useState<ScheduledNotification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize notification service όταν φορτώνει το hook
   useEffect(() => {
     if (user) {
-      fetchNotifications();
-      // Check for new notifications every 30 seconds
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+      handleInitialize();
     }
   }, [user]);
-  
-  const fetchNotifications = async () => {
-    if (!user) return; // Don't fetch if no user
-    
-    try {
-      const response = await API.apiRequest('/notifications/user?per_page=20');
-      
-      // Handle different HTTP status codes gracefully
-      if (response.status === 401) {
-        // Unauthorized - just return silently
-        return;
-      }
-      
-      if (response.status === 404) {
-        // Endpoint not found - backend doesn't have notifications API yet
-        console.log('Notifications endpoint not available (404)');
-        return;
-      }
-      
-      if (!response.ok) {
-        // Other errors - log but don't crash
-        console.log(`Notifications API returned ${response.status}, notifications disabled`);
-        return;
-      }
-      
-      const result = await response.json();
-      
-      if (result.data) {
-        const notificationsData = result.data.data || [];
-        setNotifications(notificationsData);
-        
-        // Count unread
-        const unread = notificationsData.filter((n: any) => !n.read_at).length;
-        setUnreadCount(unread);
-        
-        // Show toast for new order ready notifications
-        const newOrderReadyNotifications = notificationsData.filter((n: any) => 
-          n.notification?.type === 'order_ready' && !n.read_at
-        );
-        
-        newOrderReadyNotifications.forEach((notif: any) => {
-          toast.success(notif.notification.title, {
-            description: notif.notification.message,
-            duration: 5000,
-          });
-        });
 
-        // Show toast for booking request notifications
-        const bookingRequestNotifications = notificationsData.filter((n: any) => 
-          ['booking_request_approved', 'booking_request_scheduled', 'booking_request_cancelled'].includes(n.notification?.type) && !n.read_at
-        );
+  const handleInitialize = async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const success = await notificationService.initialize();
+      setIsInitialized(success);
+
+      if (success) {
+        const permissions = await notificationService.areNotificationsEnabled();
+        setPermissionsGranted(permissions);
         
-        bookingRequestNotifications.forEach((notif: any) => {
-          const isPositive = ['booking_request_approved', 'booking_request_scheduled'].includes(notif.notification?.type);
-          
-          if (isPositive) {
-            toast.success(notif.notification.title, {
-              description: notif.notification.message,
-              duration: 6000,
-            });
-          } else {
-            toast.error(notif.notification.title, {
-              description: notif.notification.message,
-              duration: 5000,
-            });
-          }
-        });
+        if (permissions) {
+          await refreshNotifications();
+        }
       }
-    } catch (error) {
-      // Network or parsing errors - handle gracefully
-      console.log('Notifications temporarily unavailable:', error.message);
+
+      return success;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to initialize notifications';
+      setError(errorMessage);
+      console.error('Notification initialization error:', err);
+      return false;
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const markAsRead = async (notificationId: number) => {
+
+  const handleRequestPermissions = async (): Promise<boolean> => {
     try {
-      const response = await API.apiRequest(`/notifications/${notificationId}/read`, {
-        method: 'POST'
-      });
+      setError(null);
+      const granted = await notificationService.requestPermissions();
+      setPermissionsGranted(granted);
       
-      if (response.ok) {
-        setNotifications(prev => 
-          prev.map(n => 
-            n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
-          )
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
+      if (granted) {
+        toast.success('Οι ειδοποιήσεις ενεργοποιήθηκαν!');
+        await refreshNotifications();
+      } else {
+        toast.error('Δεν δόθηκε άδεια για ειδοποιήσεις');
       }
-    } catch (error) {
-      console.log('Mark as read temporarily unavailable:', error.message);
+      
+      return granted;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to request permissions';
+      setError(errorMessage);
+      toast.error('Σφάλμα κατά την αίτηση αδειών ειδοποιήσεων');
+      return false;
     }
   };
-  
-  const markAllAsRead = async () => {
+
+  const handleSchedulePackageExpiry = async (packageEndDate: Date, packageId: number): Promise<void> => {
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     try {
-      const response = await API.apiRequest('/notifications/read-all', {
-        method: 'POST'
-      });
-      
-      if (response.ok) {
-        setNotifications(prev => 
-          prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
-        );
-        setUnreadCount(0);
-      }
-    } catch (error) {
-      console.log('Mark all as read temporarily unavailable:', error.message);
+      setError(null);
+      await notificationService.schedulePackageExpiryNotifications(packageEndDate, user.id, packageId);
+      toast.success('Ειδοποιήσεις λήξης πακέτου προγραμματίστηκαν!');
+      await refreshNotifications();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to schedule package expiry notifications';
+      setError(errorMessage);
+      toast.error('Σφάλμα κατά τον προγραμματισμό ειδοποιήσεων');
+      throw err;
     }
   };
-  
+
+  const handleScheduleAppointmentReminder = async (appointmentDate: Date, appointmentId: number, title: string): Promise<void> => {
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      setError(null);
+      await notificationService.scheduleAppointmentReminder(appointmentDate, user.id, appointmentId, title);
+      toast.success('Υπενθύμιση ραντεβού προγραμματίστηκε!');
+      await refreshNotifications();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to schedule appointment reminder';
+      setError(errorMessage);
+      toast.error('Σφάλμα κατά τον προγραμματισμό υπενθύμισης');
+      throw err;
+    }
+  };
+
+  const handleCancelNotification = async (notificationId: string): Promise<void> => {
+    try {
+      setError(null);
+      await notificationService.cancelNotification(notificationId);
+      toast.success('Ειδοποίηση ακυρώθηκε!');
+      await refreshNotifications();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel notification';
+      setError(errorMessage);
+      toast.error('Σφάλμα κατά την ακύρωση ειδοποίησης');
+      throw err;
+    }
+  };
+
+  const refreshNotifications = async (): Promise<void> => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const notifications = await notificationService.getUserNotifications(user.id);
+      setUserNotifications(notifications);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to refresh notifications';
+      setError(errorMessage);
+      console.error('Failed to refresh notifications:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendTestNotification = async (title: string, body: string): Promise<void> => {
+    try {
+      setError(null);
+      await notificationService.sendTestNotification(title, body);
+      toast.success('Test ειδοποίηση στάλθηκε!');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to send test notification';
+      setError(errorMessage);
+      toast.error(`Test Notification Failed: ${errorMessage}`);
+      throw err;
+    }
+  };
+
   return {
-    notifications,
-    unreadCount,
-    fetchNotifications,
-    markAsRead,
-    markAllAsRead
+    isInitialized,
+    permissionsGranted,
+    userNotifications,
+    loading,
+    error,
+    
+    // Actions
+    initialize: handleInitialize,
+    requestPermissions: handleRequestPermissions,
+    schedulePackageExpiry: handleSchedulePackageExpiry,
+    scheduleAppointmentReminder: handleScheduleAppointmentReminder,
+    cancelNotification: handleCancelNotification,
+    refreshNotifications,
+    sendTestNotification: handleSendTestNotification,
   };
-}
+};
