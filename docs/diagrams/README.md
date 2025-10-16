@@ -1,6 +1,6 @@
-# SWEAT24 Client App - Technical Diagrams
+# sweat93 Client App - Technical Diagrams
 
-Αυτός ο φάκελος περιέχει τα τεχνικά διαγράμματα για τις βασικές λειτουργίες της εφαρμογής SWEAT24 Client App.
+Αυτός ο φάκελος περιέχει τα τεχνικά διαγράμματα για τις βασικές λειτουργίες της εφαρμογής sweat93 Client App.
 
 ## 📋 Περιεχόμενα
 
@@ -50,5 +50,5 @@
 ---
 
 **Ημερομηνία Δημιουργίας**: 5 Αυγούστου 2025  
-**Συντάκτης**: AI Assistant για SWEAT24 Development Team  
+**Συντάκτης**: AI Assistant για sweat93 Development Team  
 **Version**: 1.0.0

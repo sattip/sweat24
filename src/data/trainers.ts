@@ -21,7 +21,7 @@ export const trainers: Trainer[] = [
     name: "Alex Rodriguez",
     title: "Head Personal Trainer",
     imageUrl: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952",
-    bio: "Alex has been with Sweat24 since our founding and brings over 15 years of fitness expertise to our team. With a background in competitive athletics and strength training, he specializes in helping clients transform their physique while building sustainable fitness habits.\n\nAlex's training philosophy centers on progressive overload with perfect form, ensuring clients build strength safely while avoiding plateaus. His sessions are known for their intensity, but also for his encouraging approach that keeps clients motivated through challenging workouts.",
+    bio: "Alex has been with Sweat93 since our founding and brings over 15 years of fitness expertise to our team. With a background in competitive athletics and strength training, he specializes in helping clients transform their physique while building sustainable fitness habits.\n\nAlex's training philosophy centers on progressive overload with perfect form, ensuring clients build strength safely while avoiding plateaus. His sessions are known for their intensity, but also for his encouraging approach that keeps clients motivated through challenging workouts.",
     specialties: ["Strength Training", "Weight Loss", "Sports Performance"],
     certifications: [
       "National Academy of Sports Medicine (NASM) Certified Personal Trainer",
@@ -105,7 +105,7 @@ export const trainers: Trainer[] = [
     name: "Emily Chen",
     title: "Yoga & Mindfulness Coach",
     imageUrl: "https://images.unsplash.com/photo-1518495973542-4542c06a5843",
-    bio: "Emily brings a calming presence to Sweat24 with her expertise in yoga, mobility, and mindfulness practices. After spending five years studying various yoga disciplines throughout Asia, she developed an approach that blends traditional practices with modern movement science.\n\nEmily specializes in helping clients recover from injuries, improve flexibility, and develop mind-body awareness. Her sessions focus not just on the physical aspects of fitness but incorporate breathing techniques and mindfulness to reduce stress and improve overall wellbeing.",
+    bio: "Emily brings a calming presence to Sweat93 with her expertise in yoga, mobility, and mindfulness practices. After spending five years studying various yoga disciplines throughout Asia, she developed an approach that blends traditional practices with modern movement science.\n\nEmily specializes in helping clients recover from injuries, improve flexibility, and develop mind-body awareness. Her sessions focus not just on the physical aspects of fitness but incorporate breathing techniques and mindfulness to reduce stress and improve overall wellbeing.",
     specialties: ["Yoga", "Recovery", "Stress Management"],
     certifications: [
       "500-Hour Registered Yoga Teacher (RYT-500)",

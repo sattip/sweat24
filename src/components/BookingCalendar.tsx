@@ -34,16 +34,14 @@ export const BookingCalendar: React.FC = () => {
   useEffect(() => {
     if (user) {
       fetchBookings();
-      
+
       // Set up polling every 30 seconds for calendar bookings updates
       const pollingInterval = setInterval(() => {
-        console.log('🔄 Polling for calendar bookings updates...');
         fetchBookings();
       }, 30000); // 30 seconds
 
       // Cleanup interval on unmount
       return () => {
-        console.log('🛑 Stopping calendar bookings polling');
         clearInterval(pollingInterval);
       };
     }
@@ -61,8 +59,6 @@ export const BookingCalendar: React.FC = () => {
       const futureArray = Array.isArray(futureBookings) ? futureBookings : [];
       const pastArray = Array.isArray(pastBookings) ? pastBookings : [];
       const allBookings = [...futureArray, ...pastArray];
-      console.log('BookingCalendar - All bookings received:', allBookings);
-      console.log('BookingCalendar - Waitlist bookings:', allBookings.filter(b => b.status === 'waitlist' || b.is_waitlist));
       setBookings(allBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -102,35 +98,31 @@ export const BookingCalendar: React.FC = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Το Ημερολόγιό μου
-            </CardTitle>
-            <CardDescription>Δες όλες τις κρατήσεις σου σε μια ματιά</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handlePreviousMonth}
-              className="h-8 w-8"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <h3 className="text-lg font-semibold min-w-[140px] text-center">
-              {format(currentMonth, 'MMMM yyyy', { locale: el })}
-            </h3>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleNextMonth}
-              className="h-8 w-8"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+        <CardTitle className="text-xl flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Το Ημερολόγιό μου
+        </CardTitle>
+        <CardDescription>Δες όλες τις κρατήσεις σου σε μια ματιά</CardDescription>
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handlePreviousMonth}
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-lg font-semibold min-w-[140px] text-center">
+            {format(currentMonth, 'MMMM yyyy', { locale: el })}
+          </h3>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleNextMonth}
+            className="h-8 w-8"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
       <CardContent>

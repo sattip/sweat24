@@ -6,8 +6,9 @@ const config: CapacitorConfig = {
   appName: 'sweat93',
   webDir: 'dist',
   server: {
-    allowNavigation: ['api.sweat93.gr'],
-    cleartext: false
+    allowNavigation: ['api.sweat93.gr', 'sweat93laravel.obs.com.gr', 'localhost'],
+    cleartext: true,
+    androidScheme: 'https'
   },
   plugins: {
     SplashScreen: {

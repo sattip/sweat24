@@ -1,24 +1,24 @@
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/JSTypes.swift":
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.o"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.dia"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.d"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.swiftdeps"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Codable/JSValueEncoder.swift":
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.d"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.o"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.swiftdeps"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.dia"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Codable/JSValueDecoder.swift":
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.swiftdeps"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.o"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.d"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.dia"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/KeyPath.swift":
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.d"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.swiftdeps"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.dia"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.o"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/JSTypes.swift":
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSTypes.swiftdeps"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/Codable/JSValueEncoder.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.d"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.o"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueEncoder.dia"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/Codable/JSValueDecoder.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.swiftdeps"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.o"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.d"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/JSValueDecoder.dia"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/KeyPath.swift":
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.dia"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/KeyPath.o"

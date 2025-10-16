@@ -212,7 +212,7 @@ class FCMService {
           requireInteraction: true
         };
 
-        const notif = new Notification(notification.title || 'Sweat24', notificationOptions);
+        const notif = new Notification(notification.title || 'Sweat93', notificationOptions);
         
         notif.onclick = () => {
           this.handleNotificationClick(data);

@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://sweat93laravel.obs.com.gr/api/v1';
+import { API_URL } from '@/config/api';
+
+const API_BASE_URL = API_URL;
 
 export interface ProgressPhoto {
   id: number;

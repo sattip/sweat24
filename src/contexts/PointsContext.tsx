@@ -79,11 +79,10 @@ export const PointsProvider: React.FC<PointsProviderProps> = ({ children }) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       const userPoints = await pointsApi.getUserPoints(user.id);
-      console.log('✅ User points fetched:', userPoints);
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         balance: userPoints.points_balance,
-        loading: false 
+        loading: false
       }));
     } catch (error) {
       console.error('❌ Error fetching user points:', error);
@@ -102,11 +101,10 @@ export const PointsProvider: React.FC<PointsProviderProps> = ({ children }) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       const history = await pointsApi.getPointsHistory(user.id, filter);
-      console.log('✅ Points history fetched:', history.length, 'items');
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         history,
-        loading: false 
+        loading: false
       }));
     } catch (error) {
       console.error('❌ Error fetching points history:', error);
@@ -124,26 +122,21 @@ export const PointsProvider: React.FC<PointsProviderProps> = ({ children }) => {
     
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      
-      console.log('🎁 Fetching rewards for user:', user.id, 'with balance:', state.balance);
-      
+
       // First try to get ALL rewards to show in catalog
       let allRewards = [];
       try {
         allRewards = await pointsApi.getAllRewards();
-        console.log('✅ All rewards fetched:', allRewards.length, 'total rewards');
-        console.log('📋 All rewards data:', allRewards);
       } catch (error) {
         console.error('❌ Error fetching all rewards, falling back to affordable only:', error);
         // Fallback to affordable only if all rewards endpoint fails
         allRewards = await pointsApi.getAffordableRewards(state.balance, user.id);
-        console.log('✅ Affordable rewards fetched (fallback):', allRewards.length, 'rewards');
       }
-      
-      setState(prev => ({ 
-        ...prev, 
+
+      setState(prev => ({
+        ...prev,
         rewards: allRewards,
-        loading: false 
+        loading: false
       }));
     } catch (error) {
       console.error('❌ Error fetching rewards:', error);
@@ -158,11 +151,9 @@ export const PointsProvider: React.FC<PointsProviderProps> = ({ children }) => {
   // Λήψη στατιστικών
   const fetchStats = async () => {
     if (!user?.id) return;
-    
+
     try {
-      console.log('📊 Fetching stats for user:', user.id);
       const stats = await pointsApi.getPointsStats(user.id);
-      console.log('✅ Stats calculated:', stats);
       setState(prev => ({ ...prev, stats }));
     } catch (error) {
       console.error('❌ Error fetching stats:', error);
@@ -274,11 +265,9 @@ export const PointsProvider: React.FC<PointsProviderProps> = ({ children }) => {
 
   // Ανανέωση όλων των δεδομένων
   const refreshAllData = async () => {
-    console.log('🔄 Refreshing all points data...');
-    
     // First fetch user points to get current balance
     await fetchUserPoints();
-    
+
     // Then fetch other data that might depend on balance
     await Promise.all([
       fetchPointsHistory(),
@@ -295,7 +284,6 @@ export const PointsProvider: React.FC<PointsProviderProps> = ({ children }) => {
   // Αρχική φόρτωση δεδομένων όταν ο χρήστης συνδεθεί
   useEffect(() => {
     if (user?.id) {
-      console.log('🚀 Initializing points system for user:', user.id);
       refreshAllData();
       // Αρχικοποίηση notification service
       pointsNotificationService.initialize(toast, null);

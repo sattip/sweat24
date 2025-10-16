@@ -3,12 +3,12 @@ import { apiRequest } from '@/config/api';
 import * as API from '@/config/api';
 
 /**
- * Ενημερώνει το status του χρήστη user@sweat24.gr σε ενεργή συνδρομή
+ * Ενημερώνει το status του χρήστη user@sweat93.gr σε ενεργή συνδρομή
  */
 export async function updateUserStatusToActive(): Promise<void> {
   try {
-    // Βρίσκουμε τον χρήστη user@sweat24.gr
-    const targetEmail = 'user@sweat24.gr';
+    // Βρίσκουμε τον χρήστη user@sweat93.gr
+    const targetEmail = 'user@sweat93.gr';
     
     // Ανακτούμε όλους τους χρήστες για να βρούμε τον συγκεκριμένο
     const response = await apiRequest(API.API_ENDPOINTS.users.list);
@@ -38,12 +38,12 @@ export async function updateUserStatusToActive(): Promise<void> {
     console.log('Επιτυχής ενημέρωση του χρήστη:', updateResponse);
     
     // Ενημερώνουμε και το localStorage αν ο χρήστης είναι συνδεδεμένος
-    const currentUserStr = localStorage.getItem('sweat24_user');
+    const currentUserStr = localStorage.getItem('sweat93_user');
     if (currentUserStr) {
       const currentUser = JSON.parse(currentUserStr);
       if (currentUser.email === targetEmail) {
         const updatedUser = { ...currentUser, ...updatedData };
-        localStorage.setItem('sweat24_user', JSON.stringify(updatedUser));
+        localStorage.setItem('sweat93_user', JSON.stringify(updatedUser));
         console.log('Ενημερώθηκε και το localStorage για τον συνδεδεμένο χρήστη');
       }
     }
@@ -55,16 +55,16 @@ export async function updateUserStatusToActive(): Promise<void> {
 }
 
 /**
- * Ενημερώνει άμεσα το localStorage για τον χρήστη user@sweat24.gr (για demo purposes)
+ * Ενημερώνει άμεσα το localStorage για τον χρήστη user@sweat93.gr (για demo purposes)
  */
 export function updateLocalStorageUserStatus(): void {
   try {
-    const currentUserStr = localStorage.getItem('sweat24_user');
+    const currentUserStr = localStorage.getItem('sweat93_user');
     if (currentUserStr) {
       const currentUser = JSON.parse(currentUserStr);
       
       // Ελέγχουμε αν είναι ο σωστός χρήστης
-      if (currentUser.email === 'user@sweat24.gr') {
+      if (currentUser.email === 'user@sweat93.gr') {
         const updatedUser = {
           ...currentUser,
           status: 'active',
@@ -76,13 +76,13 @@ export function updateLocalStorageUserStatus(): void {
           last_visit: new Date().toISOString().split('T')[0],
         };
         
-        localStorage.setItem('sweat24_user', JSON.stringify(updatedUser));
-        console.log('Το status του χρήστη user@sweat24.gr ενημερώθηκε σε ενεργή συνδρομή!');
+        localStorage.setItem('sweat93_user', JSON.stringify(updatedUser));
+        console.log('Το status του χρήστη user@sweat93.gr ενημερώθηκε σε ενεργή συνδρομή!');
         
         // Ανανεώνουμε τη σελίδα για να φανούν οι αλλαγές
         window.location.reload();
       } else {
-        console.log('Ο συνδεδεμένος χρήστης δεν είναι ο user@sweat24.gr');
+        console.log('Ο συνδεδεμένος χρήστης δεν είναι ο user@sweat93.gr');
       }
     } else {
       console.log('Δεν υπάρχει συνδεδεμένος χρήστης');

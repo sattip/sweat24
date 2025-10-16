@@ -91,17 +91,16 @@ const DashboardPage = () => {
       setStats(statsData);
       const bookingsArray = Array.isArray(bookingsData) ? bookingsData : (Array.isArray(bookingsData?.data) ? bookingsData.data : []);
       setRecentBookings(bookingsArray.slice(0, 5));
-      
-      // Debug session data discrepancy
-      console.log('🔍 Dashboard Debug - Active packages from profile API:', activePkgs);
-      console.log('🔍 Dashboard Debug - User from auth context:', displayUser);
+
       if (Array.isArray(activePkgs)) {
-        const activePackage = activePkgs.find(p => p?.status === 'active' && p?.is_frozen === false);
-        console.log('🔍 Dashboard Debug - Found active package:', activePackage);
-        console.log('🔍 Dashboard Debug - Remaining sessions:', activePackage?.remaining_sessions);
-        console.log('🔍 Dashboard Debug - Total sessions:', activePackage?.total_sessions);
+        const activePackage = activePkgs.find(p => {
+          const status = p?.status?.toLowerCase();
+          const isActive = status === 'active' || status === 'ενεργό' || p?.is_active === true;
+          const notFrozen = p?.is_frozen === false || p?.is_frozen === undefined;
+          return isActive && notFrozen;
+        });
       }
-      
+
       setActivePackages(Array.isArray(activePkgs) ? activePkgs : []);
 
       // Process and set available packages
@@ -133,15 +132,27 @@ const DashboardPage = () => {
   const derivedActivePackage: any = (() => {
     const activeFromRoot = (displayUser as any)?.active_package;
     const fromList = Array.isArray((displayUser as any)?.user_packages)
-      ? (displayUser as any).user_packages.find((p: any) => p?.status === 'active')
+      ? (displayUser as any).user_packages.find((p: any) => {
+          const status = p?.status?.toLowerCase();
+          return status === 'active' || status === 'ενεργό' || p?.is_active === true;
+        })
       : undefined;
-    return activeFromRoot || fromList || null;
+    const result = activeFromRoot || fromList || null;
+    return result;
   })();
   
   // Check if it's the user's birthday week (simulated or real)
   const birthdayWeek = isAdminTester ? isSimulatedBirthdayWeek() : (displayUser ? isBirthdayWeek(displayUser.birth_date) : false);
   
-  const apiActivePackage = Array.isArray(activePackages) ? activePackages.find(p => p?.status === 'active' && p?.is_frozen === false) : null;
+  // More flexible active package detection - handle Greek and English status values
+  const apiActivePackage = Array.isArray(activePackages)
+    ? activePackages.find(p => {
+        const status = p?.status?.toLowerCase();
+        const isActive = status === 'active' || status === 'ενεργό' || p?.is_active === true;
+        const notFrozen = p?.is_frozen === false || p?.is_frozen === undefined;
+        return isActive && notFrozen;
+      })
+    : null;
   // Determine package status (simulated for admin, real for others)
   const packageStatus = isAdminTester
     ? getPackageStatus()
@@ -154,8 +165,21 @@ const DashboardPage = () => {
     derivedActivePackage?.remaining_sessions ??
     displayUser?.remaining_sessions ?? 0
   );
-  const hasActivePackage = Boolean(apiActivePackage || derivedActivePackage) || remainingSessions === null || (typeof remainingSessions === 'number' && remainingSessions > 0);
-  
+
+  // Check if package end date is in the future
+  const isPackageNotExpired = displayUser?.package_end_date
+    ? new Date(displayUser.package_end_date) > new Date()
+    : false;
+
+  // More robust check for active package
+  const hasActivePackage = Boolean(
+    apiActivePackage ||
+    derivedActivePackage ||
+    (displayUser?.status === 'active' && isPackageNotExpired) ||
+    (remainingSessions !== null && remainingSessions !== undefined && remainingSessions > 0) ||
+    isPackageNotExpired
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">

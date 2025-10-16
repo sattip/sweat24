@@ -1,18 +1,18 @@
 {
   "" : {
-    "diagnostics" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master.dia",
-    "emit-module-dependencies" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master-emit-module.d",
-    "emit-module-diagnostics" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master-emit-module.dia",
-    "swift-dependencies" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master.swiftdeps"
+    "diagnostics" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master.dia",
+    "emit-module-dependencies" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master-emit-module.dia",
+    "swift-dependencies" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/CapacitorStatusBar-master.swiftdeps"
   },
-  "/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/StatusBarPlugin.swift" : {
-    "const-values" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.swiftconstvalues",
-    "dependencies" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.d",
-    "diagnostics" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.dia",
+  "/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/status-bar/ios/Sources/StatusBarPlugin/StatusBarPlugin.swift" : {
+    "const-values" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.swiftconstvalues",
+    "dependencies" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.d",
+    "diagnostics" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.dia",
     "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.o",
-    "llvm-bc" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.bc",
-    "object" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.o",
-    "swift-dependencies" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.swiftdeps",
-    "swiftmodule" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin~partial.swiftmodule"
+    "llvm-bc" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.bc",
+    "object" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.o",
+    "swift-dependencies" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin.swiftdeps",
+    "swiftmodule" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorStatusBar.build/Objects-normal/arm64/StatusBarPlugin~partial.swiftmodule"
   }
 }

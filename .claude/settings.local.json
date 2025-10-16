@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Read(//c/Users/olive/Desktop/**)",
-      "Bash(clip)"
+      "Bash(clip)",
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Read(//c/Users/olive/Downloads/**)"
     ],
     "deny": [],
     "ask": []

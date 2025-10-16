@@ -122,7 +122,7 @@ export const BookingRequests: React.FC = () => {
       setLoading(true);
       console.log('🔍 BookingRequests: Starting fetch');
       console.log('🔍 BookingRequests: User from context:', user);
-      console.log('🔍 BookingRequests: localStorage sweat24_user:', localStorage.getItem('sweat24_user'));
+      console.log('🔍 BookingRequests: localStorage sweat93_user:', localStorage.getItem('sweat93_user'));
       console.log('🔍 BookingRequests: localStorage auth_token exists:', !!localStorage.getItem('auth_token'));
       
       const requests = await bookingRequestService.getMyRequests();

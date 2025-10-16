@@ -57,8 +57,8 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     // Clear any existing auth data before login
     this.clearAuth();
-    
-    const response = await fetch('https://api.sweat93.gr/api/v1/auth/login', {
+
+    const response = await fetch(`${API.API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ class AuthService {
     }
     
     // Store user data and token only for approved users
-    localStorage.setItem('sweat24_user', JSON.stringify(data.user));
+    localStorage.setItem('sweat93_user', JSON.stringify(data.user));
     localStorage.setItem('auth_token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
     
@@ -98,7 +98,7 @@ class AuthService {
 
   async register(data: RegisterData): Promise<AuthResponse> {
     // Always use register-with-consent endpoint for all registrations
-    const endpoint = 'https://api.sweat93.gr/api/v1/auth/register-with-consent';
+    const endpoint = `${API.API_URL}/auth/register-with-consent`;
     
     // Build the request payload
     const payload = {
@@ -162,7 +162,7 @@ class AuthService {
     try {
       const token = localStorage.getItem('auth_token');
       if (token) {
-        await fetch('https://sweat93laravel.obs.com.gr/api/v1/auth/logout', {
+        await fetch(`${API.API_URL}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -206,11 +206,11 @@ class AuthService {
   }
 
   getStoredUser(): User | null {
-    // First check sweat24_user (our new system)
-    const sweat24UserStr = localStorage.getItem('sweat24_user');
-    if (sweat24UserStr) {
+    // First check sweat93_user (our new system)
+    const sweat93UserStr = localStorage.getItem('sweat93_user');
+    if (sweat93UserStr) {
       try {
-        return JSON.parse(sweat24UserStr);
+        return JSON.parse(sweat93UserStr);
       } catch {
         // Fall through to check 'user' key
       }
@@ -228,13 +228,13 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth_token') || !!localStorage.getItem('sweat24_user');
+    return !!localStorage.getItem('auth_token') || !!localStorage.getItem('sweat93_user');
   }
 
   clearAuth(): void {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
-    localStorage.removeItem('sweat24_user');
+    localStorage.removeItem('sweat93_user');
   }
 }
 

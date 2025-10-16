@@ -1,24 +1,24 @@
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/CAPPluginMethod.swift":
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.o"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.swiftdeps"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.d"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.swiftconstvalues"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.dia"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Data+Capacitor.swift":
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.dia"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.swiftdeps"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.d"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.o"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/CAPPluginCall.swift":
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.o"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.dia"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.d"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.swiftdeps"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Plugins/Console.swift":
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.o"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.dia"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.swiftconstvalues"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.swiftdeps"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.d"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/CAPPluginMethod.swift":
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginMethod-b3aae96c53240179d5db525d2aaca0bb.dia"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/Data+Capacitor.swift":
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.dia"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.d"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Data+Capacitor.o"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/CAPPluginCall.swift":
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/CAPPluginCall-8f302c92cd6dea9db4338fa3de83d698.swiftdeps"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/Plugins/Console.swift":
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.dia"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.swiftconstvalues"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/Console.d"

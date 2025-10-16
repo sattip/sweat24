@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script για δημιουργία favicon από το logo του γυμναστηρίου
-echo "🎯 Δημιουργία favicon από το logo του Sweat24..."
+echo "🎯 Δημιουργία favicon από το logo του sweat93..."
 
 # Έλεγχος αν υπάρχει το ImageMagick (convert command)
 if command -v convert >/dev/null 2>&1; then

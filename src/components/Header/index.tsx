@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Logo from "../Logo";
 import { Button } from "../ui/button";
-import { Menu, User, MessageCircle, ShoppingCart, ChevronLeft, ClipboardList } from "lucide-react";
+import { Menu, ShoppingCart, ChevronLeft } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
 import { NotificationBell } from "../notifications/NotificationBell";
@@ -30,29 +30,17 @@ const Header: React.FC = () => {
     <header
       className="bg-white border-b sticky top-0 z-10"
       style={{
-        paddingTop: 'max(20px, env(safe-area-inset-top))',
-        minHeight: 'calc(64px + max(20px, env(safe-area-inset-top)))'
+        paddingTop: 'max(8px, env(safe-area-inset-top))',
+        minHeight: 'calc(56px + max(8px, env(safe-area-inset-top)))'
       }}
     >
-      <div className="container flex h-16 md:h-16 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-          {/* Back button for mobile */}
-          {showBackButton && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-12 w-12 md:hidden shrink-0 touch-manipulation"
-              onClick={() => navigate(-1)}
-            >
-              <ChevronLeft className="h-6 w-6" />
-              <span className="sr-only">Πίσω</span>
-            </Button>
-          )}
-          
+      <div className="container relative flex h-14 md:h-14 items-center justify-between px-3 md:px-4 max-w-7xl mx-auto">
+        {/* Left section: Menu + Back button */}
+        <div className="flex items-center gap-2 shrink-0">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 md:h-10 md:w-10 shrink-0 touch-manipulation">
-                <Menu className="h-6 w-6 md:h-5 md:w-5" />
+              <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 touch-manipulation">
+                <Menu className="h-5 w-5" />
                 <span className="sr-only">Εναλλαγή μενού</span>
               </Button>
             </SheetTrigger>
@@ -67,42 +55,39 @@ const Header: React.FC = () => {
               <SheetClose className="absolute right-4 top-4" />
             </SheetContent>
           </Sheet>
+
+          {/* Back button for mobile - right of menu */}
+          {showBackButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 md:hidden shrink-0 touch-manipulation"
+              onClick={() => navigate(-1)}
+            >
+              <ChevronLeft className="h-5 w-5" />
+              <span className="sr-only">Πίσω</span>
+            </Button>
+          )}
+        </div>
+
+        {/* Center section: Logo */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
           <Logo to="/dashboard" className="shrink-0" />
         </div>
-        
-        <div className="flex items-center gap-1 md:gap-2 shrink-0">
+
+        {/* Right section: Notifications + Cart */}
+        <div className="flex items-center gap-1 shrink-0">
           <NotificationBell />
 
-          <Link to="/questionnaires">
-            <Button variant="ghost" size="icon" className="h-12 w-12 md:h-10 md:w-10 touch-manipulation">
-              <ClipboardList className="h-6 w-6 md:h-5 md:w-5" />
-              <span className="sr-only">Ερωτηματολόγια</span>
-            </Button>
-          </Link>
-
           <Link to="/cart">
-            <Button variant="ghost" size="icon" className="relative h-12 w-12 md:h-10 md:w-10 touch-manipulation">
-              <ShoppingCart className="h-6 w-6 md:h-5 md:w-5" />
+            <Button variant="ghost" size="icon" className="relative h-10 w-10 touch-manipulation">
+              <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-primary text-primary-foreground rounded-full text-xs h-5 w-5 md:h-5 md:w-5 flex items-center justify-center font-medium min-w-[20px]">
+                <span className="absolute top-0 right-0 bg-primary text-primary-foreground rounded-full text-[10px] h-4 w-4 flex items-center justify-center font-bold">
                   {itemCount > 9 ? '9+' : itemCount}
                 </span>
               )}
               <span className="sr-only">Καλάθι αγορών</span>
-            </Button>
-          </Link>
-          
-          <Link to="/contact">
-            <Button variant="ghost" size="icon" className="h-12 w-12 md:h-10 md:w-10 touch-manipulation">
-              <MessageCircle className="h-6 w-6 md:h-5 md:w-5" />
-              <span className="sr-only">Επικοινωνία</span>
-            </Button>
-          </Link>
-          
-          <Link to="/profile">
-            <Button variant="ghost" size="icon" className="h-12 w-12 md:h-10 md:w-10 touch-manipulation">
-              <User className="h-6 w-6 md:h-5 md:w-5" />
-              <span className="sr-only">Προφίλ χρήστη</span>
             </Button>
           </Link>
         </div>

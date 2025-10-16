@@ -1,24 +1,24 @@
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/Plugins/WebView.swift":
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.swiftdeps"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.swiftconstvalues"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.o"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.dia"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.d"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/WebViewAssetHandler.swift":
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.swiftdeps"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.o"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.dia"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.d"
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.swiftconstvalues"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/WKWebView+Capacitor.swift":
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.swiftconstvalues"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.o"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.swiftdeps"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.dia"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.d"
-"/Users/sattip/Documents/GitHub/sweat24/node_modules/@capacitor/ios/Capacitor/Capacitor/WebViewDelegationHandler.swift":
-  const-values: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.swiftconstvalues"
-  diagnostics: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.dia"
-  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.swiftdeps"
-  dependencies: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.d"
-  object: "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.o"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/Plugins/WebView.swift":
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.swiftdeps"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.swiftconstvalues"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebView.d"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/WebViewAssetHandler.swift":
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.swiftdeps"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.o"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.d"
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewAssetHandler.swiftconstvalues"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/WKWebView+Capacitor.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.swiftconstvalues"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.o"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.swiftdeps"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.dia"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WKWebView+Capacitor-0e5cab0b52b13f37ea31b42da8de8aba.d"
+"/Users/sattip/Documents/GitHub/sweat93/node_modules/@capacitor/ios/Capacitor/Capacitor/WebViewDelegationHandler.swift":
+  const-values: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.swiftconstvalues"
+  diagnostics: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.dia"
+  swift-dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.swiftdeps"
+  dependencies: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.d"
+  object: "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Capacitor.build/Objects-normal/x86_64/WebViewDelegationHandler.o"

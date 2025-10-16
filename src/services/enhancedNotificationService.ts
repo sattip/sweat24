@@ -38,7 +38,6 @@ class EnhancedNotificationService {
 
   constructor() {
     this.isNativePlatform = Capacitor.isNativePlatform();
-    console.log(`🔔 NotificationService created for ${this.isNativePlatform ? 'native' : 'web'} platform`);
   }
 
   /**
@@ -46,17 +45,13 @@ class EnhancedNotificationService {
    */
   async initialize(): Promise<boolean> {
     try {
-      console.log('🔔 Starting notification initialization...');
-
       // Prevent multiple simultaneous initializations
       if (this.isInitialized) {
-        console.log('✅ Notification service already initialized');
         return true;
       }
 
       // Increment attempt counter
       this.initializationAttempts++;
-      console.log(`📱 Initialization attempt ${this.initializationAttempts}/${this.maxAttempts}`);
 
       // Check if max attempts reached
       if (this.initializationAttempts > this.maxAttempts) {
@@ -66,7 +61,6 @@ class EnhancedNotificationService {
 
       // Web platform handling
       if (!this.isNativePlatform) {
-        console.log('🌐 Web platform - notifications will use browser API');
         this.isInitialized = true;
         return await this.initializeWebNotifications();
       }
@@ -86,17 +80,14 @@ class EnhancedNotificationService {
   private async initializeWebNotifications(): Promise<boolean> {
     try {
       if (!('Notification' in window)) {
-        console.log('ℹ️ Browser notifications not supported');
         return false;
       }
 
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        console.log('✅ Web notification permissions granted');
         return true;
       }
 
-      console.log('❌ Web notification permissions denied');
       return false;
     } catch (error) {
       console.error('⚠️ Web notification initialization failed:', error);
@@ -115,26 +106,19 @@ class EnhancedNotificationService {
         return false;
       }
 
-      console.log('📱 Native platform detected, requesting permissions...');
-
       // Request permissions with timeout
       const permission = await this.requestPermissionsWithTimeout();
       if (!permission || permission.receive !== 'granted') {
-        console.log('❌ Push notification permissions denied or failed');
         return false;
       }
 
-      console.log('✅ Permissions granted, registering for push notifications...');
-
       // Register with timeout
       await this.registerWithTimeout();
-      console.log('✅ Registration successful, adding listeners...');
 
       // Add event listeners safely
       this.addNativeListeners();
-      
+
       this.isInitialized = true;
-      console.log('🎉 Native push notifications initialized successfully!');
       return true;
 
     } catch (error) {
@@ -177,13 +161,9 @@ class EnhancedNotificationService {
    */
   private addNativeListeners(): void {
     try {
-      console.log('📡 Adding native notification listeners...');
-
       // Registration success
       const registrationListener = PushNotifications.addListener('registration', (token: Token) => {
         try {
-          console.log('✅ Push registration successful');
-          console.log('🔑 Token:', token.value.substring(0, 20) + '...');
           this.pushToken = token.value;
           this.sendTokenToServer(token.value);
         } catch (error) {
@@ -199,7 +179,6 @@ class EnhancedNotificationService {
       // Notification received (app in foreground)
       const notificationReceivedListener = PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
         try {
-          console.log('📩 Push notification received (foreground):', notification);
           this.handleNotificationReceived(notification);
         } catch (error) {
           console.error('⚠️ Error handling notification received:', error);
@@ -209,7 +188,6 @@ class EnhancedNotificationService {
       // Notification tapped (app opened from notification)
       const notificationActionListener = PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
         try {
-          console.log('👆 Push notification tapped:', notification);
           this.handleNotificationTapped(notification);
         } catch (error) {
           console.error('⚠️ Error handling notification action:', error);
@@ -224,8 +202,6 @@ class EnhancedNotificationService {
         notificationActionListener.remove
       ];
 
-      console.log('✅ All native listeners added successfully');
-
     } catch (error) {
       console.error('💥 Critical error adding native listeners:', error);
     }
@@ -236,8 +212,6 @@ class EnhancedNotificationService {
    */
   private async handleInitializationError(): Promise<boolean> {
     if (this.initializationAttempts < this.maxAttempts) {
-      console.log(`⏳ Retrying initialization in ${this.retryDelay}ms...`);
-      
       return new Promise((resolve) => {
         setTimeout(async () => {
           const result = await this.initialize();
@@ -255,8 +229,6 @@ class EnhancedNotificationService {
    */
   private async sendTokenToServer(token: string): Promise<void> {
     try {
-      console.log('📤 Sending push token to server...');
-      
       await API.apiRequest('/users/push-token', {
         method: 'POST',
         body: JSON.stringify({
@@ -269,14 +241,11 @@ class EnhancedNotificationService {
           }
         })
       });
-
-      console.log('✅ Push token sent to server successfully');
     } catch (error) {
       console.error('⚠️ Failed to send push token to server:', error);
-      
+
       // Retry after delay
       setTimeout(() => {
-        console.log('🔄 Retrying token send...');
         this.sendTokenToServer(token);
       }, 5000);
     }
@@ -288,8 +257,6 @@ class EnhancedNotificationService {
   private handleNotificationReceived(notification: PushNotificationSchema): void {
     try {
       const notificationType = notification.data?.type;
-      
-      console.log(`📱 Handling ${notificationType} notification`);
 
       // Show in-app notification for foreground
       if (this.isNativePlatform) {
@@ -320,8 +287,6 @@ class EnhancedNotificationService {
       const data = notification.notification.data;
       const notificationType = data?.type;
 
-      console.log(`👆 User tapped ${notificationType} notification`);
-
       // Navigate based on notification type
       if (notificationType === 'package_expiry') {
         // Navigate to profile/packages page
@@ -344,8 +309,6 @@ class EnhancedNotificationService {
    */
   private showInAppNotification(notification: PushNotificationSchema): void {
     // This can be integrated with your toast/alert system
-    console.log('📱 Showing in-app notification:', notification.title);
-    
     // Example: Could integrate with your toast system
     // toast.info(notification.body, { title: notification.title });
   }
@@ -355,7 +318,7 @@ class EnhancedNotificationService {
    */
   private showWebNotification(notification: PushNotificationSchema): void {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(notification.title || 'Sweat24', {
+      new Notification(notification.title || 'Sweat93', {
         body: notification.body,
         icon: '/logo-light.png',
         tag: notification.data?.id || 'general'
@@ -367,7 +330,6 @@ class EnhancedNotificationService {
    * Handle package expiry specific logic
    */
   private handlePackageExpiryNotification(notification: PushNotificationSchema): void {
-    console.log('📦 Package expiry notification received');
     // Add any package-specific handling here
   }
 
@@ -375,7 +337,6 @@ class EnhancedNotificationService {
    * Handle appointment reminder specific logic  
    */
   private handleAppointmentReminderNotification(notification: PushNotificationSchema): void {
-    console.log('📅 Appointment reminder notification received');
     // Add any appointment-specific handling here
   }
 
@@ -425,7 +386,6 @@ class EnhancedNotificationService {
         await this.scheduleNotification(notification);
       }
 
-      console.log(`✅ Scheduled ${notifications.length} package expiry notifications`);
       return notifications;
 
     } catch (error) {
@@ -459,7 +419,6 @@ class EnhancedNotificationService {
       };
 
       await this.scheduleNotification(notification);
-      console.log('✅ Appointment reminder scheduled successfully');
       return notification;
 
     } catch (error) {
@@ -493,8 +452,6 @@ class EnhancedNotificationService {
       if (!response.ok) {
         throw new Error(`Failed to schedule notification: ${response.status}`);
       }
-      
-      console.log(`✅ Notification scheduled: ${notification.id}`);
     } catch (error) {
       console.error('⚠️ Failed to schedule notification:', error);
       throw error;
@@ -514,7 +471,6 @@ class EnhancedNotificationService {
         throw new Error(`Failed to cancel notification: ${response.status}`);
       }
 
-      console.log(`✅ Notification cancelled: ${notificationId}`);
       return true;
     } catch (error) {
       console.error('⚠️ Failed to cancel notification:', error);
@@ -544,7 +500,7 @@ class EnhancedNotificationService {
   /**
    * Send test notification
    */
-  async sendTestNotification(title: string = 'Test Notification', body: string = 'This is a test notification from Sweat24!'): Promise<boolean> {
+  async sendTestNotification(title: string = 'Test Notification', body: string = 'This is a test notification from Sweat93!'): Promise<boolean> {
     if (!this.isInitialized) {
       console.error('⚠️ Notification service not initialized');
       return false;
@@ -564,8 +520,7 @@ class EnhancedNotificationService {
       if (!response.ok) {
         throw new Error(`Test notification failed: ${response.status}`);
       }
-      
-      console.log('✅ Test notification sent successfully');
+
       return true;
     } catch (error) {
       console.error('⚠️ Failed to send test notification:', error);
@@ -670,8 +625,6 @@ class EnhancedNotificationService {
       this.listeners = [];
       this.isInitialized = false;
       this.pushToken = null;
-      
-      console.log('🧹 Notification service cleaned up');
     } catch (error) {
       console.error('⚠️ Error during cleanup:', error);
     }

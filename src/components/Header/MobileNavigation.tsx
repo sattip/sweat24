@@ -57,24 +57,12 @@ const MobileNavigation = () => {
       
       {/* Navigation Menu */}
       <nav className="flex-1 p-3 sm:p-4 space-y-1 sm:space-y-2 overflow-y-auto">
-        <Link 
-          to="/dashboard" 
+        <Link
+          to="/points"
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/dashboard") 
-              ? "bg-primary text-primary-foreground shadow-sm" 
-              : "hover:bg-muted/50 text-foreground"
-          )}
-        >
-          Αρχική
-        </Link>
-        
-        <Link 
-          to="/points" 
-          className={cn(
-            "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/points") 
-              ? "bg-primary text-primary-foreground shadow-sm" 
+            isActive("/points")
+              ? "bg-primary text-primary-foreground shadow-sm"
               : "hover:bg-muted/50 text-foreground"
           )}
         >
@@ -85,19 +73,7 @@ const MobileNavigation = () => {
             </span>
           </div>
         </Link>
-        
-        <Link 
-          to="/bookings" 
-          className={cn(
-            "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/bookings") || isActive("/history") 
-              ? "bg-primary text-primary-foreground shadow-sm" 
-              : "hover:bg-muted/50 text-foreground"
-          )}
-        >
-          Οι Κρατήσεις μου
-        </Link>
-        
+
         <Link 
           to="/notifications" 
           className={cn(
@@ -196,30 +172,18 @@ const MobileNavigation = () => {
           Συνεργαζόμενες Επιχειρήσεις
         </Link>
         
-        <Link 
-          to="/events" 
+        <Link
+          to="/events"
           className={cn(
             "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/events") 
-              ? "bg-primary text-primary-foreground shadow-sm" 
+            isActive("/events")
+              ? "bg-primary text-primary-foreground shadow-sm"
               : "hover:bg-muted/50 text-foreground"
           )}
         >
           Εκδηλώσεις
         </Link>
-        
-        <Link 
-          to="/store" 
-          className={cn(
-            "flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-lg transition-all duration-200 touch-manipulation",
-            isActive("/store") 
-              ? "bg-primary text-primary-foreground shadow-sm" 
-              : "hover:bg-muted/50 text-foreground"
-          )}
-        >
-          Κατάστημα
-        </Link>
-        
+
         <Link 
           to="/contact" 
           className={cn(

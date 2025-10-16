@@ -115,7 +115,7 @@ const AppointmentRequestPage = () => {
 
   // Auto-populate user data for logged in users
   useEffect(() => {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
@@ -227,7 +227,7 @@ const AppointmentRequestPage = () => {
     
     try {
       // Get user data
-      const userStr = localStorage.getItem('sweat24_user');
+      const userStr = localStorage.getItem('sweat93_user');
       const token = localStorage.getItem('auth_token');
       
       if (!userStr || !token) {

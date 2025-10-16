@@ -102,7 +102,7 @@ export function AdminHeader() {
                   className="text-xs opacity-75 leading-tight"
                   data-oid=".c:bz3m"
                 >
-                  {user?.email || 'admin@sweat24.com'}
+                  {user?.email || 'admin@sweat93.com'}
                 </span>
                 {user?.role && (
                   <Badge 

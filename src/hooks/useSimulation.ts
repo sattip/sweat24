@@ -41,7 +41,7 @@ const DEFAULT_SIMULATION_STATE: SimulationState = {
 };
 
 /**
- * Hook to manage simulation state for admin@sweat24.gr user
+ * Hook to manage simulation state for admin@sweat93.gr user
  * Returns simulated user data based on current simulation settings
  */
 export const useSimulation = () => {
@@ -50,7 +50,7 @@ export const useSimulation = () => {
   const [isSimulationActive, setIsSimulationActive] = useState(false);
 
   // Check if current user is the admin tester
-  const isAdminTester = user?.email === 'admin@sweat24.gr';
+  const isAdminTester = user?.email === 'admin@sweat93.gr';
 
   useEffect(() => {
     if (isAdminTester) {

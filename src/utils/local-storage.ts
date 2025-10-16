@@ -7,7 +7,7 @@
 export const setLocalStorageItem = (key: string, value: any): void => {
   try {
     const serializedValue = typeof value === 'string' ? value : JSON.stringify(value);
-    localStorage.setItem(`sweat24_${key}`, serializedValue);
+    localStorage.setItem(`sweat93_${key}`, serializedValue);
   } catch (err) {
     console.error('Error saving to localStorage', err);
   }
@@ -18,7 +18,7 @@ export const setLocalStorageItem = (key: string, value: any): void => {
  */
 export const getLocalStorageItem = <T>(key: string, defaultValue: T): T => {
   try {
-    const item = localStorage.getItem(`sweat24_${key}`);
+    const item = localStorage.getItem(`sweat93_${key}`);
     if (item === null) {
       return defaultValue;
     }
@@ -34,7 +34,7 @@ export const getLocalStorageItem = <T>(key: string, defaultValue: T): T => {
  */
 export const removeLocalStorageItem = (key: string): void => {
   try {
-    localStorage.removeItem(`sweat24_${key}`);
+    localStorage.removeItem(`sweat93_${key}`);
   } catch (err) {
     console.error('Error removing from localStorage', err);
   }

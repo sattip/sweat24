@@ -1,8 +1,8 @@
-# 🎯 Points System Backend Requirements - SWEAT24
+# 🎯 Points System Backend Requirements - sweat93
 
 ## 📋 Overview
 
-This document outlines the complete backend implementation requirements for the SWEAT24 Points Rewards System. The frontend is already implemented and waiting for these API endpoints.
+This document outlines the complete backend implementation requirements for the sweat93 Points Rewards System. The frontend is already implemented and waiting for these API endpoints.
 
 ## 🔗 Required API Endpoints
 

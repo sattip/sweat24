@@ -1,4 +1,4 @@
-package com.sweat24.app;
+package com.sweat93.app;
 
 import com.getcapacitor.BridgeActivity;
 

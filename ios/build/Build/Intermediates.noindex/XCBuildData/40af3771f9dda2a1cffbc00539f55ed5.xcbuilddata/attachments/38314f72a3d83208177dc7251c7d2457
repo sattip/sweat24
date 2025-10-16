@@ -4,20 +4,20 @@
   "case-sensitive": false,
   "roots": [{
     "type": "directory",
-    "name": "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Products/Debug-iphonesimulator/CapacitorCamera/CapacitorCamera.framework/Modules",
+    "name": "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Products/Debug-iphonesimulator/CapacitorCamera/CapacitorCamera.framework/Modules",
     "contents": [{
       "type": "file",
       "name": "module.modulemap",
-      "external-contents": "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorCamera.build/unextended-module.modulemap",
+      "external-contents": "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorCamera.build/unextended-module.modulemap",
     }]
     },
     {
     "type": "directory",
-    "name": "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Products/Debug-iphonesimulator/CapacitorCamera/CapacitorCamera.framework/Headers",
+    "name": "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Products/Debug-iphonesimulator/CapacitorCamera/CapacitorCamera.framework/Headers",
     "contents": [{
       "type": "file",
       "name": "CapacitorCamera-Swift.h",
-      "external-contents": "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorCamera.build/unextended-interface-header.h",
+      "external-contents": "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/CapacitorCamera.build/unextended-interface-header.h",
     }]
   }]
 }

@@ -1,6 +1,6 @@
 # 🔥 Firebase Cloud Messaging Setup Guide
 
-This guide will help you set up Firebase Cloud Messaging (FCM) for the Sweat24 app.
+This guide will help you set up Firebase Cloud Messaging (FCM) for the sweat93 app.
 
 ## 📋 Prerequisites
 
@@ -12,7 +12,7 @@ This guide will help you set up Firebase Cloud Messaging (FCM) for the Sweat24 a
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
 2. Click "Add project"
-3. Enter project name: `sweat24-notifications`
+3. Enter project name: `sweat93-notifications`
 4. Disable Google Analytics (optional)
 5. Click "Create project"
 
@@ -25,7 +25,7 @@ This guide will help you set up Firebase Cloud Messaging (FCM) for the Sweat24 a
 ## 🌐 Step 3: Add Web App
 
 1. In Project Overview, click **Web** icon `</>`
-2. Enter app nickname: `sweat24-web`
+2. Enter app nickname: `sweat93-web`
 3. Check "Also set up Firebase Hosting"
 4. Click "Register app"
 5. Copy the Firebase configuration object
@@ -47,9 +47,9 @@ Edit `src/config/firebase.ts`:
 ```typescript
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "sweat24-notifications.firebaseapp.com",
-  projectId: "sweat24-notifications",
-  storageBucket: "sweat24-notifications.appspot.com",
+  authDomain: "sweat93-notifications.firebaseapp.com",
+  projectId: "sweat93-notifications",
+  storageBucket: "sweat93-notifications.appspot.com",
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID",
   measurementId: "YOUR_MEASUREMENT_ID" // Optional
@@ -65,9 +65,9 @@ Edit `public/firebase-messaging-sw.js`:
 ```javascript
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
-  authDomain: "sweat24-notifications.firebaseapp.com",
-  projectId: "sweat24-notifications",
-  storageBucket: "sweat24-notifications.appspot.com",
+  authDomain: "sweat93-notifications.firebaseapp.com",
+  projectId: "sweat93-notifications",
+  storageBucket: "sweat93-notifications.appspot.com",
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID"
 };
@@ -78,7 +78,7 @@ const firebaseConfig = {
 ### Add Android App to Firebase
 
 1. In Firebase Console, click "Add app" → Android
-2. Enter package name: `com.sweat24.app`
+2. Enter package name: `com.sweat93.app`
 3. Download `google-services.json`
 4. Place it in `android/app/` directory
 
@@ -109,7 +109,7 @@ dependencies {
 ### Add iOS App to Firebase
 
 1. In Firebase Console, click "Add app" → iOS
-2. Enter bundle ID: `com.sweat24.app`
+2. Enter bundle ID: `com.sweat93.app`
 3. Download `GoogleService-Info.plist`
 4. Add it to your iOS project in Xcode
 
@@ -135,7 +135,7 @@ Add these environment variables to your Laravel `.env`:
 ```env
 FIREBASE_SERVER_KEY=your_server_key_here
 FIREBASE_SENDER_ID=your_sender_id_here
-FIREBASE_PROJECT_ID=sweat24-notifications
+FIREBASE_PROJECT_ID=sweat93-notifications
 ```
 
 ### Install Firebase Admin SDK (Laravel)

@@ -4,6 +4,7 @@ import { notificationService } from '@/services/notificationService';
 import { pusherService } from '@/services/pusherService';
 import { PendingUserModal } from '@/components/modals/PendingUserModal';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 
 interface AuthContextType {
   user: User | null;
@@ -36,23 +37,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Show modal only for approved users who haven't signed terms
-    console.log('🔍 AUTH DEBUG:', {
-      user: user,
-      status: user?.status,
-      has_signed_terms: user?.has_signed_terms,
-      condition1: user && user.status === 'active',
-      condition2: !user?.has_signed_terms,
-      finalCondition: user && user.status === 'active' && !user?.has_signed_terms
-    });
-
     if (user && user.status === 'active' && !user?.has_signed_terms) {
       // Always show modal for users who haven't signed terms in backend
       // Session storage is unreliable for critical functions
-      console.log('🚀 SHOWING MODAL for user', user.id, '- has_signed_terms:', user.has_signed_terms);
       setShowPendingModal(true);
     } else if (user && user.status === 'active' && user?.has_signed_terms) {
       // Hide modal when user has signed terms
-      console.log('✅ HIDING MODAL - user has signed terms:', user.has_signed_terms);
       setShowPendingModal(false);
     }
   }, [user]);
@@ -67,10 +57,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // ΠΑΝΤΑ φέρνουμε φρέσκα στοιχεία από backend στο background
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
-        
+
     // NOTIFICATIONS TEMPORARILY DISABLED DUE TO EMULATOR CRASHES
     // Will be enabled after production deployment
-    console.log('ℹ️ Notification service disabled for emulator stability');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -103,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Make actual API call to get fresh user data from backend
-      const response = await fetch('https://api.sweat93.gr/api/v1/auth/me', {
+      const response = await fetch(`${API_URL}/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -119,13 +108,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const data = await response.json();
-      console.log('🔄 FRESH USER DATA from backend:', data);
-      
+
       if (data.success && data.user) {
         let updatedUser = data.user;
-        
+
         // Backend already sends full URL for avatar, no need to modify it
-        console.log('📸 Avatar from backend:', updatedUser.avatar);
 
         // Fallback: αν δεν υπάρχουν aggregates για πακέτο, προσπάθησε να τα αντλήσεις από /users/{id}
         const needsPackageDerive =
@@ -134,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (needsPackageDerive) {
           try {
-            const detailsResp = await fetch(`https://api.sweat93.gr/api/v1/users/${updatedUser.id}`, {
+            const detailsResp = await fetch(`${API_URL}/users/${updatedUser.id}`, {
               method: 'GET',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -171,10 +158,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // Store and set
-        localStorage.setItem('sweat24_user', JSON.stringify(updatedUser));
+        localStorage.setItem('sweat93_user', JSON.stringify(updatedUser));
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
-        console.log('✅ User refreshed - has_signed_terms:', data.user.has_signed_terms);
       }
     } catch (error) {
       console.error('Error refreshing user:', error);
@@ -183,15 +169,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handlePendingUserSignature = async (signatureData: string) => {
-    console.log('🚀 SIGNATURE SAVE CALLED for user:', user?.id);
-    console.log('🚀 Signature data length:', signatureData?.length);
-    
     try {
       // Save signature to backend
       const token = localStorage.getItem('auth_token');
-      console.log('🔍 Token exists:', !!token);
-      console.log('🔍 User exists:', !!user);
-      
+
       if (!token || !user) {
         throw new Error('No authentication token or user');
       }
@@ -202,15 +183,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         document_type: 'terms_and_conditions',
         document_version: '1.0',
       };
-      
-      console.log('🚀 SENDING REQUEST to /api/v1/signatures');
-      console.log('🚀 Request payload:', {
-        user_id: requestPayload.user_id,
-        signature_data_length: signatureData.length,
-        document_type: requestPayload.document_type
-      });
 
-      const response = await fetch('https://api.sweat93.gr/api/v1/signatures', {
+      const response = await fetch(`${API_URL}/signatures`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -220,8 +194,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify(requestPayload),
       });
 
-      console.log('🚀 RESPONSE STATUS:', response.status, response.statusText);
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Failed to save signature:', errorText);
@@ -229,7 +201,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const responseData = await response.json();
-      console.log('✅ Signature saved successfully:', responseData);
 
       // Refresh user data to get updated has_signed_terms from backend
       await refreshUser();

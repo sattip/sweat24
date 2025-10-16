@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔧 ΔΙΟΡΘΩΣΗ FAVICON - Sweat24 Logo"
+echo "🔧 ΔΙΟΡΘΩΣΗ FAVICON - sweat93 Logo"
 echo "=================================="
 
 # Βήμα 1: Αντιγραφή του logo ως favicon
@@ -14,7 +14,7 @@ npm run build
 # Βήμα 3: Έλεγχος αν το build ολοκληρώθηκε
 if [ $? -eq 0 ]; then
     echo "✅ Build ολοκληρώθηκε επιτυχώς!"
-    echo "🎯 Favicon διορθώθηκε - θα βλέπετε το logo του Sweat24"
+    echo "🎯 Favicon διορθώθηκε - θα βλέπετε το logo του sweat93"
     echo ""
     echo "📌 ΣΗΜΕΙΩΣΗ: Κάντε hard refresh (Ctrl+F5) στον browser"
     echo "   για να φορτωθεί το νέο favicon!"

@@ -362,6 +362,6 @@ Log::info('age_verification', [
 ---
 
 **Ημερομηνία Σύνταξης**: 5 Αυγούστου 2025  
-**Συντάκτης**: AI Assistant για SWEAT24 Client App  
+**Συντάκτης**: AI Assistant για sweat93 Client App  
 **Status**: Production Ready  
 **Priority**: HIGH - Νομική Συμμόρφωση

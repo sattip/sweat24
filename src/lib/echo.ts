@@ -1,5 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { API_URL } from '@/config/api';
 
 declare global {
   interface Window {
@@ -19,20 +20,23 @@ const getAuthHeaders = () => {
   };
 };
 
+// Get broadcasting auth endpoint from API_URL
+const BROADCASTING_AUTH_ENDPOINT = `${API_URL}/broadcasting/auth`;
+
 // CORRECT PUSHER CONFIGURATION - NOT REVERB!
 export const echo = new Echo({
   broadcaster: 'pusher',
   key: '9a32af76b0f65715f3ea',
   cluster: 'eu',
   forceTLS: true,
-  authEndpoint: 'https://api.sweat93.gr/api/v1/broadcasting/auth',
+  authEndpoint: BROADCASTING_AUTH_ENDPOINT,
   authorizer: (channel) => {
     return {
       authorize: (socketId: string, callback: (error: boolean, data: any) => void) => {
         const headers = getAuthHeaders();
         const body = `socket_id=${encodeURIComponent(socketId)}&channel_name=${encodeURIComponent(channel.name)}`;
 
-        fetch('https://api.sweat93.gr/api/v1/broadcasting/auth', {
+        fetch(BROADCASTING_AUTH_ENDPOINT, {
           method: 'POST',
           headers,
           body,

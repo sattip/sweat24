@@ -519,7 +519,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
 
     // Check authentication first
     try {
-      const userStr = localStorage.getItem('sweat24_user');
+      const userStr = localStorage.getItem('sweat93_user');
       token = localStorage.getItem('auth_token') || '';
 
       console.log('🔐 Auth check:', {
@@ -562,7 +562,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       // Get fresh user data from backend
       try {
         console.log('🔄 Fetching fresh user data from backend...');
-        const userDataResponse = await fetch('https://api.sweat93.gr/api/v1/auth/me', {
+        const userDataResponse = await fetch(`${API.API_URL}/auth/me`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -584,7 +584,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           user = userDataResult.user;
 
           // Update localStorage with fresh data
-          localStorage.setItem('sweat24_user', JSON.stringify(user));
+          localStorage.setItem('sweat93_user', JSON.stringify(user));
           localStorage.setItem('user', JSON.stringify(user));
 
           console.log('✅ Fresh user data loaded:', {

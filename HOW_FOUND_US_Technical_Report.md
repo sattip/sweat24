@@ -1,7 +1,7 @@
 # Τεχνική Αναφορά: Φόρμα "Πώς μας βρήκατε;" στη Διαδικασία Εγγραφής
 
 **Ημερομηνία Σύνταξης**: 5 Αυγούστου 2025  
-**Συντάκτης**: AI Assistant για SWEAT24 Client App  
+**Συντάκτης**: AI Assistant για sweat93 Client App  
 **Status**: Production Ready  
 **Priority**: MEDIUM
 

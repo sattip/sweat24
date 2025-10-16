@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { el } from 'date-fns/locale';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 
 interface Message {
   id: number;
@@ -135,7 +136,7 @@ export function ChatWidget() {
       if (!token) return;
       
       // Use the backend's specified endpoint for marking messages as read
-      const response = await fetch(`https://sweat93laravel.obs.com.gr/api/v1/chat/conversations/${conversation.id}/read`, {
+      const response = await fetch(`${API_URL}/chat/conversations/${conversation.id}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -37,7 +37,7 @@ return data.data || data; // Handle both formats
 **Αρχείο:** `src/pages/ReferralProgramPage.tsx`
 
 **Αλλαγές:**
-- **Hardcoded URL:** Αλλάχθηκε από `sweat24.obs.com.gr` σε `sweat93laravel.obs.com.gr`
+- **Hardcoded URL:** Αλλάχθηκε από `sweat93.obs.com.gr` σε `sweat93laravel.obs.com.gr`
 - **Error Handling:** Προστέθηκε user-friendly error messages με toast notifications
 - **Comments:** Προστέθηκαν σχόλια που εξηγούν το σωστό API endpoint
 
@@ -75,7 +75,7 @@ link: "https://sweat93laravel.obs.com.gr/invite/DEMO123"
   "success": true,
   "data": {
     "referral_code": "MARIA1234",
-    "referral_link": "https://sweat24.obs.com.gr/invite/MARIA1234",
+    "referral_link": "https://sweat93.obs.com.gr/invite/MARIA1234",
     "total_referrals": 2,
     "next_tier": {
       "name": "3η Σύσταση",

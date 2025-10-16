@@ -9,7 +9,7 @@
       "guid" : "0ca3007d900a678c2b4d53418799ee3d34df47fa015b7e467e67e9235d8a1297"
     }
   ],
-  "containerPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/App/App.xcworkspace",
+  "containerPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/App/App.xcworkspace",
   "continueBuildingAfterErrors" : false,
   "dependencyScope" : "workspace",
   "enableIndexBuildArena" : false,
@@ -29,13 +29,13 @@
       "targetArchitecture" : "undefined_arch"
     },
     "arenaInfo" : {
-      "buildIntermediatesPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex",
-      "buildProductsPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Products",
-      "derivedDataPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/build",
-      "indexDataStoreFolderPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Index.noindex/DataStore",
+      "buildIntermediatesPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Products",
+      "derivedDataPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/build",
+      "indexDataStoreFolderPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Index.noindex/DataStore",
       "indexEnableDataStore" : true,
-      "indexPCHPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Index.noindex/PrecompiledHeaders",
-      "pchPath" : "/Users/sattip/Documents/GitHub/sweat24/ios/build/Build/Intermediates.noindex/PrecompiledHeaders"
+      "indexPCHPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/sattip/Documents/GitHub/sweat93/ios/build/Build/Intermediates.noindex/PrecompiledHeaders"
     },
     "configurationName" : "Debug",
     "overrides" : {

@@ -33,16 +33,14 @@ export const UpcomingBookings: React.FC = () => {
   useEffect(() => {
     if (user) {
       fetchUpcomingBookings();
-      
+
       // Set up polling every 30 seconds for upcoming bookings updates
       const pollingInterval = setInterval(() => {
-        console.log('🔄 Polling for upcoming bookings updates...');
         fetchUpcomingBookings();
       }, 30000); // 30 seconds
 
       // Cleanup interval on unmount
       return () => {
-        console.log('🛑 Stopping upcoming bookings polling');
         clearInterval(pollingInterval);
       };
     }
@@ -122,7 +120,7 @@ export const UpcomingBookings: React.FC = () => {
           <div className="space-y-3">
             {bookings.map((booking) => {
               const canCancel = !isWithin6Hours(booking.date);
-              
+
               return (
                 <div key={booking.id} className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                   <div className="flex items-start justify-between">
@@ -178,7 +176,7 @@ export const UpcomingBookings: React.FC = () => {
                         <span className="font-medium">{booking.booked}/{booking.capacity}</span>
                       </div>
                       <div className="mt-1 h-2 bg-secondary rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-primary transition-all"
                           style={{ width: `${(booking.booked / booking.capacity) * 100}%` }}
                         />

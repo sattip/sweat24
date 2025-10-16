@@ -19,7 +19,6 @@ class HybridFCMService {
 
   constructor() {
     this.isNativePlatform = Capacitor.isNativePlatform();
-    console.log(`🔥 Hybrid FCM Service created for ${this.isNativePlatform ? 'native' : 'web'} platform`);
   }
 
   /**
@@ -27,10 +26,7 @@ class HybridFCMService {
    */
   async initialize(): Promise<boolean> {
     try {
-      console.log('🔥 Initializing Hybrid FCM service...');
-
       if (this.isInitialized) {
-        console.log('✅ Hybrid FCM service already initialized');
         return true;
       }
 
@@ -50,8 +46,6 @@ class HybridFCMService {
    */
   private async initializeNativeFCM(): Promise<boolean> {
     try {
-      console.log('📱 Initializing native FCM...');
-
       // Request permissions
       const permission = await PushNotifications.requestPermissions();
       
@@ -60,14 +54,11 @@ class HybridFCMService {
         throw new Error('Push notification permissions denied');
       }
 
-      console.log('✅ Push notification permissions granted');
-
       // Register for push notifications
       await PushNotifications.register();
 
       // Add listeners
       PushNotifications.addListener('registration', (token: Token) => {
-        console.log('✅ Native FCM registration success:', token.value.substring(0, 30) + '...');
         this.currentToken = token.value;
         this.sendTokenToBackend(token.value, 'native_fcm');
       });
@@ -78,17 +69,14 @@ class HybridFCMService {
       });
 
       PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-        console.log('📩 Native FCM notification received:', notification);
         this.handleNativeMessage(notification);
       });
 
       PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-        console.log('👆 Native FCM notification action performed:', notification);
         this.handleNativeMessage(notification.notification);
       });
 
       this.isInitialized = true;
-      console.log('🎉 Native FCM initialized successfully!');
       return true;
 
     } catch (error) {
@@ -102,8 +90,6 @@ class HybridFCMService {
    */
   private async initializeWebFCM(): Promise<boolean> {
     try {
-      console.log('🌐 Initializing web FCM...');
-
       if (!messaging) {
         console.error('❌ Firebase messaging not available');
         return false;
@@ -129,7 +115,6 @@ class HybridFCMService {
       await this.sendTokenToBackend(token, 'web_fcm');
 
       this.isInitialized = true;
-      console.log('🎉 Web FCM initialized successfully!');
       return true;
 
     } catch (error) {
@@ -145,10 +130,8 @@ class HybridFCMService {
     try {
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('✅ Service Worker registered:', registration);
-        
+
         await navigator.serviceWorker.ready;
-        console.log('✅ Service Worker ready');
       }
     } catch (error) {
       console.error('⚠️ Service Worker registration failed:', error);
@@ -163,13 +146,11 @@ class HybridFCMService {
     try {
       // Request permission
       const permission = await Notification.requestPermission();
-      
+
       if (permission !== 'granted') {
         console.warn('⚠️ Notification permission denied');
         return null;
       }
-
-      console.log('✅ Notification permission granted');
 
       // Get FCM token
       const token = await getToken(messaging!, {
@@ -177,7 +158,6 @@ class HybridFCMService {
       });
 
       if (token) {
-        console.log('✅ FCM token received:', token.substring(0, 30) + '...');
         return token;
       } else {
         console.warn('⚠️ No registration token available');
@@ -196,7 +176,6 @@ class HybridFCMService {
   private setupWebMessageListener(): void {
     try {
       onMessage(messaging!, (payload: MessagePayload) => {
-        console.log('📩 Web FCM message received:', payload);
         this.handleWebMessage(payload);
       });
     } catch (error) {
@@ -293,8 +272,6 @@ class HybridFCMService {
    */
   private async sendTokenToBackend(token: string, type: string): Promise<void> {
     try {
-      console.log(`📤 Sending ${type} token to backend...`);
-
       const response = await API.apiRequest('/users/push-token', {
         method: 'POST',
         body: JSON.stringify({
@@ -313,14 +290,11 @@ class HybridFCMService {
       if (!response.ok) {
         throw new Error(`Backend token registration failed: ${response.status}`);
       }
-
-      console.log('✅ FCM token sent to backend successfully');
     } catch (error) {
       console.error('⚠️ Failed to send FCM token to backend:', error);
-      
+
       // Retry after delay
       setTimeout(() => {
-        console.log('🔄 Retrying FCM token send...');
         this.sendTokenToBackend(token, type);
       }, 5000);
     }
@@ -331,20 +305,12 @@ class HybridFCMService {
    */
   async sendTestNotification(title: string = 'Test FCM Notification', body: string = 'This is a test Firebase Cloud Messaging notification! 🔥'): Promise<boolean> {
     try {
-      console.log('📤 Sending test FCM notification...');
-      
-      // Check if user is authenticated
-      const token = localStorage.getItem('auth_token');
-      console.log('🔐 Auth token present:', !!token, token ? `${token.substring(0, 20)}...` : 'None');
-
       const requestData = {
         title,
         body, // Try both fields
         message: body, // Backend expects 'message' field
         token: this.currentToken
       };
-
-      console.log('📤 Sending request data:', requestData);
 
       const response = await API.apiRequest('/notifications/test', {
         method: 'POST',
@@ -362,7 +328,6 @@ class HybridFCMService {
         throw new Error(`Test notification failed: ${response.status} - ${errorText}`);
       }
 
-      console.log('✅ Test FCM notification sent successfully');
       return true;
 
     } catch (error) {

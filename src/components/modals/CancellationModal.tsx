@@ -85,7 +85,7 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
     try {
       setCheckingPolicy(true);
       // Get current user and auth token for authorization
-      const userStr = localStorage.getItem('sweat24_user');
+      const userStr = localStorage.getItem('sweat93_user');
       const token = localStorage.getItem('auth_token');
       if (!userStr || !token) {
         throw new Error('Not authenticated');

@@ -58,7 +58,7 @@ const AdvancedNotificationSettings: React.FC = () => {
 
   const handleSendTest = async () => {
     const title = testMessage.title || 'Test Notification';
-    const body = testMessage.body || 'This is a test notification from Sweat24!';
+    const body = testMessage.body || 'This is a test notification from Sweat93!';
     await sendTestNotification(title, body);
   };
 

@@ -174,7 +174,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   // Load saved data from localStorage or use default
   const loadSavedData = (): SignupData => {
     try {
-      const saved = localStorage.getItem('sweat24_signup_data');
+      const saved = localStorage.getItem('sweat93_signup_data');
       if (saved) {
         const parsedData = JSON.parse(saved);
         return { ...getDefaultSignupData(), ...parsedData };
@@ -248,7 +248,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     const { password, confirmPassword, ...safeData } = dataToSave;
     
     try {
-      localStorage.setItem('sweat24_signup_data', JSON.stringify(safeData));
+      localStorage.setItem('sweat93_signup_data', JSON.stringify(safeData));
     } catch (error) {
       console.warn('Failed to save signup data:', error);
     }
@@ -277,7 +277,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   const handleComplete = () => {
     // Clear saved data on successful completion
     try {
-      localStorage.removeItem('sweat24_signup_data');
+      localStorage.removeItem('sweat93_signup_data');
     } catch (error) {
       console.warn('Failed to clear saved signup data:', error);
     }

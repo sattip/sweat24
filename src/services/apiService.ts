@@ -33,7 +33,7 @@ export const authService = {
     const data = await response.json();
     if (data.success && data.user) {
       // Store BOTH user data AND auth token
-      localStorage.setItem('sweat24_user', JSON.stringify(data.user));
+      localStorage.setItem('sweat93_user', JSON.stringify(data.user));
       localStorage.setItem('user', JSON.stringify(data.user));
       
       // Store auth token if provided
@@ -48,18 +48,18 @@ export const authService = {
   },
   
   logout() {
-    localStorage.removeItem('sweat24_user');
+    localStorage.removeItem('sweat93_user');
     localStorage.removeItem('user');
     localStorage.removeItem('auth_token');
   },
   
   getCurrentUser() {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     return userStr ? JSON.parse(userStr) : null;
   },
   
   isAuthenticated() {
-    return !!localStorage.getItem('sweat24_user');
+    return !!localStorage.getItem('sweat93_user');
   }
 };
 
@@ -94,7 +94,7 @@ export const classService = {
 export const bookingService = {
   async getUserBookings() {
     // Get user from localStorage
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) {
       return [];
     }
@@ -111,7 +111,6 @@ export const bookingService = {
       },
     });
     if (!response.ok) {
-      console.log('Failed to fetch user bookings, returning empty array');
       return [];
     }
     const data = await response.json();
@@ -120,7 +119,7 @@ export const bookingService = {
 
   async getAll() {
     // Get user from localStorage
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) {
       return [];
     }
@@ -137,7 +136,6 @@ export const bookingService = {
       },
     });
     if (!response.ok) {
-      console.log('Failed to fetch all bookings, returning empty array');
       return [];
     }
     const data = await response.json();
@@ -146,7 +144,7 @@ export const bookingService = {
 
   async create(data: any) {
     // Get user from localStorage and auth token
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     const token = localStorage.getItem('auth_token');
     
     if (!userStr || !token) {
@@ -181,24 +179,20 @@ export const bookingService = {
     
     if (!response.ok) {
       let errorMessage = 'Failed to create booking';
-      
+
       try {
         const errorText = await response.text();
-        console.log('🔍 Raw error response:', errorText);
-        
+
         // Try to parse as JSON
         const errorData = JSON.parse(errorText);
-        console.log('🔍 Parsed error data:', errorData);
-        
+
         if (errorData.message) {
           errorMessage = errorData.message;
         }
       } catch (parseError) {
-        console.log('🔍 Error parsing response:', parseError);
         // Keep default message if can't parse
       }
-      
-      console.log('🔍 Final error message:', errorMessage);
+
       throw new Error(errorMessage);
     }
     return response.json();
@@ -213,7 +207,7 @@ export const bookingService = {
     const data = await response.json();
 
     // Trigger after_lesson questionnaire
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (userStr) {
       const user = JSON.parse(userStr);
       import('@/utils/triggerQuestionnaire').then(({ triggerQuestionnaireAfterEvent }) => {
@@ -225,15 +219,10 @@ export const bookingService = {
   },
 
   async cancel(id: string | number, reason?: string) {
-    console.log('🔍 bookingService.cancel called with:', id, reason);
-
     try {
       // Get user and auth token
-      const userStr = localStorage.getItem('sweat24_user');
+      const userStr = localStorage.getItem('sweat93_user');
       const token = localStorage.getItem('auth_token');
-
-      console.log('🔍 User from localStorage:', userStr);
-      console.log('🔍 Token exists:', !!token);
 
       if (!userStr || !token) {
         console.error('🔍 Not authenticated - missing user or token');
@@ -242,7 +231,6 @@ export const bookingService = {
 
       const user = JSON.parse(userStr);
       const url = buildApiUrl(`/bookings/${id}/cancel`);
-      console.log('🔍 Making request to:', url);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -256,9 +244,6 @@ export const bookingService = {
           user_id: user.id
         }),
       });
-
-      console.log('🔍 Response status:', response.status);
-      console.log('🔍 Response ok:', response.ok);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -278,7 +263,6 @@ export const bookingService = {
       }
 
       const data = await response.json();
-      console.log('🔍 Cancel booking success response:', data);
 
       if (data?.success === false) {
         throw new Error(data.message || 'Σφάλμα κατά την ακύρωση');
@@ -300,7 +284,6 @@ export const bookingService = {
       }
 
       // Mock successful cancellation for development when the network request truly fails
-      console.log('🔍 Using mock cancellation response');
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
 
       return {
@@ -312,7 +295,7 @@ export const bookingService = {
   },
 
   async reschedule(id: string | number, newClassId: string | number, reason?: string) {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     const token = localStorage.getItem('auth_token');
     
     if (!userStr || !token) throw new Error('Not authenticated');
@@ -339,32 +322,10 @@ export const bookingService = {
   },
 
   async getUserPastBookings() {
-    // Get user from localStorage (using the same pattern as other methods)
-    const userStr = localStorage.getItem('sweat24_user');
-    if (!userStr) {
-      console.log('No user found in localStorage');
-      return [];
-    }
-    
-    const user = JSON.parse(userStr);
-    
-    // Use the test-history endpoint without v1 version for this specific endpoint
-    const response = await fetch(
-      `https://api.sweat93.gr/api/test-history?user_id=${user.id}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-        },
-      }
-    );
-    
-    if (!response.ok) {
-      console.log('Failed to fetch past bookings, returning empty array');
-      return [];
-    }
-    
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
+    // TODO: Backend endpoint /bookings/past doesn't exist yet
+    // Return empty array until backend implements this endpoint
+    // Past bookings are currently included in the main /bookings endpoint
+    return [];
   }
 };
 
@@ -372,7 +333,7 @@ export const bookingService = {
 export const bookingRequestService = {
   async create(data: any) {
     // Get user from localStorage and auth token
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     const token = localStorage.getItem('auth_token');
     
     if (!userStr || !token) {
@@ -400,24 +361,20 @@ export const bookingRequestService = {
     
     if (!response.ok) {
       let errorMessage = 'Failed to create booking request';
-      
+
       try {
         const errorText = await response.text();
-        console.log('🔍 Raw error response:', errorText);
-        
+
         // Try to parse as JSON
         const errorData = JSON.parse(errorText);
-        console.log('🔍 Parsed error data:', errorData);
-        
+
         if (errorData.message) {
           errorMessage = errorData.message;
         }
       } catch (parseError) {
-        console.log('🔍 Error parsing response:', parseError);
         // Keep default message if can't parse
       }
-      
-      console.log('🔍 Final error message:', errorMessage);
+
       throw new Error(errorMessage);
     }
     return response.json();
@@ -425,20 +382,15 @@ export const bookingRequestService = {
 
   async getMyRequests() {
     // Get user from localStorage
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     const token = localStorage.getItem('auth_token');
-    
+
     if (!userStr || !token) {
-      console.log('🔍 getMyRequests: No user or token found');
-      console.log('🔍 userStr exists:', !!userStr);
-      console.log('🔍 token exists:', !!token);
       return [];
     }
-    
+
     const user = JSON.parse(userStr);
-    console.log('🔍 getMyRequests: Making request for user:', user.id);
-    console.log('🔍 getMyRequests: Token:', token?.substring(0, 20) + '...');
-    
+
     // Use direct fetch with user authentication
     const response = await fetch(buildApiUrl('/booking-requests/my-requests'), {
       method: 'GET',
@@ -448,30 +400,22 @@ export const bookingRequestService = {
         'Accept': 'application/json',
       },
     });
-    
-    console.log('🔍 getMyRequests: Response status:', response.status);
-    console.log('🔍 getMyRequests: Response headers:', Object.fromEntries(response.headers.entries()));
-    
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('🔍 getMyRequests: Error response:', errorText);
-      
+
       try {
         const errorData = JSON.parse(errorText);
-        console.log('🔍 getMyRequests: Parsed error data:', errorData);
       } catch (parseError) {
-        console.log('🔍 getMyRequests: Could not parse error as JSON');
       }
-      
+
       return [];
     }
-    
+
     const data = await response.json();
-    console.log('🔍 getMyRequests: Success response:', data);
-    
+
     // Handle paginated response from Laravel
     if (data && data.data && Array.isArray(data.data)) {
-      console.log('🔍 getMyRequests: Returning paginated data:', data.data);
       return data.data;
     }
     
@@ -481,17 +425,15 @@ export const bookingRequestService = {
 
   async cancel(id: string | number, reason?: string) {
     // Get user and auth token
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     const token = localStorage.getItem('auth_token');
     
     if (!userStr || !token) throw new Error('Not authenticated');
-    
+
     const user = JSON.parse(userStr);
-    console.log('🔍 Cancel booking request:', id, 'for user:', user.id);
-    
+
     // First try with empty body as per API specification
-    console.log('🔍 Cancel request - trying with empty body');
-    
+
     const response = await fetch(buildApiUrl(`/booking-requests/${id}/cancel`), {
       method: 'POST',
       headers: {
@@ -501,12 +443,9 @@ export const bookingRequestService = {
       },
       body: JSON.stringify({}),
     });
-    
-    console.log('🔍 Cancel response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('🔍 Cancel error response:', errorText);
       throw new Error('Failed to cancel booking request: ' + errorText);
     }
     return response.json();
@@ -571,7 +510,6 @@ export const dashboardService = {
       // Get auth token for authenticated request
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        console.log('No auth token found, returning default stats');
         return { bookings_today: 0, total_users: 0, active_classes: 0 };
       }
 
@@ -581,16 +519,14 @@ export const dashboardService = {
           'Accept': 'application/json',
         }
       });
-      
+
       if (!response.ok) {
-        console.log(`Dashboard stats API returned ${response.status}, returning default stats`);
         // Return empty stats instead of throwing error
         return { bookings_today: 0, total_users: 0, active_classes: 0 };
       }
       const data = await response.json();
       return data || { bookings_today: 0, total_users: 0, active_classes: 0 };
     } catch (error) {
-      console.log('Dashboard stats network error, returning default stats:', error);
       // Network error - return empty stats
       return { bookings_today: 0, total_users: 0, active_classes: 0 };
     }
@@ -625,7 +561,7 @@ export const profileService = {
 export const waitlistService = {
   async join(classId: string | number) {
     // Use direct fetch to avoid auth issues
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
@@ -643,7 +579,7 @@ export const waitlistService = {
   },
 
   async leave(classId: string | number) {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) throw new Error('Not authenticated');
     
     const user = JSON.parse(userStr);
@@ -697,7 +633,7 @@ export const storeProductService = {
 // Generic API service for authenticated requests
 export const apiService = {
   async get(url: string) {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) throw new Error('Not authenticated');
     
     const response = await fetch(buildApiUrl(url), {
@@ -713,7 +649,7 @@ export const apiService = {
   },
   
   async post(url: string, data: any) {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) throw new Error('Not authenticated');
     
     const response = await fetch(buildApiUrl(url), {
@@ -730,7 +666,7 @@ export const apiService = {
   },
   
   async put(url: string, data?: any) {
-    const userStr = localStorage.getItem('sweat24_user');
+    const userStr = localStorage.getItem('sweat93_user');
     if (!userStr) throw new Error('Not authenticated');
     
     const response = await fetch(buildApiUrl(url), {
@@ -752,7 +688,6 @@ export const notificationService = {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        console.log('No auth token for notifications');
         return [];
       }
 
@@ -764,10 +699,9 @@ export const notificationService = {
           'Accept': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          console.log('Notifications endpoint not found');
           return [];
         }
         throw new Error('Failed to fetch notifications');
@@ -847,7 +781,7 @@ export const orderHistoryService = {
   async getOrderHistory(userId?: number) {
     try {
       const token = localStorage.getItem('auth_token');
-      const userStr = localStorage.getItem('sweat24_user');
+      const userStr = localStorage.getItem('sweat93_user');
       
       if (!token && !userId) {
         throw new Error('Not authenticated');
@@ -903,8 +837,8 @@ export const loyaltyService = {
         throw new Error('Not authenticated');
       }
 
-      // ✅ ΣΩΣΤΟ ENDPOINT: https://api.sweat93.gr/api/v1/loyalty/dashboard
-      const response = await fetch('https://api.sweat93.gr/api/v1/loyalty/dashboard', {
+      // ✅ ΣΩΣΤΟ ENDPOINT: Using environment API_URL
+      const response = await fetch(buildApiUrl('/loyalty/dashboard'), {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -927,12 +861,10 @@ export const loyaltyService = {
       }
 
       const data = await response.json();
-      console.log('✅ Loyalty Dashboard Response:', data);
-      
+
       // ✅ ΔΙΟΡΘΩΣΗ: Επιστρέφω τα δεδομένα από το data.data
       const dashboardData = data.data || data;
-      console.log('✅ Parsed dashboard data:', dashboardData);
-      
+
       return dashboardData;
     } catch (error) {
       console.error('❌ Error fetching loyalty dashboard:', error);
@@ -947,8 +879,8 @@ export const loyaltyService = {
         throw new Error('Not authenticated');
       }
 
-      // ✅ ΣΩΣΤΟ ENDPOINT: https://api.sweat93.gr/api/v1/loyalty/rewards/available
-      const response = await fetch('https://api.sweat93.gr/api/v1/loyalty/rewards/available', {
+      // ✅ ΣΩΣΤΟ ENDPOINT: Using environment API_URL
+      const response = await fetch(buildApiUrl('/loyalty/rewards/available'), {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -971,25 +903,20 @@ export const loyaltyService = {
       }
 
       const data = await response.json();
-      console.log('✅ Available Rewards Response:', data);
-      
+
       // ✅ ΔΙΟΡΘΩΣΗ: Τα rewards είναι στο data.rewards, όχι στο root
       let rewards = [];
-      
+
       if (data.data && Array.isArray(data.data.rewards)) {
         rewards = data.data.rewards;
-        console.log(`✅ Found ${rewards.length} loyalty rewards in data.rewards`);
       } else if (Array.isArray(data.rewards)) {
         rewards = data.rewards;
-        console.log(`✅ Found ${rewards.length} loyalty rewards in rewards`);
       } else if (Array.isArray(data)) {
         rewards = data;
-        console.log(`✅ Found ${rewards.length} loyalty rewards in root array`);
       } else {
-        console.log('⚠️ No rewards array found in response structure:', Object.keys(data));
         rewards = [];
       }
-      
+
       return rewards;
     } catch (error) {
       console.error('❌ Error fetching available rewards:', error);
@@ -1004,8 +931,8 @@ export const loyaltyService = {
         throw new Error('Not authenticated');
       }
 
-      // ✅ ΣΩΣΤΟ ENDPOINT: https://api.sweat93.gr/api/v1/loyalty/rewards/{id}/redeem
-      const response = await fetch(`https://api.sweat93.gr/api/v1/loyalty/rewards/${rewardId}/redeem`, {
+      // ✅ ΣΩΣΤΟ ENDPOINT: Using environment API_URL
+      const response = await fetch(buildApiUrl(`/loyalty/rewards/${rewardId}/redeem`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1016,8 +943,7 @@ export const loyaltyService = {
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('❌ Redeem error:', errorData);
-        
+
         if (response.status === 401) {
           throw new Error('Παρακαλώ συνδεθείτε ξανά');
         }
@@ -1032,7 +958,6 @@ export const loyaltyService = {
       }
 
       const data = await response.json();
-      console.log('✅ Reward redeemed successfully:', data);
       return data;
     } catch (error) {
       console.error('❌ Error redeeming reward:', error);
@@ -1154,7 +1079,7 @@ export const userService = {
       if (!response.ok) {
         if (response.status === 401) {
           // Clear auth if token is invalid
-          localStorage.removeItem('sweat24_user');
+          localStorage.removeItem('sweat93_user');
           localStorage.removeItem('user');
           localStorage.removeItem('auth_token');
           throw new Error('Authentication required');
@@ -1165,7 +1090,7 @@ export const userService = {
       const data = await response.json();
       if (data.success && data.user) {
         // Update local storage with fresh user data
-        localStorage.setItem('sweat24_user', JSON.stringify(data.user));
+        localStorage.setItem('sweat93_user', JSON.stringify(data.user));
         localStorage.setItem('user', JSON.stringify(data.user));
         return data.user;
       }
@@ -1179,7 +1104,7 @@ export const userService = {
   
   async updateProfile(userId: number, data: any) {
     try {
-      const token = localStorage.getItem('sweat24_token');
+      const token = localStorage.getItem('sweat93_token');
       const response = await fetch(buildApiUrl('/profile'), {
         method: 'PUT',
         headers: {
@@ -1244,7 +1169,6 @@ export const newMemberInfoService = {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        console.log('No auth token found for new member info');
         return [];
       }
 
@@ -1287,7 +1211,6 @@ export const newMemberInfoService = {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        console.log('No auth token found for category info');
         return [];
       }
 

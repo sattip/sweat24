@@ -67,7 +67,7 @@ export const ApprovedAppointments: React.FC = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="text-xl flex items-center gap-2">
             <Calendar className="h-5 w-5" />
             Εγκεκριμένα Ραντεβού
           </CardTitle>
@@ -84,7 +84,7 @@ export const ApprovedAppointments: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="text-xl flex items-center gap-2">
           <Calendar className="h-5 w-5" />
           Εγκεκριμένα Ραντεβού
         </CardTitle>

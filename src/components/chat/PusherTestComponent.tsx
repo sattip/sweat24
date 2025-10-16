@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { pusherService } from '@/services/pusherService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
+import { API_URL } from '@/config/api';
 
 export function PusherTestComponent() {
   const { user, isAuthenticated } = useAuth();
@@ -56,7 +57,7 @@ export function PusherTestComponent() {
     }
 
     try {
-      const response = await fetch('https://sweat93laravel.obs.com.gr/broadcasting/auth', {
+      const response = await fetch(`${API_URL}/broadcasting/auth`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -156,7 +157,7 @@ export function PusherTestComponent() {
           <ul className="list-disc list-inside mt-1">
             <li>Pusher Key: {import.meta.env.VITE_PUSHER_APP_KEY || 'YOUR_PUSHER_APP_KEY'}</li>
             <li>Cluster: {import.meta.env.VITE_PUSHER_CLUSTER || 'eu'}</li>
-            <li>Auth Endpoint: https://sweat93laravel.obs.com.gr/broadcasting/auth</li>
+            <li>Auth Endpoint: {API_URL}/broadcasting/auth</li>
           </ul>
         </div>
       </CardContent>

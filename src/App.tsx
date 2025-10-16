@@ -53,13 +53,14 @@ import { QuestionnairePromptManager } from "./components/questionnaires/Question
 import QuestionnairesPage from "./pages/QuestionnairesPage";
 import QuestionnaireDetailPage from "./pages/QuestionnaireDetailPage";
 import NewMemberInfoPage from "./pages/NewMemberInfoPage";
+import { BottomNavigation } from "./components/BottomNavigation";
 
 const queryClient = new QueryClient();
 
 function BackButtonHandler() {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Apply mobile keyboard fixes
   useMobileKeyboardFix();
 
@@ -89,6 +90,20 @@ function BackButtonHandler() {
   }, [location.pathname, navigate]);
 
   return null;
+}
+
+function ConditionalBottomNav() {
+  const location = useLocation();
+  const publicRoutes = ['/', '/login', '/signup', '/signup-success', '/evaluation'];
+
+  // Don't show bottom nav on login, signup, or public pages
+  const showBottomNav = !publicRoutes.some(route =>
+    location.pathname === route || location.pathname.startsWith('/evaluation')
+  );
+
+  if (!showBottomNav) return null;
+
+  return <BottomNavigation />;
 }
 
 const App = () => {
@@ -174,6 +189,7 @@ const App = () => {
           <ChatWidget />
           <NotificationManager />
           <QuestionnairePromptManager />
+          <ConditionalBottomNav />
         </BrowserRouter>
           </PointsProvider>
         </CartProvider>

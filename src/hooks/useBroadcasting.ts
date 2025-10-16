@@ -24,7 +24,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
   const { user } = useAuth();
   const isConnectedRef = useRef(false);
   const channelsRef = useRef<any[]>([]);
-  
+
   const {
     onNotification,
     debug = false
@@ -38,10 +38,10 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
 
   const showNotificationToast = useCallback((notification: BroadcastNotification) => {
     log('Showing notification toast:', notification);
-    
+
     const isPositive = ['order_ready', 'booking_request_status', 'new_event'].includes(notification.type);
-    const duration = notification.priority === 'high' ? 3000 : 
-                     notification.priority === 'medium' ? 2500 : 2000;
+    const duration = notification.priority === 'high' ? 3000 :
+      notification.priority === 'medium' ? 2500 : 2000;
 
     if (isPositive && !notification.message.includes('απορρίφθηκε') && !notification.message.includes('Απορρίφθηκε')) {
       toast.success(notification.title, {
@@ -120,7 +120,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
 
   const handleBroadcastEvent = useCallback((eventData: any) => {
     log('📢 Real broadcast event received:', eventData);
-    
+
     // Transform backend event data to our notification format
     const notification: BroadcastNotification = {
       id: eventData.id || Date.now().toString(),
@@ -133,7 +133,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
     };
 
     showNotificationToast(notification);
-    
+
     if (onNotification) {
       onNotification(notification);
     }
@@ -145,18 +145,9 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
     }
 
     try {
-      log('Setting up Pusher channels...');
 
       refreshEchoAuthHeaders();
-      
-      // DEBUG: Log user and token info (without triggering network calls)
-      const token = localStorage.getItem('auth_token');
-      if (debug) {
-        console.log('🔧 useBroadcasting setup:');
-        console.log('- User ID:', user.id);
-        console.log('- Token (first 20 chars):', token?.substring(0, 20) + '...');
-      }
-      
+
       // Clean up any existing channels
       channelsRef.current.forEach(channel => {
         echo.leave(channel.name);
@@ -184,7 +175,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
           const message = e.isLastSession
             ? 'Αυτή είναι η τελευταία σας συνεδρία! Χρειάζεστε νέο πακέτο για να συνεχίσετε.'
             : `Έχετε μόνο ${e.remainingSessions} συνεδρίες ακόμα!`;
-          
+
           handleBroadcastEvent({
             type: 'warning',
             title: e.isLastSession ? 'Τελευταία Συνεδρία! ⚠️' : 'Προτελευταία Συνεδρία! 📅',
@@ -195,7 +186,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
         })
         .listen('WaitlistSpotAvailable', (e: any) => {
           log('Waitlist spot available event:', e);
-          
+
           // Show browser notification
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('Διαθέσιμη θέση στο μάθημα!', {
@@ -203,7 +194,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
               icon: '/notification-icon.png'
             });
           }
-          
+
           handleBroadcastEvent({
             type: 'booking_request_status',
             title: 'Διαθέσιμη θέση στο μάθημα! 🎉',
@@ -211,7 +202,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
             data: e,
             priority: 'high'
           });
-          
+
           // Refresh bookings to show updated status
           setTimeout(() => {
             window.location.reload();
@@ -225,7 +216,7 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
           log('Chat message event:', e);
           handleBroadcastEvent({
             type: 'chat_message',
-            title: 'Νέο μήνυμα από το SWEAT24! 💬',
+            title: 'Νέο μήνυμα από το sweat93! 💬',
             message: `${e.message?.sender_name || 'Γραμματεία'}: ${e.message?.content || ''}`,
             data: e.message,
             priority: 'medium'
@@ -251,12 +242,12 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
       const bookingChannel = echo.private(`booking-request.user.${user.id}`)
         .listen('BookingRequestStatusChanged', (e: any) => {
           log('Booking request status changed:', e);
-          
+
           const isConfirmed = e.newStatus === 'confirmed';
           const statusMessage = isConfirmed
             ? `Το ραντεβού σας επιβεβαιώθηκε για ${e.bookingRequest?.confirmed_date || ''} στις ${e.bookingRequest?.confirmed_time || ''}`
             : `Το ραντεβού σας απορρίφθηκε. ${e.bookingRequest?.rejection_reason ? 'Λόγος: ' + e.bookingRequest.rejection_reason : ''}`;
-          
+
           handleBroadcastEvent({
             type: 'booking_request_status',
             title: isConfirmed ? 'Ραντεβού Επιβεβαιώθηκε! ✅' : 'Ραντεβού Απορρίφθηκε ❌',
@@ -268,7 +259,6 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
       channelsRef.current.push(bookingChannel);
 
       isConnectedRef.current = true;
-      log('✅ Pusher channels established');
 
     } catch (error) {
       log('❌ Channel setup failed:', error);
@@ -277,13 +267,12 @@ export function useBroadcasting(options: UseBroadcastingOptions = {}) {
 
   const disconnectChannels = useCallback(() => {
     if (channelsRef.current.length > 0) {
-      log('Disconnecting channels...');
       channelsRef.current.forEach(channel => {
         echo.leave(channel.name);
       });
       channelsRef.current = [];
       isConnectedRef.current = false;
-      log('Channels disconnected');
+
     }
   }, [log]);
 

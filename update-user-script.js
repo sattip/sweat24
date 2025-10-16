@@ -1,7 +1,7 @@
-// Script για την ενημέρωση του status του χρήστη user@sweat24.gr
+// Script για την ενημέρωση του status του χρήστη user@sweat93.gr
 // Εκτελέστε αυτό το script στην κονσόλα του browser (F12 -> Console)
 
-function updateUserSweat24Status() {
+function updateUserSweat93Status() {
   try {
     // Ελέγχουμε αν υπάρχει localStorage
     if (typeof localStorage === 'undefined') {
@@ -10,21 +10,21 @@ function updateUserSweat24Status() {
     }
 
     // Παίρνουμε τον τρέχοντα χρήστη από localStorage
-    const currentUserStr = localStorage.getItem('sweat24_user');
-    
+    const currentUserStr = localStorage.getItem('sweat93_user');
+
     if (!currentUserStr) {
       console.error('Δεν βρέθηκε συνδεδεμένος χρήστης');
-      console.log('Παρακαλώ συνδεθείτε πρώτα με το email: user@sweat24.gr');
+      console.log('Παρακαλώ συνδεθείτε πρώτα με το email: user@sweat93.gr');
       return;
     }
 
     const currentUser = JSON.parse(currentUserStr);
-    
+
     // Ελέγχουμε αν είναι ο σωστός χρήστης
-    if (currentUser.email !== 'user@sweat24.gr') {
-      console.error('Ο συνδεδεμένος χρήστης δεν είναι ο user@sweat24.gr');
+    if (currentUser.email !== 'user@sweat93.gr') {
+      console.error('Ο συνδεδεμένος χρήστης δεν είναι ο user@sweat93.gr');
       console.log('Τρέχων χρήστης:', currentUser.email);
-      console.log('Παρακαλώ συνδεθείτε με το email: user@sweat24.gr');
+      console.log('Παρακαλώ συνδεθείτε με το email: user@sweat93.gr');
       return;
     }
 
@@ -44,7 +44,7 @@ function updateUserSweat24Status() {
     };
     
     // Αποθηκεύουμε τον ενημερωμένο χρήστη
-    localStorage.setItem('sweat24_user', JSON.stringify(updatedUser));
+    localStorage.setItem('sweat93_user', JSON.stringify(updatedUser));
     
     console.log('✅ Επιτυχής ενημέρωση!');
     console.log('📊 Νέα στοιχεία χρήστη:');
@@ -66,5 +66,5 @@ function updateUserSweat24Status() {
 }
 
 // Εκτέλεση του script
-console.log('🚀 Εκκίνηση ενημέρωσης του χρήστη user@sweat24.gr...');
-updateUserSweat24Status(); 
+console.log('🚀 Εκκίνηση ενημέρωσης του χρήστη user@sweat93.gr...');
+updateUserSweat93Status(); 

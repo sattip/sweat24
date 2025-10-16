@@ -32,7 +32,7 @@ export function AdminSettingsModal({
   // Profile Settings
   const [profileData, setProfileData] = useState({
     name: "Διαχειριστής Γυμναστηρίου",
-    email: "admin@sweat24.gr",
+    email: "admin@sweat93.gr",
     phone: "6944123456",
     position: "Γενικός Διευθυντής",
   });

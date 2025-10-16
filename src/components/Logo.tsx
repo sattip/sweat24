@@ -12,13 +12,13 @@ const Logo: React.FC<LogoProps> = ({ to = "/", className = "", disableLink = fal
     <>
       <img
         src="/logo-dark.png"
-        alt="Sweat24 Logo"
-        className="h-12 w-auto block dark:hidden"
+        alt="Sweat93 Logo"
+        className="h-14 w-auto block dark:hidden"
       />
       <img
         src="/logo-light.png"
-        alt="Sweat24 Logo"
-        className="h-12 w-auto hidden dark:block"
+        alt="Sweat93 Logo"
+        className="h-14 w-auto hidden dark:block"
       />
     </>
   );
