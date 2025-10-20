@@ -5,7 +5,11 @@
       "Bash(clip)",
       "Bash(test:*)",
       "Bash(cat:*)",
-      "Read(//c/Users/olive/Downloads/**)"
+      "Read(//c/Users/olive/Downloads/**)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "Bash(npx cap:*)",
+      "Bash(./gradlew.bat:*)"
     ],
     "deny": [],
     "ask": []

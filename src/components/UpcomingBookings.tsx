@@ -150,7 +150,7 @@ export const UpcomingBookings: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Badge variant={booking.is_waitlist ? "warning" : "secondary"}>
+                      <Badge variant={booking.is_waitlist ? "outline" : "secondary"}>
                         {booking.is_waitlist ? "Λίστα Αναμονής" : "Επιβεβαιωμένη"}
                       </Badge>
                       {canCancel ? (
