@@ -713,10 +713,10 @@ export const notificationService = {
       if (data && data.data && Array.isArray(data.data)) {
         return data.data;
       }
-      
+
       return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // Silently handle errors - notifications endpoint may not be available
       return [];
     }
   },

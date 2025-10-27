@@ -9,7 +9,12 @@
       "mcp__ide__getDiagnostics",
       "Bash(npm run build:*)",
       "Bash(npx cap:*)",
-      "Bash(./gradlew.bat:*)"
+      "Bash(./gradlew.bat:*)",
+      "Read(//c/Users/olive/AppData/Local/Android/Sdk/**)",
+      "Read(//c/Users/olive/Pictures/Screenshots/**)",
+      "Bash(keytool:*)",
+      "Bash(npm run dev:*)",
+      "Bash(start:*)"
     ],
     "deny": [],
     "ask": []

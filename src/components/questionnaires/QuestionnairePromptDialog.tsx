@@ -36,7 +36,7 @@ export const QuestionnairePromptDialog: React.FC<QuestionnairePromptDialogProps>
   }
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onLater(questionnaire)}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

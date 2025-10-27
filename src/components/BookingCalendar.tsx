@@ -61,8 +61,8 @@ export const BookingCalendar: React.FC = () => {
       const allBookings = [...futureArray, ...pastArray];
       setBookings(allBookings);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
-      toast.error('Σφάλμα κατά τη φόρτωση των κρατήσεων');
+      // Silently handle errors - just show empty state
+      setBookings([]);
     } finally {
       setLoading(false);
     }

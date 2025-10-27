@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity, Camera } from "lucide-react";
+import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity, Camera, ArrowRight } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { profileService } from "@/services/apiService";
 import { Badge } from "@/components/ui/badge";
@@ -202,8 +202,14 @@ const ProfilePage = () => {
                 </Link>
                 <h1 className="text-2xl sm:text-3xl font-bold">Αιτήματα Ραντεβού</h1>
               </div>
+              <Link to="/services">
+                <Button className="flex items-center gap-2">
+                  Νέο Αίτημα
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
-            
+
             <BookingRequests />
           </main>
         </div>

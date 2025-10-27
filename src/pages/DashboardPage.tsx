@@ -444,9 +444,9 @@ const DashboardPage = () => {
               </CardFooter>
             </Card>
           )}
-          
+
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl">Κλείσε Μάθημα</CardTitle>
@@ -460,127 +460,105 @@ const DashboardPage = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex flex-col gap-2">
                 <Button
+                  type="button"
                   className="w-full flex items-center justify-center gap-2"
                   onClick={() => setShowBookingWizard(true)}
                 >
                   Κλείσε Μάθημα Βήμα-Βήμα
                   <ArrowRight className="h-4 w-4" />
                 </Button>
+                <Link to="/workout-history" className="w-full">
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                    Ιστορικό Προπονήσεων
+                    <History className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
+
+          {/* Approved Appointments - Right after booking card */}
+          <ApprovedAppointments />
+
+          {/* Referral & Questionnaires - Side by side */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-6">
+            <Card className="hover:border-primary transition-colors">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-xl">Συστήστε έναν Φίλο</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Κάντε δώρο μια προπόνηση γνωριμίας</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-32 sm:h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-2 sm:p-4">
+                    <Gift className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-xs sm:text-sm hidden sm:block">Μοιραστείτε την αγάπη για τη γυμναστική και κερδίστε ανταμοιβές</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-2">
+                <Link to="/referrals" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm" variant="outline">
+                    <span className="hidden sm:inline">Μάθετε Περισσότερα</span>
+                    <span className="sm:hidden">Περισσότερα</span>
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
 
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Ιστορικό Προπονήσεων</CardTitle>
-                <CardDescription>Δες όλες τις προπονήσεις που έχεις κάνει</CardDescription>
+                <CardTitle className="text-base sm:text-xl">Ερωτηματολόγια</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Συμπλήρωσε τα ερωτηματολόγιά σου</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <History className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Παρακολούθησε την πρόοδό σου και καταγράψε τις μυϊκές ομάδες</p>
+                <div className="h-32 sm:h-40 flex items-center justify-center bg-muted rounded-md">
+                  <div className="text-center p-2 sm:p-4">
+                    <ClipboardList className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-primary/70" />
+                    <p className="text-xs sm:text-sm hidden sm:block">Βοήθησέ μας να βελτιώσουμε την εμπειρία σου συμπληρώνοντας ερωτηματολόγια</p>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <Link to="/workout-history" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Προβολή Ιστορικού
-                    <ArrowRight className="h-4 w-4" />
+              <CardFooter className="flex flex-col gap-2">
+                <Link to="/questionnaires" className="w-full">
+                  <Button className="w-full flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm" variant="outline">
+                    <span className="hidden sm:inline">Προβολή Ερωτηματολογίων</span>
+                    <span className="sm:hidden">Προβολή</span>
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </Link>
               </CardFooter>
             </Card>
-            
+          </div>
+
+          {/* More Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="hover:border-primary transition-colors">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Συστήστε έναν Φίλο</CardTitle>
-                <CardDescription>Κάντε δώρο μια προπόνηση γνωριμίας</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <Gift className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Μοιραστείτε την αγάπη για τη γυμναστική και κερδίστε ανταμοιβές</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Link to="/referrals" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Μάθετε Περισσότερα
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-            
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Κατάστημα</CardTitle>
-                <CardDescription>Περιήγηση σε συμπληρώματα, ρούχα και άλλα</CardDescription>
+                <CardTitle className="text-xl">Κατάστημα & Παραγγελίες</CardTitle>
+                <CardDescription>Περιήγηση και διαχείριση παραγγελιών</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-40 flex items-center justify-center bg-muted rounded-md">
                   <div className="text-center p-4">
                     <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Ψώνισε συμπληρώματα, ρούχα γυμναστικής και αξεσουάρ</p>
+                    <p className="text-sm">Ψώνισε προϊόντα και παρακολούθησε τις παραγγελίες σου</p>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex flex-col gap-2">
                 <Link to="/store" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
                     Επίσκεψη Καταστήματος
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-              </CardFooter>
-            </Card>
-            
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Οι Παραγγελίες μου</CardTitle>
-                <CardDescription>Δες την κατάσταση των παραγγελιών σου</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <Package className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Παρακολούθησε τις παραγγελίες σου και δες πότε είναι έτοιμες</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
                 <Link to="/store?tab=orders" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Προβολή Παραγγελιών
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Ερωτηματολόγια</CardTitle>
-                <CardDescription>Συμπλήρωσε τα ερωτηματολόγιά σου</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <ClipboardList className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Βοήθησέ μας να βελτιώσουμε την εμπειρία σου συμπληρώνοντας ερωτηματολόγια</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Link to="/questionnaires" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Προβολή Ερωτηματολογίων
-                    <ArrowRight className="h-4 w-4" />
+                    Οι Παραγγελίες μου
+                    <Package className="h-4 w-4" />
                   </Button>
                 </Link>
               </CardFooter>
@@ -599,7 +577,7 @@ const DashboardPage = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex flex-col gap-2">
                 <Link to="/new-member-info" className="w-full">
                   <Button className="w-full flex items-center justify-center gap-2" variant="outline">
                     Προβολή Οδηγού
@@ -609,14 +587,9 @@ const DashboardPage = () => {
               </CardFooter>
             </Card>
           </div>
-          
-          {/* Approved Appointments */}
-          <div className="mt-6">
-            <ApprovedAppointments />
-          </div>
 
           {/* Personal Booking Calendar & Upcoming Bookings */}
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <BookingCalendar />
             </div>

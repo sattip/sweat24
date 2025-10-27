@@ -35,15 +35,17 @@ export const ApprovedAppointments: React.FC = () => {
     try {
       setLoading(true);
       const requests = await bookingRequestService.getMyRequests();
-      
+
       // Filter for approved/confirmed/scheduled appointments
       const approvedRequests = (Array.isArray(requests) ? requests : [])
         .filter(request => ['approved', 'confirmed', 'scheduled'].includes(request.status))
         .slice(0, 3); // Show only next 3 appointments
-      
+
       setAppointments(approvedRequests);
     } catch (error) {
-      console.error('Error fetching approved appointments:', error);
+      // Silently handle errors - the API endpoint may not be available
+      // This is not a critical feature, so we just show no appointments
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -149,7 +151,13 @@ export const ApprovedAppointments: React.FC = () => {
               </div>
             ))}
             
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t flex flex-col gap-2">
+              <Link to="/services">
+                <Button className="w-full flex items-center justify-center gap-2">
+                  Νέο Αίτημα
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link to="/profile?tab=booking-requests">
                 <Button variant="outline" className="w-full flex items-center justify-center gap-2">
                   Δείτε όλα τα αιτήματα

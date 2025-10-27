@@ -39,9 +39,13 @@ interface Gym {
 }
 
 interface ClassCategory {
-  id: string;
+  id: number;
   name: string;
-  icon?: string;
+  value: string;
+  description?: string;
+  color?: string;
+  is_active: boolean;
+  sort_order: number;
 }
 
 interface ClassItem {
@@ -59,6 +63,7 @@ interface TimeSlot {
   date: string;
   time: string;
   available_spots: number;
+  isAlreadyBooked?: boolean;
 }
 
 const STEPS = [
@@ -91,6 +96,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
   const [bulkBookingMode, setBulkBookingMode] = useState(false);
   const [selectedDaysOfWeek, setSelectedDaysOfWeek] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]); // 0=Sunday, 6=Saturday
+  const [selectedDate, setSelectedDate] = useState<string | null>(null); // New state for date picker
+  const [dateScrollIndex, setDateScrollIndex] = useState(0); // For date carousel navigation
+  const [currentMonth, setCurrentMonth] = useState<string>(''); // Track current month YYYY-MM
 
   // Booking state
   const [bookingInProgress, setBookingInProgress] = useState(false);
@@ -111,6 +119,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
     setSelectedTimeSlots([]);
     setBulkBookingMode(false);
     setSelectedDaysOfWeek([0, 1, 2, 3, 4, 5, 6]);
+    setSelectedDate(null);
+    setDateScrollIndex(0);
+    setCurrentMonth('');
     setClasses([]);
     setTimeSlots([]);
   };
@@ -126,7 +137,8 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       const dayOfWeek = slotDate.getDay();
       return slotDate >= today &&
              slotDate <= endDate &&
-             selectedDaysOfWeek.includes(dayOfWeek);
+             selectedDaysOfWeek.includes(dayOfWeek) &&
+             !slot.isAlreadyBooked; // Exclude already-booked slots
     });
 
     setSelectedTimeSlots(slotsInRange);
@@ -145,6 +157,12 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   };
 
   const toggleTimeSlotSelection = (slot: TimeSlot) => {
+    // Prevent selecting already-booked slots
+    if (slot.isAlreadyBooked) {
+      toast.warning('Έχετε ήδη κράτηση για αυτό το μάθημα');
+      return;
+    }
+
     if (!bulkBookingMode) {
       // Single booking mode
       setSelectedTimeSlot(slot);
@@ -199,104 +217,34 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   const loadCategories = async () => {
     setLoading(true);
     try {
-      // Fetch both specialized services and class types
-      const [servicesResponse, classesResponse] = await Promise.all([
-        API.apiRequest('/specialized-services').catch(() => ({ ok: false })),
-        API.apiRequest(API.API_ENDPOINTS.classes.list).catch(() => ({ ok: false }))
-      ]);
+      // Fetch class types from the new API endpoint
+      const response = await API.apiRequest('/class-types?active_only=1');
 
-      const categoriesMap = new Map<string, ClassCategory>();
-
-      // Add specialized services
-      if (servicesResponse.ok) {
-        const servicesData = await servicesResponse.json();
-        const servicesArray = servicesData.data || servicesData;
-
-        if (Array.isArray(servicesArray)) {
-          servicesArray
-            .filter((service: any) => service.is_active)
-            .forEach((service: any) => {
-              categoriesMap.set(service.slug, {
-                id: service.slug,
-                name: service.name
-              });
-            });
-        }
+      if (!response.ok) {
+        throw new Error('Failed to fetch class types');
       }
 
-      // Add class types from actual classes
-      if (classesResponse.ok) {
-        const classesData = await classesResponse.json();
+      const data = await response.json();
 
-        if (Array.isArray(classesData)) {
-          const uniqueTypes = new Set<string>();
-
-          classesData.forEach((classItem: any) => {
-            if (classItem.status === 'active') {
-              // Create descriptive names based on type and service
-              let categoryName = '';
-              let categoryId = '';
-
-              if (classItem.type === 'group' && classItem.service?.slug === 'semi-personal') {
-                categoryName = 'Ομαδικό Semi Personal';
-                categoryId = 'group-semi-personal';
-              } else if (classItem.type === 'group' && classItem.service?.slug === 'personal-training') {
-                categoryName = 'Ομαδικό Personal Training';
-                categoryId = 'group-personal-training';
-              } else if (classItem.type === 'personal') {
-                categoryName = 'Προσωπική Προπόνηση';
-                categoryId = 'personal-training';
-              } else if (classItem.type === 'group') {
-                categoryName = 'Ομαδικά Μαθήματα';
-                categoryId = 'group-classes';
-              }
-
-              if (categoryName && !uniqueTypes.has(categoryId)) {
-                uniqueTypes.add(categoryId);
-                categoriesMap.set(categoryId, {
-                  id: categoryId,
-                  name: categoryName
-                });
-              }
-            }
-          });
-        }
-      }
-
-      // Convert map to array and sort
-      const formattedCategories = Array.from(categoriesMap.values()).sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
-
-      // Ensure we have at least some basic categories as fallback
-      if (formattedCategories.length === 0) {
-        formattedCategories.push(
-          { id: "group-classes", name: "Ομαδικά Μαθήματα" },
-          { id: "personal-training", name: "Προσωπική Προπόνηση" },
-          { id: "ems", name: "EMS" }
+      if (data.success && Array.isArray(data.data)) {
+        // Sort by sort_order
+        const sortedCategories = data.data.sort((a: ClassCategory, b: ClassCategory) =>
+          a.sort_order - b.sort_order
         );
-      }
 
-      setCategories(formattedCategories);
+        setCategories(sortedCategories);
+
+        if (sortedCategories.length === 0) {
+          toast.info('Δεν βρέθηκαν διαθέσιμοι τύποι μαθημάτων');
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
 
     } catch (error) {
       console.error('Failed to load categories:', error);
       toast.error('Σφάλμα κατά τη φόρτωση κατηγοριών');
-
-      // Fallback to comprehensive list
-      setCategories([
-        { id: "group-classes", name: "Ομαδικά Μαθήματα" },
-        { id: "group-semi-personal", name: "Ομαδικό Semi Personal" },
-        { id: "group-personal-training", name: "Ομαδικό Personal Training" },
-        { id: "personal-training", name: "Προσωπική Προπόνηση" },
-        { id: "pilates", name: "Pilates" },
-        { id: "pilates-group", name: "Pilates Ομαδικό" },
-        { id: "yoga", name: "Yoga" },
-        { id: "yoga-group", name: "Yoga Ομαδικό" },
-        { id: "hiit", name: "HIIT & Cardio" },
-        { id: "strength", name: "Strength Training" },
-        { id: "ems", name: "EMS" }
-      ]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -307,68 +255,56 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
 
     setLoading(true);
     try {
-      // Fetch classes from API
-      const response = await API.apiRequest(API.API_ENDPOINTS.classes.list);
-      if (!response.ok) {
-        throw new Error('Failed to fetch classes');
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('type', selectedCategory.value);
+      params.append('status', 'active');
+      if (selectedGym) {
+        params.append('store_id', selectedGym.id.toString());
       }
 
-      const classesData = await response.json();
+      // Try the new endpoint first
+      let response = await API.apiRequest(`/fitness-classes?${params.toString()}`);
+      let classesData: any[] = [];
 
-      // Filter classes based on selected category
-      let filteredClasses: any[] = [];
+      // If 403 or 404, fallback to old endpoint
+      if (response.status === 403 || response.status === 404) {
+        console.warn('fitness-classes endpoint not available, falling back to /classes');
+        response = await API.apiRequest(API.API_ENDPOINTS.classes.list);
 
-      if (Array.isArray(classesData)) {
-        if (selectedCategory.id === 'group-classes') {
-          // Generic group classes
-          filteredClasses = classesData.filter((classItem: any) =>
-            classItem.type === 'group' && classItem.status === 'active'
-          );
-        } else if (selectedCategory.id === 'group-semi-personal') {
-          // Group semi personal classes
-          filteredClasses = classesData.filter((classItem: any) =>
-            classItem.type === 'group' &&
-            classItem.service?.slug === 'semi-personal' &&
-            classItem.status === 'active'
-          );
-        } else if (selectedCategory.id === 'group-personal-training') {
-          // Group personal training classes
-          filteredClasses = classesData.filter((classItem: any) =>
-            classItem.type === 'group' &&
-            classItem.service?.slug === 'personal-training' &&
-            classItem.status === 'active'
-          );
-        } else if (selectedCategory.id === 'personal-training') {
-          // Personal training classes
-          filteredClasses = classesData.filter((classItem: any) =>
-            classItem.type === 'personal' && classItem.status === 'active'
-          );
-        } else if (selectedCategory.id === 'ems') {
-          // EMS classes
-          filteredClasses = classesData.filter((classItem: any) =>
-            classItem.service?.slug === 'ems' ||
-            classItem.name.toLowerCase().includes('ems') &&
-            classItem.status === 'active'
-          );
-        } else {
-          // For other specialized services or fallback
-          filteredClasses = classesData.filter((classItem: any) =>
-            classItem.status === 'active'
-          );
+        if (!response.ok) {
+          throw new Error('Failed to fetch classes from fallback endpoint');
         }
+
+        // Old endpoint returns array directly
+        const data = await response.json();
+        classesData = Array.isArray(data) ? data : [];
+
+        // Filter client-side for old endpoint
+        classesData = classesData.filter((classItem: any) =>
+          classItem.type === selectedCategory.value &&
+          classItem.status === 'active' &&
+          (!selectedGym || classItem.store_id === selectedGym.id)
+        );
+      } else if (!response.ok) {
+        throw new Error('Failed to fetch classes');
+      } else {
+        // New endpoint returns {success, data} format
+        const result = await response.json();
+        classesData = result.success && result.data ? result.data : [];
       }
 
-      // Group classes by name to avoid duplicates and get unique class types
+      // Group classes by name and instructor to avoid duplicates
       const uniqueClasses = new Map<string, ClassItem>();
 
-      filteredClasses.forEach((classItem: any) => {
+      classesData.forEach((classItem: any) => {
         const classKey = `${classItem.name}-${classItem.instructor_name || classItem.instructor}`;
 
         if (!uniqueClasses.has(classKey)) {
           uniqueClasses.set(classKey, {
             id: classItem.id,
             name: classItem.name,
-            category: selectedCategory.id,
+            category: selectedCategory.value,
             instructor: classItem.instructor_name || classItem.trainer_name || classItem.instructor,
             duration: classItem.duration,
             max_capacity: classItem.max_participants,
@@ -396,35 +332,70 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   };
 
   const loadTimeSlots = async () => {
-    if (!selectedClass) return;
+    if (!selectedClass || !selectedCategory) return;
 
     setLoading(true);
     try {
-      // Fetch all classes to find available time slots for the selected class type
-      const response = await API.apiRequest(API.API_ENDPOINTS.classes.list);
-      if (!response.ok) {
-        throw new Error('Failed to fetch class schedule');
+      // Build query parameters for filtered search
+      const params = new URLSearchParams();
+      params.append('type', selectedCategory.value);
+      params.append('status', 'active');
+      if (selectedGym) {
+        params.append('store_id', selectedGym.id.toString());
       }
 
-      const classesData = await response.json();
+      // Fetch matching classes and user bookings in parallel
+      const [classesResponse, userBookings] = await Promise.all([
+        API.apiRequest(`/fitness-classes?${params.toString()}`),
+        bookingService.getUserBookings()
+      ]);
+
+      let classesData: any[] = [];
+
+      // If 403 or 404, fallback to old endpoint
+      if (classesResponse.status === 403 || classesResponse.status === 404) {
+        console.warn('fitness-classes endpoint not available, falling back to /classes');
+        const fallbackResponse = await API.apiRequest(API.API_ENDPOINTS.classes.list);
+
+        if (!fallbackResponse.ok) {
+          throw new Error('Failed to fetch class schedule from fallback endpoint');
+        }
+
+        const data = await fallbackResponse.json();
+        classesData = Array.isArray(data) ? data : [];
+      } else if (!classesResponse.ok) {
+        throw new Error('Failed to fetch class schedule');
+      } else {
+        const result = await classesResponse.json();
+        classesData = result.success && result.data ? result.data : [];
+      }
 
       // Filter classes that match the selected class (by name and instructor)
-      const matchingClasses = Array.isArray(classesData)
-        ? classesData.filter((classItem: any) =>
-            classItem.name === selectedClass.name &&
-            (classItem.instructor_name === selectedClass.instructor ||
-             classItem.trainer_name === selectedClass.instructor) &&
-            classItem.status === 'active' &&
-            new Date(classItem.date) >= new Date() // Only future classes
-          )
-        : [];
+      const matchingClasses = classesData.filter((classItem: any) =>
+        classItem.name === selectedClass.name &&
+        (classItem.instructor_name === selectedClass.instructor ||
+         classItem.trainer_name === selectedClass.instructor) &&
+        classItem.status === 'active' &&
+        new Date(classItem.date) >= new Date() // Only future classes
+      );
 
-      // Convert classes to time slots
+      // Create a set of booked class IDs for quick lookup
+      const bookedClassIds = new Set(
+        userBookings
+          .filter((booking: any) =>
+            booking.status !== 'cancelled' &&
+            booking.status !== 'rejected'
+          )
+          .map((booking: any) => booking.class_id?.toString())
+      );
+
+      // Convert classes to time slots and mark already-booked ones
       const formattedTimeSlots: TimeSlot[] = matchingClasses.map((classItem: any) => ({
         id: classItem.id.toString(),
         date: classItem.date,
         time: classItem.time,
-        available_spots: Math.max(0, classItem.max_participants - (classItem.current_participants || 0))
+        available_spots: Math.max(0, classItem.max_participants - (classItem.current_participants || 0)),
+        isAlreadyBooked: bookedClassIds.has(classItem.id.toString())
       }));
 
       // Sort by date and time
@@ -610,12 +581,26 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
 
     try {
       // Fetch the complete class details to get all required fields
-      const classesResponse = await API.apiRequest(API.API_ENDPOINTS.classes.list);
-      if (!classesResponse.ok) {
-        throw new Error('Failed to fetch class details');
-      }
+      let classesResponse = await API.apiRequest('/fitness-classes?status=active');
+      let classesData: any[] = [];
 
-      const classesData = await classesResponse.json();
+      // If 403 or 404, fallback to old endpoint
+      if (classesResponse.status === 403 || classesResponse.status === 404) {
+        console.warn('fitness-classes endpoint not available, falling back to /classes');
+        classesResponse = await API.apiRequest(API.API_ENDPOINTS.classes.list);
+
+        if (!classesResponse.ok) {
+          throw new Error('Failed to fetch class details from fallback endpoint');
+        }
+
+        const data = await classesResponse.json();
+        classesData = Array.isArray(data) ? data : [];
+      } else if (!classesResponse.ok) {
+        throw new Error('Failed to fetch class details');
+      } else {
+        const result = await classesResponse.json();
+        classesData = result.success && result.data ? result.data : [];
+      }
 
       // Process all bookings
       let successCount = 0;
@@ -775,13 +760,28 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                     onClick={() => setSelectedCategory(category)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <Dumbbell className="h-5 w-5 text-primary" />
-                        <div className="flex-1">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{
+                            backgroundColor: category.color ? `${category.color}20` : '#f3f4f6'
+                          }}
+                        >
+                          <Dumbbell
+                            className="h-5 w-5"
+                            style={{ color: category.color || '#6b7280' }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
                           <h4 className="font-medium">{category.name}</h4>
+                          {category.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                              {category.description}
+                            </p>
+                          )}
                         </div>
                         {selectedCategory?.id === category.id && (
-                          <CheckCircle className="h-5 w-5 text-primary" />
+                          <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
                         )}
                       </div>
                     </CardContent>
@@ -855,6 +855,50 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           { value: 0, label: 'Κυρ', fullLabel: 'Κυριακή' }
         ];
 
+        // Generate dates grouped by month for next 3 months
+        const today = new Date();
+        const monthsData: { key: string; dates: string[] }[] = [];
+
+        for (let monthOffset = 0; monthOffset < 3; monthOffset++) {
+          const monthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+          const monthKey = monthDate.toISOString().substring(0, 7); // YYYY-MM
+          const monthDates: string[] = [];
+
+          const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+          const firstDay = monthOffset === 0 ? today.getDate() : 1;
+
+          for (let day = firstDay; day <= lastDay; day++) {
+            const date = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+            monthDates.push(date.toISOString().split('T')[0]);
+          }
+
+          monthsData.push({ key: monthKey, dates: monthDates });
+        }
+
+        // Initialize currentMonth if not set
+        if (!currentMonth && monthsData.length > 0) {
+          setCurrentMonth(monthsData[0].key);
+        }
+
+        // Get current month dates
+        const currentMonthData = monthsData.find(m => m.key === currentMonth) || monthsData[0];
+        const currentMonthDates = currentMonthData?.dates || [];
+
+        // Initialize selectedDate if not set
+        if (!selectedDate && currentMonthDates.length > 0) {
+          setSelectedDate(currentMonthDates[0]);
+        }
+
+        // Filter time slots by selected date
+        const filteredTimeSlots = selectedDate
+          ? timeSlots.filter(slot => slot.date === selectedDate)
+          : [];
+
+        const visibleDates = currentMonthDates.slice(dateScrollIndex, dateScrollIndex + 7);
+        const currentMonthIndex = monthsData.findIndex(m => m.key === currentMonth);
+        const canScrollLeft = dateScrollIndex > 0 || currentMonthIndex > 0;
+        const canScrollRight = dateScrollIndex + 7 < currentMonthDates.length || currentMonthIndex < monthsData.length - 1;
+
         return (
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Επιλέξτε Ημερομηνία & Ώρα</h3>
@@ -924,53 +968,148 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {timeSlots.map((slot) => {
-                  const isSelected = bulkBookingMode
-                    ? selectedTimeSlots.some(s => s.id === slot.id)
-                    : selectedTimeSlot?.id === slot.id;
+              <>
+                {/* Date Selection Carousel */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Επιλέξτε Ημερομηνία</Label>
 
-                  return (
-                    <Card
-                      key={slot.id}
-                      className={`cursor-pointer transition-all ${
-                        isSelected
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:border-primary/50'
-                      }`}
-                      onClick={() => toggleTimeSlotSelection(slot)}
+                  {/* Month Header with Navigation */}
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (dateScrollIndex > 0) {
+                          // Scroll within current month
+                          setDateScrollIndex(dateScrollIndex - 7);
+                        } else if (currentMonthIndex > 0) {
+                          // Switch to previous month
+                          setCurrentMonth(monthsData[currentMonthIndex - 1].key);
+                          setDateScrollIndex(0);
+                        }
+                      }}
+                      disabled={!canScrollLeft}
+                      className="h-8 w-8"
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Calendar className="h-5 w-5 text-primary" />
-                            <div>
-                              <p className="font-medium">
-                                {new Date(slot.date).toLocaleDateString('el-GR', {
-                                  weekday: 'long',
-                                  day: 'numeric',
-                                  month: 'long'
-                                })}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {slot.time}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={slot.available_spots > 5 ? "default" : "secondary"}>
-                              {slot.available_spots} θέσεις
-                            </Badge>
-                            {isSelected && (
-                              <CheckCircle className="h-5 w-5 text-primary" />
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+
+                    <div className="text-lg font-semibold min-w-[150px] text-center">
+                      {visibleDates.length > 0 && new Date(visibleDates[0]).toLocaleDateString('el-GR', {
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (dateScrollIndex + 7 < currentMonthDates.length) {
+                          // Scroll within current month
+                          setDateScrollIndex(dateScrollIndex + 7);
+                        } else if (currentMonthIndex < monthsData.length - 1) {
+                          // Switch to next month
+                          setCurrentMonth(monthsData[currentMonthIndex + 1].key);
+                          setDateScrollIndex(0);
+                        }
+                      }}
+                      disabled={!canScrollRight}
+                      className="h-8 w-8"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Date Buttons */}
+                  <div className="flex gap-2">
+                    {visibleDates.map((date) => {
+                      const dateObj = new Date(date);
+                      const dayName = dateObj.toLocaleDateString('el-GR', { weekday: 'short' });
+                      const dayNum = dateObj.getDate();
+                      const isSelected = selectedDate === date;
+
+                      return (
+                        <button
+                          key={date}
+                          onClick={() => setSelectedDate(date)}
+                          className={`flex-1 flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${
+                            isSelected
+                              ? 'border-primary bg-primary text-primary-foreground'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <span className="text-xs font-medium">{dayName}</span>
+                          <span className="text-2xl font-bold">{dayNum}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Time Slots for Selected Date */}
+                {selectedDate && !bulkBookingMode && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Διαθέσιμες Ώρες - {new Date(selectedDate).toLocaleDateString('el-GR', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long'
+                      })}
+                    </Label>
+
+                    {filteredTimeSlots.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+                        {filteredTimeSlots.map((slot) => {
+                          const isSelected = selectedTimeSlot?.id === slot.id;
+
+                          return (
+                            <button
+                              key={slot.id}
+                              onClick={() => {
+                                if (!slot.isAlreadyBooked) {
+                                  setSelectedTimeSlot(slot);
+                                }
+                              }}
+                              disabled={slot.isAlreadyBooked}
+                              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                                slot.isAlreadyBooked
+                                  ? 'opacity-50 cursor-not-allowed border-muted bg-muted/30'
+                                  : isSelected
+                                  ? 'border-primary bg-primary/5'
+                                  : 'border-border hover:border-primary/50'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                <span className={`font-semibold ${slot.isAlreadyBooked ? 'line-through' : ''}`}>
+                                  {slot.time}
+                                </span>
+                              </div>
+                              {slot.isAlreadyBooked ? (
+                                <Badge variant="secondary" className="mt-1 text-xs">
+                                  Κρατημένο
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground mt-1">
+                                  {slot.available_spots} θέσεις
+                                </span>
+                              )}
+                              {isSelected && !slot.isAlreadyBooked && (
+                                <CheckCircle className="h-4 w-4 text-primary mt-1" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         );

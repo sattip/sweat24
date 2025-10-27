@@ -74,8 +74,10 @@ const SessionCountIndicator: React.FC<SessionCountIndicatorProps> = ({
         onClick={handleIndicatorClick}
       >
         <Badge variant={getVariant()} className="text-sm">
-          {typeof remainingSessions === 'number'
-            ? `Απομένουν ${remainingSessions}${typeof totalSessions === 'number' ? `/${totalSessions}` : ''}`
+          {typeof remainingSessions === 'number' && typeof totalSessions === 'number'
+            ? `Πραγματοποιήθηκαν ${totalSessions - remainingSessions}/${totalSessions}`
+            : typeof remainingSessions === 'number'
+            ? `Απομένουν ${remainingSessions}`
             : 'Απεριόριστο'}
           {showWarning && <AlertTriangle className="h-3 w-3 ml-1" />}
         </Badge>

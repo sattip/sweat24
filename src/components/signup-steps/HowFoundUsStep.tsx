@@ -25,6 +25,7 @@ const HOW_FOUND_OPTIONS = [
   { value: 'google', label: 'Google' },
   { value: 'site', label: 'Site' },
   { value: 'passing_by', label: 'Πέρναγα απέξω' },
+  { value: 'flyers', label: 'Διαφημιστικά Φυλλάδια' },
   { value: 'know_owner', label: 'Γνωρίζω τον ιδιοκτήτη' }
 ];
 

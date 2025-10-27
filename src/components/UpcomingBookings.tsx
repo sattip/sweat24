@@ -58,8 +58,8 @@ export const UpcomingBookings: React.FC = () => {
         .slice(0, 3); // Show only next 3 bookings
       setBookings(upcoming);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
-      toast.error('Σφάλμα κατά τη φόρτωση των κρατήσεων');
+      // Silently handle errors - just show empty state
+      setBookings([]);
     } finally {
       setLoading(false);
     }

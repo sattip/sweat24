@@ -102,16 +102,37 @@ const BookingsPage = () => {
       // Filter only future bookings (both confirmed and waitlist)
       const userBookings = allBookings.filter((b: any) => {
         // Handle different date formats
-        let bookingDate;
-        if (b.date.includes('T')) {
-          // Already a full timestamp
-          bookingDate = new Date(b.date);
-        } else {
-          // Combine date and time
-          bookingDate = new Date(b.date + ' ' + b.time);
+        if (!b.date) {
+          console.warn('Booking missing date:', b);
+          return false;
         }
-        
-        return bookingDate >= new Date();
+
+        let bookingDate;
+        try {
+          if (b.date.includes('T')) {
+            // Already a full timestamp
+            bookingDate = new Date(b.date);
+          } else {
+            // Combine date and time
+            bookingDate = new Date(b.date + ' ' + b.time);
+          }
+
+          const isFuture = bookingDate >= new Date();
+          console.log('Booking date check:', {
+            id: b.id,
+            class_name: b.class_name,
+            date: b.date,
+            time: b.time,
+            bookingDate: bookingDate.toISOString(),
+            now: new Date().toISOString(),
+            isFuture
+          });
+
+          return isFuture;
+        } catch (error) {
+          console.error('Error parsing booking date:', b, error);
+          return false;
+        }
       });
       
       // Sort by date and time
@@ -147,6 +168,8 @@ const BookingsPage = () => {
       
       // Update previous bookings for next comparison
       setPreviousBookings([...userBookings]);
+      console.log('Setting bookings state with:', userBookings.length, 'bookings');
+      console.log('userBookings:', userBookings);
       setBookings(userBookings);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -235,6 +258,9 @@ const BookingsPage = () => {
 
   const hasBookings = bookings.length > 0;
   const hasWorkouts = workouts.length > 0;
+
+  console.log('Render - bookings state:', bookings.length, 'hasBookings:', hasBookings);
+  console.log('Render - bookings array:', bookings);
   
   const filteredWorkouts = workouts.filter(workout => {
     // Type filter
