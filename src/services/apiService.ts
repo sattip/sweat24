@@ -963,6 +963,96 @@ export const loyaltyService = {
       console.error('❌ Error redeeming reward:', error);
       throw error;
     }
+  },
+
+  async bookWithPoints(bookingData: {
+    class_id: number;
+    store_id: number;
+    class_name: string;
+    instructor: string;
+    date: string;
+    time: string;
+    type: string;
+    location: string;
+    user_id: number;
+    customer_name: string;
+    customer_email: string;
+    status: string;
+    payment_method: 'full_points' | 'partial' | 'cash_only';
+    points_to_use?: number;
+  }) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl('/loyalty/book-with-points'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+
+        if (response.status === 401) {
+          throw new Error('Παρακαλώ συνδεθείτε ξανά');
+        }
+        if (response.status === 400) {
+          throw new Error(errorData.message || 'Ανεπαρκείς πόντοι ή μη έγκυρα δεδομένα');
+        }
+        if (response.status === 404) {
+          throw new Error('Το μάθημα δεν βρέθηκε');
+        }
+        if (response.status === 500) {
+          throw new Error('Πρόβλημα διακομιστή, προσπαθήστε αργότερα');
+        }
+
+        throw new Error(errorData.message || 'Η κράτηση με πόντους απέτυχε');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('❌ Error booking with points:', error);
+      throw error;
+    }
+  },
+
+  async getTransactionHistory(limit: number = 10) {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl(`/loyalty/transactions?limit=${limit}`), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Παρακαλώ συνδεθείτε ξανά');
+        }
+        throw new Error('Failed to fetch transaction history');
+      }
+
+      const data = await response.json();
+      return data.data || data;
+    } catch (error) {
+      console.error('❌ Error fetching transaction history:', error);
+      throw error;
+    }
   }
 };
 

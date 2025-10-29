@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity, Camera, ArrowRight } from "lucide-react";
+import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity, Camera, ArrowRight, Gift } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { profileService } from "@/services/apiService";
 import { Badge } from "@/components/ui/badge";
@@ -179,6 +179,8 @@ const ProfilePage = () => {
       name: "Συνδρομή",
       type: activePkg?.package?.name || activePkg?.package_name || user?.membership_type || "",
       remaining: (activePkg?.remaining_sessions !== undefined ? activePkg.remaining_sessions : (user as any)?.remaining_sessions) ?? null,
+      bonusSessions: (activePkg?.bonus_sessions !== undefined ? activePkg.bonus_sessions : user?.bonus_sessions) ?? 0,
+      bonusSessionsUsed: (activePkg?.bonus_sessions_used !== undefined ? activePkg.bonus_sessions_used : user?.bonus_sessions_used) ?? 0,
       expiresAt: activePkg?.expires_at || user?.package_end_date || null,
     },
   } as const;
@@ -453,7 +455,15 @@ const ProfilePage = () => {
                           </>
                         ) : (
                           <>
-                            <p className="text-2xl font-bold text-primary">{userData.activePackage.remaining}</p>
+                            <div className="flex items-center justify-end gap-2">
+                              <p className="text-2xl font-bold text-primary">{userData.activePackage.remaining}</p>
+                              {userData.activePackage.bonusSessions > userData.activePackage.bonusSessionsUsed && (
+                                <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                                  <Gift className="h-3 w-3 mr-1" />
+                                  +{userData.activePackage.bonusSessions - userData.activePackage.bonusSessionsUsed}
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-sm text-muted-foreground">συνεδρίες</p>
                           </>
                         )}

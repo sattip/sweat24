@@ -14,7 +14,8 @@
       "Read(//c/Users/olive/Pictures/Screenshots/**)",
       "Bash(keytool:*)",
       "Bash(npm run dev:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(ssh forge@api.sweat93.gr \"cd /home/forge/api.sweat93.gr && sqlite3 database/database.sqlite \"\"SELECT id, name, email FROM users WHERE email = ''papakonstantinoumarilena@gmail.com'';\"\"\")"
     ],
     "deny": [],
     "ask": []

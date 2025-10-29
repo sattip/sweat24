@@ -33,6 +33,8 @@ export interface User {
   remaining_sessions?: number;
   total_sessions?: number;
   used_sessions?: number;
+  bonus_sessions?: number;
+  bonus_sessions_used?: number;
   join_date?: string;
   last_visit?: string;
   avatar?: string;

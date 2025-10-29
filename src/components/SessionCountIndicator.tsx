@@ -15,6 +15,8 @@ interface SessionCountIndicatorProps {
   totalSessions?: number | null;
   remainingSessions?: number | null;
   membershipType: string;
+  bonusSessions?: number; // Bonus sessions available
+  bonusSessionsUsed?: number; // Bonus sessions already used
 }
 
 interface UpsellSuggestion {
@@ -27,20 +29,30 @@ const SessionCountIndicator: React.FC<SessionCountIndicatorProps> = ({
   usedSessions,
   totalSessions,
   remainingSessions,
-  membershipType
+  membershipType,
+  bonusSessions = 0,
+  bonusSessionsUsed = 0
 }) => {
   const [showUpsellDialog, setShowUpsellDialog] = React.useState(false);
-  
+
+  // Calculate bonus sessions remaining
+  const bonusSessionsRemaining = bonusSessions - bonusSessionsUsed;
+
+  // Total remaining includes both regular and bonus sessions
+  const totalRemaining = typeof remainingSessions === 'number'
+    ? remainingSessions + bonusSessionsRemaining
+    : remainingSessions;
+
   // Determine if we need to show warning (μόνο όταν υπάρχει αριθμητικό υπόλοιπο)
-  const showWarning = typeof remainingSessions === 'number' && remainingSessions <= 2 && remainingSessions > 0;
-  const isLastSession = remainingSessions === 1;
-  const isSecondToLast = remainingSessions === 2;
+  const showWarning = typeof totalRemaining === 'number' && totalRemaining <= 2 && totalRemaining > 0;
+  const isLastSession = totalRemaining === 1;
+  const isSecondToLast = totalRemaining === 2;
   
   // Get variant based on remaining sessions
   const getVariant = () => {
-    if (remainingSessions === 0) return 'destructive';
-    if (typeof remainingSessions === 'number' && remainingSessions <= 2) return 'secondary';
-    if (typeof remainingSessions === 'number' && remainingSessions <= 3) return 'outline';
+    if (totalRemaining === 0) return 'destructive';
+    if (typeof totalRemaining === 'number' && totalRemaining <= 2) return 'secondary';
+    if (typeof totalRemaining === 'number' && totalRemaining <= 3) return 'outline';
     return 'default';
   };
 
@@ -75,9 +87,13 @@ const SessionCountIndicator: React.FC<SessionCountIndicatorProps> = ({
       >
         <Badge variant={getVariant()} className="text-sm">
           {typeof remainingSessions === 'number' && typeof totalSessions === 'number'
-            ? `Πραγματοποιήθηκαν ${totalSessions - remainingSessions}/${totalSessions}`
+            ? bonusSessionsRemaining > 0
+              ? `Πραγματοποιήθηκαν ${totalSessions - remainingSessions}/${totalSessions}+${bonusSessionsRemaining}`
+              : `Πραγματοποιήθηκαν ${totalSessions - remainingSessions}/${totalSessions}`
             : typeof remainingSessions === 'number'
-            ? `Απομένουν ${remainingSessions}`
+            ? bonusSessionsRemaining > 0
+              ? `Απομένουν ${remainingSessions}+${bonusSessionsRemaining}`
+              : `Απομένουν ${remainingSessions}`
             : 'Απεριόριστο'}
           {showWarning && <AlertTriangle className="h-3 w-3 ml-1" />}
         </Badge>
@@ -92,8 +108,10 @@ const SessionCountIndicator: React.FC<SessionCountIndicatorProps> = ({
             </DialogTitle>
             <DialogDescription className="space-y-3 pt-2">
               <p className="font-medium text-foreground">
-                {isLastSession 
+                {isLastSession
                   ? 'Αυτή είναι η τελευταία σας συνεδρία. Παρακαλούμε πληρώστε σήμερα για να συνεχίσετε.'
+                  : bonusSessionsRemaining > 0
+                  ? `Σας απομένουν ${remainingSessions} κανονικές + ${bonusSessionsRemaining} δώρο συνεδρίες.`
                   : `Σας απομένουν μόνο ${remainingSessions} συνεδρίες.`
                 }
               </p>
