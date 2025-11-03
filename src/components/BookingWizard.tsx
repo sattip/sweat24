@@ -20,12 +20,14 @@ import {
   Users,
   Dumbbell,
   Loader2,
-  CheckCircle
+  CheckCircle,
+  Coins
 } from "lucide-react";
-import { classService, bookingService, userService } from "@/services/apiService";
+import { classService, bookingService, userService, loyaltyService } from "@/services/apiService";
 import * as API from "@/config/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { BookWithPointsDialog } from "@/components/BookWithPointsDialog";
 
 interface BookingWizardProps {
   isOpen: boolean;
@@ -100,6 +102,11 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   const [dateScrollIndex, setDateScrollIndex] = useState(0); // For date carousel navigation
   const [currentMonth, setCurrentMonth] = useState<string>(''); // Track current month YYYY-MM
 
+  // Loyalty points state
+  const [userPoints, setUserPoints] = useState(0);
+  const [showPointsDialog, setShowPointsDialog] = useState(false);
+  const [usePointsForBooking, setUsePointsForBooking] = useState(false);
+
   // Booking state
   const [bookingInProgress, setBookingInProgress] = useState(false);
 
@@ -107,8 +114,21 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
     if (isOpen) {
       resetWizard();
       loadGyms();
+      fetchUserPoints();
     }
   }, [isOpen]);
+
+  // Fetch user loyalty points
+  const fetchUserPoints = async () => {
+    try {
+      const data = await loyaltyService.getDashboard();
+      setUserPoints(data.current_balance || 0);
+    } catch (error) {
+      console.error('Failed to fetch loyalty points:', error);
+      // Don't show error toast - points are optional
+      setUserPoints(0);
+    }
+  };
 
   const resetWizard = () => {
     setCurrentStep(1);
@@ -505,6 +525,72 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
     }
   };
 
+  const handleBookWithPoints = async (pointsData: {
+    payment_method: 'full_points' | 'partial' | 'cash_only';
+    points_to_use?: number;
+  }) => {
+    if (!selectedClass || !selectedGym || !selectedTimeSlot) return;
+
+    try {
+      setBookingInProgress(true);
+
+      // Get user data
+      const userStr = localStorage.getItem('sweat93_user');
+      const token = localStorage.getItem('auth_token');
+
+      if (!userStr || !token) {
+        throw new Error('Δεν είστε συνδεδεμένος. Παρακαλώ κάντε login ξανά.');
+      }
+
+      const user = JSON.parse(userStr);
+
+      // Prepare booking data
+      const bookingData = {
+        class_id: parseInt(selectedTimeSlot.id, 10),
+        store_id: selectedGym.id,
+        class_name: selectedClass.name,
+        instructor: selectedClass.instructor,
+        date: selectedTimeSlot.date,
+        time: selectedTimeSlot.time,
+        type: selectedCategory?.value || '',
+        location: selectedGym.address,
+        user_id: user.id,
+        customer_name: user.name,
+        customer_email: user.email,
+        status: 'confirmed',
+        payment_method: pointsData.payment_method,
+        points_to_use: pointsData.points_to_use,
+      };
+
+      const result = await loyaltyService.bookWithPoints(bookingData);
+
+      if (result.success) {
+        const pointsUsed = result.data?.points_used || pointsData.points_to_use || 0;
+        const remainingPoints = result.data?.remaining_points || (userPoints - pointsUsed);
+
+        toast.success(result.message || 'Κράτηση επιτυχής! 🎉', {
+          description: pointsUsed > 0
+            ? `Χρησιμοποιήθηκαν ${pointsUsed} πόντοι. Υπόλοιπο: ${remainingPoints} πόντοι`
+            : 'Η κράτηση ολοκληρώθηκε επιτυχώς',
+        });
+
+        // Update points balance
+        setUserPoints(remainingPoints);
+
+        setShowPointsDialog(false);
+        onClose();
+        navigate('/bookings');
+      } else {
+        throw new Error(result.message || 'Η κράτηση απέτυχε');
+      }
+    } catch (error: any) {
+      console.error('Booking with points failed:', error);
+      toast.error(error.message || 'Η κράτηση με πόντους απέτυχε');
+    } finally {
+      setBookingInProgress(false);
+    }
+  };
+
   const handleBooking = async () => {
     if (!selectedClass || !selectedGym) return;
     if (!selectedTimeSlot && selectedTimeSlots.length === 0) return;
@@ -894,38 +980,72 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           { value: 0, label: 'Κυρ', fullLabel: 'Κυριακή' }
         ];
 
-        // Generate dates grouped by month for next 3 months
+        // Helper function: Get Monday of a given date
+        const getWeekStart = (date: Date): Date => {
+          const d = new Date(date);
+          const day = d.getDay();
+          const diff = day === 0 ? -6 : 1 - day; // If Sunday, go back 6 days, else go to Monday
+          d.setDate(d.getDate() + diff);
+          d.setHours(0, 0, 0, 0);
+          return d;
+        };
+
+        // Helper function: Get the dominant month in a week (month with most days)
+        const getWeekDominantMonth = (weekDates: string[]): string => {
+          const monthCounts: { [key: string]: number } = {};
+          weekDates.forEach(date => {
+            const month = date.substring(0, 7);
+            monthCounts[month] = (monthCounts[month] || 0) + 1;
+          });
+          return Object.entries(monthCounts).reduce((a, b) => b[1] > a[1] ? b : a)[0];
+        };
+
+        // Generate weeks (Mon-Sun) for next 3 months
         const today = new Date();
-        const monthsData: { key: string; dates: string[] }[] = [];
+        today.setHours(0, 0, 0, 0);
+        const todayStr = today.toISOString().split('T')[0];
 
-        for (let monthOffset = 0; monthOffset < 3; monthOffset++) {
-          const monthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
-          const monthKey = monthDate.toISOString().substring(0, 7); // YYYY-MM
-          const monthDates: string[] = [];
+        // Get current week start (Monday of this week)
+        const currentWeekStart = getWeekStart(today);
 
-          const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
-          const firstDay = monthOffset === 0 ? today.getDate() : 1;
+        // Generate all weeks starting from current week
+        const allWeeks: string[][] = [];
+        let weekStart = new Date(currentWeekStart);
 
-          for (let day = firstDay; day <= lastDay; day++) {
-            const date = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
-            monthDates.push(date.toISOString().split('T')[0]);
+        // Generate weeks for approximately 3 months (13 weeks)
+        for (let weekIdx = 0; weekIdx < 13; weekIdx++) {
+          const week: string[] = [];
+          for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + dayIdx);
+            week.push(date.toISOString().split('T')[0]);
           }
+          allWeeks.push(week);
+          weekStart.setDate(weekStart.getDate() + 7);
+        }
 
-          monthsData.push({ key: monthKey, dates: monthDates });
+        // Initialize dateScrollIndex to current week (0) if not set
+        const initializedScrollIndex = dateScrollIndex >= 0 ? dateScrollIndex : 0;
+
+        // Get visible week
+        const visibleDates = allWeeks[initializedScrollIndex] || allWeeks[0];
+
+        // Calculate current month based on dominant month in visible week
+        const calculatedMonth = getWeekDominantMonth(visibleDates);
+
+        // Auto-update currentMonth if it differs from calculated
+        if (currentMonth !== calculatedMonth) {
+          setCurrentMonth(calculatedMonth);
         }
 
         // Initialize currentMonth if not set
-        if (!currentMonth && monthsData.length > 0) {
-          setCurrentMonth(monthsData[0].key);
+        if (!currentMonth) {
+          setCurrentMonth(calculatedMonth);
         }
 
-        // Get current month dates
-        const currentMonthData = monthsData.find(m => m.key === currentMonth) || monthsData[0];
-        const currentMonthDates = currentMonthData?.dates || [];
-
-        // Initialize selectedDate if not set
-        if (!selectedDate && currentMonthDates.length > 0) {
-          setSelectedDate(currentMonthDates[0]);
+        // Initialize selectedDate to today if not set
+        if (!selectedDate) {
+          setSelectedDate(todayStr);
         }
 
         // Filter time slots by selected date
@@ -933,10 +1053,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           ? timeSlots.filter(slot => slot.date === selectedDate)
           : [];
 
-        const visibleDates = currentMonthDates.slice(dateScrollIndex, dateScrollIndex + 7);
-        const currentMonthIndex = monthsData.findIndex(m => m.key === currentMonth);
-        const canScrollLeft = dateScrollIndex > 0 || currentMonthIndex > 0;
-        const canScrollRight = dateScrollIndex + 7 < currentMonthDates.length || currentMonthIndex < monthsData.length - 1;
+        // Navigation helpers
+        const canScrollLeft = initializedScrollIndex > 0;
+        const canScrollRight = initializedScrollIndex < allWeeks.length - 1;
+
+        // Find which week index corresponds to the first week of current selected month
+        const findFirstWeekOfMonth = (monthKey: string): number => {
+          return allWeeks.findIndex(week => {
+            const weekMonth = getWeekDominantMonth(week);
+            return weekMonth === monthKey;
+          });
+        };
 
         return (
           <div className="space-y-3">
@@ -1009,32 +1136,35 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
             ) : (
               <>
                 {/* Date Selection Carousel */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label className="text-sm font-medium">Επιλέξτε Ημερομηνία</Label>
 
                   {/* Month Header with Navigation */}
-                  <div className="flex items-center justify-center gap-2 mb-3">
+                  <div className="flex items-center justify-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        if (dateScrollIndex > 0) {
-                          // Scroll within current month
-                          setDateScrollIndex(dateScrollIndex - 7);
-                        } else if (currentMonthIndex > 0) {
-                          // Switch to previous month
-                          setCurrentMonth(monthsData[currentMonthIndex - 1].key);
-                          setDateScrollIndex(0);
+                        // Get previous month key
+                        const currentDate = new Date(currentMonth + '-01');
+                        currentDate.setMonth(currentDate.getMonth() - 1);
+                        const prevMonthKey = currentDate.toISOString().substring(0, 7);
+
+                        // Find first week of previous month
+                        const weekIndex = findFirstWeekOfMonth(prevMonthKey);
+                        if (weekIndex >= 0) {
+                          setDateScrollIndex(weekIndex);
+                          // currentMonth will auto-update via the logic above
                         }
                       }}
-                      disabled={!canScrollLeft}
+                      disabled={initializedScrollIndex === 0}
                       className="h-8 w-8"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
 
                     <div className="text-lg font-semibold min-w-[150px] text-center">
-                      {visibleDates.length > 0 && new Date(visibleDates[0]).toLocaleDateString('el-GR', {
+                      {currentMonth && new Date(currentMonth + '-01').toLocaleDateString('el-GR', {
                         month: 'long',
                         year: 'numeric'
                       })}
@@ -1044,13 +1174,16 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        if (dateScrollIndex + 7 < currentMonthDates.length) {
-                          // Scroll within current month
-                          setDateScrollIndex(dateScrollIndex + 7);
-                        } else if (currentMonthIndex < monthsData.length - 1) {
-                          // Switch to next month
-                          setCurrentMonth(monthsData[currentMonthIndex + 1].key);
-                          setDateScrollIndex(0);
+                        // Get next month key
+                        const currentDate = new Date(currentMonth + '-01');
+                        currentDate.setMonth(currentDate.getMonth() + 1);
+                        const nextMonthKey = currentDate.toISOString().substring(0, 7);
+
+                        // Find first week of next month
+                        const weekIndex = findFirstWeekOfMonth(nextMonthKey);
+                        if (weekIndex >= 0 && weekIndex < allWeeks.length) {
+                          setDateScrollIndex(weekIndex);
+                          // currentMonth will auto-update via the logic above
                         }
                       }}
                       disabled={!canScrollRight}
@@ -1060,29 +1193,54 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                     </Button>
                   </div>
 
-                  {/* Date Buttons */}
-                  <div className="flex gap-2">
-                    {visibleDates.map((date) => {
-                      const dateObj = new Date(date);
-                      const dayName = dateObj.toLocaleDateString('el-GR', { weekday: 'short' });
-                      const dayNum = dateObj.getDate();
-                      const isSelected = selectedDate === date;
+                  {/* Date Navigation and Buttons */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setDateScrollIndex(Math.max(0, initializedScrollIndex - 1))}
+                      disabled={!canScrollLeft}
+                      className="h-10 w-8 flex-shrink-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
 
-                      return (
-                        <button
-                          key={date}
-                          onClick={() => setSelectedDate(date)}
-                          className={`flex-1 flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${
-                            isSelected
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                        >
-                          <span className="text-xs font-medium">{dayName}</span>
-                          <span className="text-2xl font-bold">{dayNum}</span>
-                        </button>
-                      );
-                    })}
+                    {/* Date Buttons */}
+                    <div className="grid grid-cols-7 gap-2 flex-1">
+                      {visibleDates.map((date) => {
+                        const dateObj = new Date(date);
+                        const dayName = dateObj.toLocaleDateString('el-GR', { weekday: 'short' });
+                        const dayNum = dateObj.getDate();
+                        const isSelected = selectedDate === date;
+                        const dateMonth = date.substring(0, 7); // YYYY-MM
+                        const isCurrentMonth = dateMonth === currentMonth;
+
+                        return (
+                          <button
+                            key={date}
+                            onClick={() => setSelectedDate(date)}
+                            className={`flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${
+                              isSelected
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-border hover:border-primary/50'
+                            } ${!isCurrentMonth ? 'opacity-40' : ''}`}
+                          >
+                            <span className="text-xs font-medium">{dayName}</span>
+                            <span className="text-2xl font-bold">{dayNum}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setDateScrollIndex(initializedScrollIndex + 1)}
+                      disabled={!canScrollRight}
+                      className="h-10 w-8 flex-shrink-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -1145,6 +1303,47 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                           );
                         })}
                       </div>
+                    )}
+
+                    {/* Loyalty Points Option */}
+                    {selectedTimeSlot && !selectedTimeSlot.isAlreadyBooked && (
+                      <Card className="bg-purple-50 border-purple-200 mt-4">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Coins className="h-5 w-5 text-purple-600" />
+                              <Label className="text-base font-semibold text-purple-900">
+                                Χρήση Πόντων Loyalty
+                              </Label>
+                            </div>
+                            <Badge className="bg-purple-600 hover:bg-purple-700">
+                              <Coins className="h-3 w-3 mr-1" />
+                              {userPoints} διαθέσιμοι
+                            </Badge>
+                          </div>
+
+                          {userPoints > 0 ? (
+                            <div className="space-y-2">
+                              <p className="text-sm text-purple-700">
+                                Έχετε {userPoints} πόντους διαθέσιμους. Χρησιμοποιήστε τους για να εξοικονομήσετε χρήματα!
+                              </p>
+                              <Button
+                                variant="outline"
+                                onClick={() => setShowPointsDialog(true)}
+                                className="w-full border-purple-300 hover:bg-purple-100"
+                                disabled={bookingInProgress}
+                              >
+                                <Coins className="h-4 w-4 mr-2" />
+                                Κράτηση με Πόντους
+                              </Button>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              Δεν έχετε διαθέσιμους πόντους αυτή τη στιγμή.
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
                     )}
                   </div>
                 )}
@@ -1239,6 +1438,19 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           </Button>
         </div>
       </DialogContent>
+
+      {/* Book with Points Dialog */}
+      <BookWithPointsDialog
+        isOpen={showPointsDialog}
+        onClose={() => setShowPointsDialog(false)}
+        onConfirm={handleBookWithPoints}
+        classInfo={{
+          id: selectedTimeSlot ? parseInt(selectedTimeSlot.id) : 0,
+          name: selectedClass?.name || '',
+          price: 15, // Default price - should come from class data
+        }}
+        userPoints={userPoints}
+      />
     </Dialog>
   );
 };

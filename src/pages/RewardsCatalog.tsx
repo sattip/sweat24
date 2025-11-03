@@ -3,7 +3,8 @@ import { Search, Filter, Star, ArrowLeft } from 'lucide-react';
 import { usePoints } from '../contexts/PointsContext';
 import { RewardCard } from '../components/points/RewardCard';
 import { LoadingState } from '../components/points/LoadingSpinner';
-import { Reward } from '../api/modules/pointsApi';
+import { Reward, RedemptionResult } from '../api/modules/pointsApi';
+import { RedemptionSuccessDialog } from '../components/points/RedemptionSuccessDialog';
 
 const RewardsCatalog: React.FC = () => {
   const { state, actions } = usePoints();
@@ -11,6 +12,8 @@ const RewardsCatalog: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [filteredRewards, setFilteredRewards] = useState<Reward[]>([]);
   const [redeeming, setRedeeming] = useState<number | null>(null);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [redemptionData, setRedemptionData] = useState<RedemptionResult | null>(null);
 
   const filterOptions = [
     { value: 'all', label: 'Όλες', count: state.rewards.length },
@@ -55,7 +58,13 @@ const RewardsCatalog: React.FC = () => {
   const handleRedeemReward = async (rewardId: number) => {
     setRedeeming(rewardId);
     try {
-      await actions.redeemReward(rewardId);
+      const result = await actions.redeemReward(rewardId);
+
+      // If redemption was successful and returned data (not cart item)
+      if (result && result.reward_code && result.reward_code !== 'CART_PENDING') {
+        setRedemptionData(result);
+        setShowSuccessDialog(true);
+      }
     } finally {
       setRedeeming(null);
     }
@@ -204,6 +213,13 @@ const RewardsCatalog: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Redemption Success Dialog */}
+      <RedemptionSuccessDialog
+        isOpen={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        redemptionData={redemptionData}
+      />
     </div>
   );
 };

@@ -299,9 +299,11 @@ const DashboardPage = () => {
                       (apiActivePackage?.total_sessions ?? displayUser?.total_sessions) !== undefined ||
                       (apiActivePackage?.remaining_sessions ?? displayUser?.remaining_sessions) !== undefined
                     ) && (
-                      <SessionCountIndicator 
+                      <SessionCountIndicator
                         totalSessions={(apiActivePackage?.total_sessions ?? displayUser.total_sessions) ?? null}
                         remainingSessions={(apiActivePackage?.remaining_sessions ?? displayUser.remaining_sessions) ?? null}
+                        bonusSessions={(apiActivePackage?.bonus_sessions ?? displayUser.bonus_sessions) ?? 0}
+                        bonusSessionsUsed={(apiActivePackage?.bonus_sessions_used ?? displayUser.bonus_sessions_used) ?? 0}
                         membershipType="Μηνιαίο"
                       />
                     )}
