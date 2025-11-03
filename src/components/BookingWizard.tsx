@@ -362,22 +362,61 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         }
 
         const data = await fallbackResponse.json();
-        classesData = Array.isArray(data) ? data : [];
+        console.log('BookingWizard: Fallback /classes response:', data);
+        // Handle wrapped response format { success: true, data: [...] }
+        classesData = (data && data.data && Array.isArray(data.data)) ? data.data : (Array.isArray(data) ? data : []);
+        console.log('BookingWizard: Extracted classesData:', classesData.length, 'classes');
       } else if (!classesResponse.ok) {
         throw new Error('Failed to fetch class schedule');
       } else {
         const result = await classesResponse.json();
+        console.log('BookingWizard: /fitness-classes response:', result);
         classesData = result.success && result.data ? result.data : [];
+        console.log('BookingWizard: Extracted classesData:', classesData.length, 'classes');
       }
 
+      console.log('BookingWizard: Selected class to match:', selectedClass);
+      console.log('BookingWizard: First class from API for comparison:', classesData[0]);
+
       // Filter classes that match the selected class (by name and instructor)
-      const matchingClasses = classesData.filter((classItem: any) =>
-        classItem.name === selectedClass.name &&
-        (classItem.instructor_name === selectedClass.instructor ||
-         classItem.trainer_name === selectedClass.instructor) &&
-        classItem.status === 'active' &&
-        new Date(classItem.date) >= new Date() // Only future classes
-      );
+      const matchingClasses = classesData.filter((classItem: any) => {
+        const nameMatch = classItem.name === selectedClass.name;
+        const instructorMatch =
+          classItem.instructor === selectedClass.instructor ||
+          classItem.instructor_name === selectedClass.instructor ||
+          classItem.trainer_name === selectedClass.instructor;
+        const statusMatch = classItem.status === 'active';
+
+        // Compare dates without time - only check if class date is today or in the future
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const classDate = new Date(classItem.date);
+        classDate.setHours(0, 0, 0, 0);
+        const dateMatch = classDate >= today;
+
+        if (classItem.id === 76) {
+          console.log(`Detailed check for class ${classItem.id}:`, {
+            'classItem.name': classItem.name,
+            'selectedClass.name': selectedClass.name,
+            nameMatch,
+            'classItem.instructor': classItem.instructor,
+            'classItem.instructor_name': classItem.instructor_name,
+            'classItem.trainer_name': classItem.trainer_name,
+            'selectedClass.instructor': selectedClass.instructor,
+            instructorMatch,
+            statusMatch,
+            'classItem.date': classItem.date,
+            'today': today.toISOString().split('T')[0],
+            'classDate': classDate.toISOString().split('T')[0],
+            dateMatch
+          });
+        }
+
+        return nameMatch && instructorMatch && statusMatch && dateMatch;
+      });
+
+      console.log('BookingWizard: Matching classes found:', matchingClasses.length);
+      console.log('BookingWizard: First few matching classes:', matchingClasses.slice(0, 3));
 
       // Create a set of booked class IDs for quick lookup
       const bookedClassIds = new Set(

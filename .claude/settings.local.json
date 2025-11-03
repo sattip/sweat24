@@ -14,7 +14,14 @@
       "Read(//c/Users/olive/Pictures/Screenshots/**)",
       "Bash(keytool:*)",
       "Bash(npm run dev:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(agvtool next-version:*)",
+      "Bash(npx cap sync:*)",
+      "Bash(rm:*)",
+      "Bash(agvtool:*)",
+      "Bash(xcrun agvtool new-marketing-version:*)",
+      "Bash(xcrun agvtool:*)"
     ],
     "deny": [],
     "ask": []

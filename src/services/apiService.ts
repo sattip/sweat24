@@ -74,19 +74,37 @@ export const classService = {
       },
     });
     if (!response.ok) throw new Error('Failed to fetch classes');
-    return response.json();
+    const data = await response.json();
+    // Handle wrapped response format { success: true, data: [...] }
+    if (data && data.data && Array.isArray(data.data)) {
+      return data.data;
+    }
+    // Fallback for direct array response
+    return Array.isArray(data) ? data : [];
   },
 
   async getById(id: string | number) {
     // Public endpoint - no authentication needed
-    const response = await fetch(buildApiUrl(`/classes/${id}`), {
+    const url = buildApiUrl(`/fitness-classes/${id}`);
+    console.log('Fetching class from:', url);
+    const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     });
-    if (!response.ok) throw new Error('Failed to fetch class');
-    return response.json();
+    console.log('Response status:', response.status, response.statusText);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', errorText);
+      throw new Error(`Failed to fetch class: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log('Raw API response for class:', data);
+    // Handle wrapped response format { success: true, data: {...} }
+    const result = data && data.data ? data.data : data;
+    console.log('Processed class data:', result);
+    return result;
   }
 };
 
@@ -322,10 +340,52 @@ export const bookingService = {
   },
 
   async getUserPastBookings() {
-    // TODO: Backend endpoint /bookings/past doesn't exist yet
-    // Return empty array until backend implements this endpoint
-    // Past bookings are currently included in the main /bookings endpoint
-    return [];
+    // Get user and token from localStorage
+    const userStr = localStorage.getItem('sweat93_user');
+    const token = localStorage.getItem('auth_token');
+
+    if (!userStr) {
+      console.log('getUserPastBookings: No user in localStorage');
+      return [];
+    }
+
+    if (!token) {
+      console.log('getUserPastBookings: No auth token in localStorage');
+      return [];
+    }
+
+    const user = JSON.parse(userStr);
+    console.log('getUserPastBookings: Fetching for user ID:', user.id);
+
+    // Use the dedicated history endpoint
+    const url = buildApiUrl(`/bookings/history?user_id=${user.id}`);
+    console.log('getUserPastBookings: Fetching from URL:', url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      console.log('getUserPastBookings: Response not OK:', response.status);
+      const errorText = await response.text();
+      console.log('getUserPastBookings: Error response:', errorText);
+      return [];
+    }
+    const data = await response.json();
+    console.log('getUserPastBookings: Raw API response:', data);
+
+    // Handle wrapped response format { success: true, data: [...] }
+    let pastBookings = Array.isArray(data) ? data : [];
+    if (data && data.data && Array.isArray(data.data)) {
+      pastBookings = data.data;
+    }
+    console.log('getUserPastBookings: Past bookings count:', pastBookings.length);
+    console.log('getUserPastBookings: Past bookings:', pastBookings);
+
+    return pastBookings;
   }
 };
 

@@ -73,6 +73,15 @@ const ClassSchedulePage = () => {
     try {
       setLoading(true);
       const response = await classService.getAll();
+      console.log('Classes API Response:', response);
+      console.log('Is array:', Array.isArray(response));
+
+      if (!Array.isArray(response)) {
+        console.error('Response is not an array:', response);
+        toast.error("Σφάλμα: Μη έγκυρη απόκριση από τον διακομιστή");
+        return;
+      }
+
       const formattedClasses = response.map((cls: any) => ({
         ...cls,
         day: getDayOfWeek(cls.date),
@@ -82,26 +91,30 @@ const ClassSchedulePage = () => {
         totalSpots: cls.max_participants
       })) || [];
       setClasses(formattedClasses);
-      
+
       // Auto-select first day with classes if current day has no classes
       if (formattedClasses.length > 0) {
         const today = weekDates[0]?.fullDate;
         const todayHasClasses = formattedClasses.some(cls => cls.date === today && cls.status !== 'cancelled');
-        
+
         if (!todayHasClasses) {
           // Find first day in the week that has classes
-          const firstDayWithClasses = weekDates.find(day => 
+          const firstDayWithClasses = weekDates.find(day =>
             formattedClasses.some(cls => cls.date === day.fullDate && cls.status !== 'cancelled')
           );
-          
+
           if (firstDayWithClasses) {
             setActiveDay(firstDayWithClasses.fullDate);
           }
         }
       }
     } catch (error) {
+      console.error('Error fetching classes:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       toast.error("Σφάλμα κατά τη φόρτωση μαθημάτων");
-      console.error(error);
     } finally {
       setLoading(false);
     }

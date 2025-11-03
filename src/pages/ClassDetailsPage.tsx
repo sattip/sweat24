@@ -4,9 +4,9 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Calendar, Clock, MapPin, User, BarChart, Loader2, Users, AlertTriangle, Info } from "lucide-react";
+import { Calendar, Clock, MapPin, User, BarChart, Loader2, Users, AlertTriangle, Info, CheckCircle } from "lucide-react";
 import { classService, bookingService, waitlistService, userService, profileService } from "@/services/apiService";
-
+import { CancellationModal } from "@/components/modals/CancellationModal";
 import { toast } from "sonner";
 
 const ClassDetailsPage = () => {
@@ -17,6 +17,10 @@ const ClassDetailsPage = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [waitlistStatus, setWaitlistStatus] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userHasBooking, setUserHasBooking] = useState(false);
+  const [userBookingId, setUserBookingId] = useState<number | null>(null);
+  const [userBooking, setUserBooking] = useState<any>(null);
+  const [cancellationModalOpen, setCancellationModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -26,9 +30,11 @@ const ClassDetailsPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch class details
       const classData = await classService.getById(classId!);
+      console.log('Class Details API Response:', classData);
+      console.log('Class ID requested:', classId);
       setClassDetails(classData);
       
       
@@ -36,7 +42,24 @@ const ClassDetailsPage = () => {
       try {
         const userData = await userService.getCurrentUser();
         setCurrentUser(userData);
-        
+
+        // Check if user already has a booking for this class
+        try {
+          const userBookings = await bookingService.getUserBookings();
+          const existingBooking = userBookings.find((booking: any) =>
+            booking.class_id === parseInt(classId!) &&
+            booking.status !== 'cancelled' &&
+            booking.status !== 'rejected'
+          );
+          if (existingBooking) {
+            setUserHasBooking(true);
+            setUserBookingId(existingBooking.id);
+            setUserBooking(existingBooking);
+          }
+        } catch (err) {
+          console.log('Error checking user bookings:', err);
+        }
+
         // Fetch waitlist status if class is full
         if (classData.current_participants >= classData.max_participants) {
           const status = await waitlistService.getStatus(classId!);
@@ -96,11 +119,12 @@ const ClassDetailsPage = () => {
         customer_email: currentUser.email,
         class_id: classDetails.id,
         class_name: classDetails.name,
-        instructor: classDetails.instructor?.name || 'TBD',
+        instructor: classDetails.instructor?.name || classDetails.trainer_name || classDetails.instructor || 'TBD',
         date: classDetails.date,
         time: classDetails.time,
         type: classDetails.type,
-        location: classDetails.location,
+        location: classDetails.location || classDetails.store_name,
+        store_id: classDetails.store_id,
       };
       
       const response = await bookingService.create(bookingData);
@@ -148,6 +172,19 @@ const ClassDetailsPage = () => {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const handleCancelClick = () => {
+    setCancellationModalOpen(true);
+  };
+
+  const handleCancellationSuccess = () => {
+    setUserHasBooking(false);
+    setUserBookingId(null);
+    setUserBooking(null);
+    setCancellationModalOpen(false);
+    // Refresh class details to update participant count
+    fetchData();
   };
 
   if (loading) {
@@ -356,10 +393,10 @@ const ClassDetailsPage = () => {
         </Card>
 
         {/* Action Button */}
-        {!waitlistStatus?.in_waitlist && (
+        {!waitlistStatus?.in_waitlist && !userHasBooking && (
           <div className="mt-8 sticky bottom-4 bg-background/80 backdrop-blur-sm rounded-lg p-4 shadow-lg">
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               size="lg"
               onClick={handleBooking}
               disabled={bookingLoading}
@@ -374,7 +411,38 @@ const ClassDetailsPage = () => {
             )}
           </div>
         )}
+
+        {/* Already Booked Message */}
+        {userHasBooking && (
+          <Card className="mt-8 border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-center gap-2 text-green-800">
+                  <CheckCircle className="h-5 w-5" />
+                  <p className="font-semibold">Έχετε ήδη κάνει κράτηση για αυτό το μάθημα</p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+                  onClick={handleCancelClick}
+                >
+                  Ακύρωση/Μετάθεση
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
+
+      {/* Cancellation Modal */}
+      {userBooking && (
+        <CancellationModal
+          isOpen={cancellationModalOpen}
+          onClose={() => setCancellationModalOpen(false)}
+          booking={userBooking}
+          onSuccess={handleCancellationSuccess}
+        />
+      )}
     </div>
   );
 };

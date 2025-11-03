@@ -213,11 +213,15 @@ export const BookingCalendar: React.FC = () => {
                           </div>
                         </div>
                         <Badge variant={
-                          booking.checked_in || booking.attended === true ? "success" : 
+                          booking.checked_in || booking.attended === true ? "default" :
                           booking.attended === false ? "destructive" :
-                          (booking.is_waitlist || booking.status === 'waitlist') ? "warning" : 
+                          (booking.is_waitlist || booking.status === 'waitlist') ? "default" :
                           "secondary"
-                        } className={(booking.is_waitlist || booking.status === 'waitlist') ? "bg-orange-500 text-white font-bold animate-pulse" : ""}>
+                        } className={
+                          booking.checked_in || booking.attended === true ? "bg-green-500 text-white" :
+                          (booking.is_waitlist || booking.status === 'waitlist') ? "bg-orange-500 text-white font-bold animate-pulse" :
+                          ""
+                        }>
                           {booking.checked_in || booking.attended === true ? "Ολοκληρώθηκε" : 
                            booking.attended === false ? "Δεν παρευρέθηκε" :
                            (booking.is_waitlist || booking.status === 'waitlist') ? "🕒 ΛΙΣΤΑ ΑΝΑΜΟΝΗΣ" :
@@ -254,7 +258,26 @@ export const BookingCalendar: React.FC = () => {
             <div className="grid grid-cols-3 gap-4 pt-4 border-t">
               <div className="text-center">
                 <p className="text-2xl font-bold text-primary">
-                  {bookings.filter(b => new Date(b.date) >= new Date() && !b.checked_in).length}
+                  {bookings.filter(b => {
+                    const todayDateStr = new Date().toISOString().split('T')[0];
+                    const bookingDateStr = b.date;
+                    const now = new Date();
+                    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+                    // Future booking if date is after today
+                    if (bookingDateStr > todayDateStr) {
+                      return !b.checked_in;
+                    }
+
+                    // If today, check if time hasn't passed yet
+                    if (bookingDateStr === todayDateStr && b.time) {
+                      const [hours, minutes] = b.time.split(':').map(Number);
+                      const bookingTimeInMinutes = hours * 60 + minutes;
+                      return bookingTimeInMinutes >= currentTimeInMinutes && !b.checked_in;
+                    }
+
+                    return false;
+                  }).length}
                 </p>
                 <p className="text-sm text-muted-foreground">Επερχόμενες</p>
               </div>
@@ -267,15 +290,32 @@ export const BookingCalendar: React.FC = () => {
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600">
                   {bookings.filter(b => {
-                    const bookingDate = new Date(b.date);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0); // Reset time to start of day
-                    
-                    // Only count as "not attended" if:
-                    // 1. Explicitly marked as not attended (attended === false)
-                    // 2. OR booking was in the past and not checked in/attended
-                    return b.attended === false || 
-                           (!b.checked_in && b.attended !== true && bookingDate < today);
+                    const todayDateStr = new Date().toISOString().split('T')[0];
+                    const bookingDateStr = b.date;
+                    const now = new Date();
+                    const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+
+                    // Explicitly marked as not attended
+                    if (b.attended === false) {
+                      return true;
+                    }
+
+                    // Check if booking is in the past and not checked in/attended
+                    let isPast = false;
+
+                    // Past if date is before today
+                    if (bookingDateStr < todayDateStr) {
+                      isPast = true;
+                    }
+
+                    // If today, check if time has passed
+                    if (bookingDateStr === todayDateStr && b.time) {
+                      const [hours, minutes] = b.time.split(':').map(Number);
+                      const bookingTimeInMinutes = hours * 60 + minutes;
+                      isPast = bookingTimeInMinutes < currentTimeInMinutes;
+                    }
+
+                    return isPast && !b.checked_in && b.attended !== true;
                   }).length}
                 </p>
                 <p className="text-sm text-muted-foreground">Δεν παρευρέθηκε</p>
