@@ -389,15 +389,15 @@ const BookingsPage = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="bookings">
-              Επερχόμενες Κρατήσεις
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="bookings" className="text-xs sm:text-sm px-2">
+              Κρατήσεις
             </TabsTrigger>
-            <TabsTrigger value="waitlist">
-              <Users className="h-4 w-4 mr-1" />
-              Λίστα Αναμονής ({waitlistEntries.length})
+            <TabsTrigger value="waitlist" className="text-xs sm:text-sm px-2 flex items-center justify-center gap-1">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Αναμονή ({waitlistEntries.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="history">Ιστορικό Προπονήσεων</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm px-2">Ιστορικό</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bookings" className="mt-6">

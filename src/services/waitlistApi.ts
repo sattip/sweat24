@@ -1,4 +1,4 @@
-import API from './apiService';
+import * as API from '@/config/api';
 
 export interface WaitlistEntry {
   waitlist_id: number;
