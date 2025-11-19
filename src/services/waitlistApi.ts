@@ -1,4 +1,4 @@
-import API from './apiService';
+import { apiRequest } from '@/config/api';
 
 export interface WaitlistEntry {
   waitlist_id: number;
@@ -45,7 +45,7 @@ export const waitlistApi = {
    * Get all waitlists for the current user
    */
   async getMyWaitlists(): Promise<{ data: WaitlistEntry[]; total: number }> {
-    const response = await API.apiRequest('/my-waitlists');
+    const response = await apiRequest('/my-waitlists');
 
     if (!response.ok) {
       throw new Error('Failed to fetch waitlists');
@@ -59,7 +59,7 @@ export const waitlistApi = {
    * Get waitlist for a specific class (admin only)
    */
   async getClassWaitlist(classId: number): Promise<{ waitlist: any[]; total: number }> {
-    const response = await API.apiRequest(`/classes/${classId}/waitlist`);
+    const response = await apiRequest(`/classes/${classId}/waitlist`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch class waitlist');
@@ -73,7 +73,7 @@ export const waitlistApi = {
    * Check waitlist status for a specific class
    */
   async checkStatus(classId: number): Promise<WaitlistStatus> {
-    const response = await API.apiRequest(`/classes/${classId}/waitlist/status`);
+    const response = await apiRequest(`/classes/${classId}/waitlist/status`);
 
     if (!response.ok) {
       throw new Error('Failed to check waitlist status');
@@ -87,7 +87,7 @@ export const waitlistApi = {
    * Join waitlist for a class
    */
   async join(classId: number): Promise<JoinWaitlistResponse> {
-    const response = await API.apiRequest(`/classes/${classId}/waitlist/join`, {
+    const response = await apiRequest(`/classes/${classId}/waitlist/join`, {
       method: 'POST',
     });
 
@@ -104,7 +104,7 @@ export const waitlistApi = {
    * Leave waitlist for a class
    */
   async leave(classId: number): Promise<void> {
-    const response = await API.apiRequest(`/classes/${classId}/waitlist/leave`, {
+    const response = await apiRequest(`/classes/${classId}/waitlist/leave`, {
       method: 'DELETE',
     });
 
@@ -119,7 +119,7 @@ export const waitlistApi = {
    * @param stayInWaitlist - If true, moves user to back of queue. If false, removes from waitlist entirely.
    */
   async decline(classId: number, stayInWaitlist: boolean = false): Promise<DeclineWaitlistResponse> {
-    const response = await API.apiRequest(`/classes/${classId}/waitlist/decline`, {
+    const response = await apiRequest(`/classes/${classId}/waitlist/decline`, {
       method: 'POST',
       body: JSON.stringify({ stay_in_waitlist: stayInWaitlist }),
       headers: {
