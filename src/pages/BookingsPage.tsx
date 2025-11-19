@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
-import { Calendar, Clock, MapPin, User, CalendarX, Loader2, X, RefreshCw, Dumbbell, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, User, CalendarX, Loader2, X, RefreshCw, Dumbbell, CheckCircle, XCircle, Plus, Users } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,6 +20,10 @@ import RateWorkoutDialog from "@/components/workouts/RateWorkoutDialog";
 import MuscleGroupDialog from "@/components/workouts/MuscleGroupDialog";
 import { bookingService } from "@/services/apiService";
 import { toast } from "sonner";
+import { BookingWizard } from "@/components/BookingWizard";
+import { waitlistApi, type WaitlistEntry } from "@/services/waitlistApi";
+import { WaitlistStatusBadge } from "@/components/WaitlistStatusBadge";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 // Define types for workout data
 interface Workout {
@@ -63,7 +67,12 @@ const BookingsPage = () => {
     booking: null as any,
   });
   const [previousBookings, setPreviousBookings] = useState<any[]>([]);
-  
+  const [bookingWizardOpen, setBookingWizardOpen] = useState(false);
+
+  // Waitlist state
+  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
+
   // History state
   const [filter, setFilter] = useState("all");
   const [attendanceFilter, setAttendanceFilter] = useState("all");
@@ -76,11 +85,13 @@ const BookingsPage = () => {
   useEffect(() => {
     fetchBookings();
     fetchWorkoutHistory();
-    
-    // Set up polling every 25 seconds for real-time booking updates
+    fetchWaitlists();
+
+    // Set up polling every 25 seconds for real-time booking and waitlist updates
     const pollingInterval = setInterval(() => {
-      console.log('🔄 Polling for booking updates...');
+      console.log('🔄 Polling for booking and waitlist updates...');
       fetchBookings();
+      fetchWaitlists();
     }, 25000); // 25 seconds
 
     // Cleanup interval on unmount
@@ -98,9 +109,20 @@ const BookingsPage = () => {
       const allBookings = Array.isArray(response) ? response : (response && Array.isArray((response as any).data) ? (response as any).data : []);
       console.log('BookingsPage - All bookings received:', allBookings);
       console.log('BookingsPage - Waitlist bookings:', allBookings.filter(b => b.status === 'waitlist' || b.is_waitlist));
-      
-      // Filter only future bookings (both confirmed and waitlist)
+
+      // Get current user ID
+      const userStr = localStorage.getItem('sweat93_user');
+      const currentUserId = userStr ? JSON.parse(userStr).id : null;
+      console.log('BookingsPage - Current user ID:', currentUserId);
+
+      // Filter only future bookings for current user (both confirmed and waitlist)
       const userBookings = allBookings.filter((b: any) => {
+        // First filter: must be current user's booking
+        if (currentUserId && b.user_id !== currentUserId) {
+          return false;
+        }
+
+        // Second filter: must be future booking
         // Handle different date formats
         if (!b.date) {
           console.warn('Booking missing date:', b);
@@ -193,6 +215,41 @@ const BookingsPage = () => {
       toast.error('Σφάλμα κατά τη φόρτωση του ιστορικού προπονήσεων');
     } finally {
       setHistoryLoading(false);
+    }
+  };
+
+  const fetchWaitlists = async () => {
+    try {
+      setWaitlistLoading(true);
+      console.log('Fetching waitlist entries...');
+      const response = await waitlistApi.getMyWaitlists();
+      console.log('Waitlist entries received:', response.data);
+      setWaitlistEntries(response.data || []);
+
+      // Check for newly notified waitlist entries
+      response.data?.forEach((entry: WaitlistEntry) => {
+        if (entry.status === 'notified') {
+          toast.success(`🎉 Διαθέσιμη θέση στο μάθημα!`, {
+            description: `Μια θέση ελευθερώθηκε στο ${entry.class.name}. Έχετε 2 ώρες για επιβεβαίωση.`,
+            duration: 10000,
+          });
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching waitlist:', error);
+      // Don't show error toast on every poll, only log it
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
+
+  const handleLeaveWaitlist = async (classId: number) => {
+    try {
+      await waitlistApi.leave(classId);
+      toast.success('Αφαιρεθήκατε από τη λίστα αναμονής');
+      fetchWaitlists(); // Refresh waitlist
+    } catch (error: any) {
+      toast.error(error.message || 'Αποτυχία αφαίρεσης από τη λίστα αναμονής');
     }
   };
 
@@ -321,6 +378,10 @@ const BookingsPage = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button size="sm" onClick={() => setBookingWizardOpen(true)} className="gap-1">
+              <Plus className="h-4 w-4" />
+              Νέα Κράτηση
+            </Button>
             <Button size="sm" onClick={() => setShowRules(true)} variant="outline">
               Κανόνες Γυμναστηρίου
             </Button>
@@ -328,8 +389,14 @@ const BookingsPage = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="bookings">Επερχόμενες Κρατήσεις</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="bookings">
+              Επερχόμενες Κρατήσεις
+            </TabsTrigger>
+            <TabsTrigger value="waitlist">
+              <Users className="h-4 w-4 mr-1" />
+              Λίστα Αναμονής ({waitlistEntries.length})
+            </TabsTrigger>
             <TabsTrigger value="history">Ιστορικό Προπονήσεων</TabsTrigger>
           </TabsList>
           
@@ -416,7 +483,91 @@ const BookingsPage = () => {
               </div>
             )}
           </TabsContent>
-          
+
+          <TabsContent value="waitlist" className="mt-6">
+            {waitlistEntries.length > 0 ? (
+              <div className="space-y-4">
+                {waitlistEntries.map((entry) => (
+                  <Card key={entry.waitlist_id} className="hover:border-orange-500 transition-colors border-orange-200 bg-orange-50/30">
+                    <CardContent className="p-5">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-lg font-semibold">{entry.class.name}</h3>
+                            <WaitlistStatusBadge status={entry.status} position={entry.position} />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                            <div className="flex items-center">
+                              <Calendar className="mr-2 h-4 w-4" />
+                              <span>{new Date(entry.class.date).toLocaleDateString('el-GR')}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Clock className="mr-2 h-4 w-4" />
+                              <span>{entry.class.time}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <User className="mr-2 h-4 w-4" />
+                              <span>{entry.class.instructor}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <MapPin className="mr-2 h-4 w-4" />
+                              <span>{entry.class.location}</span>
+                            </div>
+                          </div>
+
+                          {entry.status === 'notified' && entry.expires_at && (
+                            <div className="flex items-center gap-2 p-3 bg-orange-100 border border-orange-300 rounded-lg">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-orange-900">
+                                  🎉 Μια θέση ελευθερώθηκε! Η κράτησή σας επιβεβαιώθηκε αυτόματα.
+                                </p>
+                                <p className="text-xs text-orange-700 mt-1">
+                                  Λήγει σε:
+                                </p>
+                                <CountdownTimer expiresAt={entry.expires_at} className="mt-1" />
+                              </div>
+                            </div>
+                          )}
+
+                          {entry.status === 'waiting' && (
+                            <div className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                              Θα ειδοποιηθείτε όταν ελευθερωθεί μια θέση
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleLeaveWaitlist(entry.class.id)}
+                            className="hover:border-red-500 hover:text-red-500"
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Αφαίρεση
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Users className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                <p className="text-lg font-medium mb-1">Δεν είστε σε καμία λίστα αναμονής</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Όταν ένα μάθημα είναι πλήρες, μπορείτε να προστεθείτε στη λίστα αναμονής
+                </p>
+                <Button onClick={() => setBookingWizardOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Κλείσε Μάθημα
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="history" className="mt-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold mb-3">Ιστορικό Προπονήσεων</h2>
@@ -605,6 +756,16 @@ const BookingsPage = () => {
           }
         }}
         workout={selectedWorkout ? { id: selectedWorkout.id, class_name: selectedWorkout.class_name, date: selectedWorkout.date } : null}
+      />
+
+      {/* Booking Wizard */}
+      <BookingWizard
+        isOpen={bookingWizardOpen}
+        onClose={() => {
+          setBookingWizardOpen(false);
+          // Refresh bookings when wizard closes
+          fetchBookings();
+        }}
       />
     </div>
   );

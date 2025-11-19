@@ -28,6 +28,7 @@ import * as API from "@/config/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { BookWithPointsDialog } from "@/components/BookWithPointsDialog";
+import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
 
 interface BookingWizardProps {
   isOpen: boolean;
@@ -107,14 +108,27 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   const [showPointsDialog, setShowPointsDialog] = useState(false);
   const [usePointsForBooking, setUsePointsForBooking] = useState(false);
 
+  // Priority booking state
+  const [hasPriorityBooking, setHasPriorityBooking] = useState(false);
+
   // Booking state
   const [bookingInProgress, setBookingInProgress] = useState(false);
+
+  // Waitlist state
+  const [showWaitlistDialog, setShowWaitlistDialog] = useState(false);
+  const [waitlistClassInfo, setWaitlistClassInfo] = useState<{
+    classId: number;
+    className: string;
+    classDate: string;
+    classTime: string;
+  } | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       resetWizard();
       loadGyms();
       fetchUserPoints();
+      fetchPriorityBookingStatus();
     }
   }, [isOpen]);
 
@@ -127,6 +141,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       console.error('Failed to fetch loyalty points:', error);
       // Don't show error toast - points are optional
       setUserPoints(0);
+    }
+  };
+
+  // Fetch priority booking status
+  const fetchPriorityBookingStatus = async () => {
+    try {
+      const userData = await userService.getCurrentUser();
+      setHasPriorityBooking(userData.has_priority_booking || false);
+    } catch (error) {
+      console.error('Failed to fetch priority booking status:', error);
+      setHasPriorityBooking(false);
     }
   };
 
@@ -237,8 +262,26 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   const loadCategories = async () => {
     setLoading(true);
     try {
+      // Get current user ID for filtering (from localStorage for performance)
+      const userStr = localStorage.getItem('sweat93_user');
+      let userId: number | null = null;
+
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userId = user?.id;
+        } catch (e) {
+          console.error('Failed to parse user data:', e);
+        }
+      }
+
       // Fetch class types from the new API endpoint
-      const response = await API.apiRequest('/class-types?active_only=1');
+      // Filter categories based on user's package type
+      const endpoint = userId
+        ? `/class-types?active_only=1&user_id=${userId}`
+        : '/class-types?active_only=1';
+
+      const response = await API.apiRequest(endpoint);
 
       if (!response.ok) {
         throw new Error('Failed to fetch class types');
@@ -449,13 +492,70 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       );
 
       // Convert classes to time slots and mark already-booked ones
-      const formattedTimeSlots: TimeSlot[] = matchingClasses.map((classItem: any) => ({
-        id: classItem.id.toString(),
-        date: classItem.date,
-        time: classItem.time,
-        available_spots: Math.max(0, classItem.max_participants - (classItem.current_participants || 0)),
-        isAlreadyBooked: bookedClassIds.has(classItem.id.toString())
-      }));
+      const formattedTimeSlots: TimeSlot[] = matchingClasses.map((classItem: any) => {
+        const maxParticipants = classItem.max_participants || 0;
+        const currentParticipants = classItem.current_participants || 0;
+        const prioritySeats = classItem.priority_seats || 0;
+
+        // DEBUG: Log class data to verify API response
+        console.log('🔍 Priority Seating Debug:', {
+          classId: classItem.id,
+          className: classItem.name,
+          date: classItem.date,
+          time: classItem.time,
+          max_participants: classItem.max_participants,
+          current_participants: classItem.current_participants,
+          priority_seats: classItem.priority_seats,
+          hasPriorityBooking: hasPriorityBooking,
+          rawClassData: classItem
+        });
+
+        // Calculate hours until class
+        const classDateTime = new Date(`${classItem.date}T${classItem.time}`);
+        const now = new Date();
+        const hoursUntilClass = (classDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        // If less than 24h before class (but not in the past), all seats available to everyone
+        const prioritySeatsOpenToAll = hoursUntilClass >= 0 && hoursUntilClass < 24;
+
+        let availableSpots = 0;
+
+        if (hasPriorityBooking) {
+          // Priority users can book any available seat
+          availableSpots = Math.max(0, maxParticipants - currentParticipants);
+        } else {
+          // Regular users
+          if (prioritySeatsOpenToAll) {
+            // Within 24h: all seats available
+            availableSpots = Math.max(0, maxParticipants - currentParticipants);
+          } else {
+            // More than 24h: only non-priority seats available
+            const regularSeats = maxParticipants - prioritySeats;
+            availableSpots = Math.max(0, regularSeats - currentParticipants);
+          }
+        }
+
+        // DEBUG: Log calculated available spots
+        console.log('📊 Available Spots Calculation:', {
+          classId: classItem.id,
+          hoursUntilClass: hoursUntilClass.toFixed(2),
+          prioritySeatsOpenToAll,
+          calculatedAvailableSpots: availableSpots,
+          formula: hasPriorityBooking
+            ? `${maxParticipants} - ${currentParticipants} = ${availableSpots}`
+            : prioritySeatsOpenToAll
+              ? `${maxParticipants} - ${currentParticipants} = ${availableSpots} (24h rule)`
+              : `(${maxParticipants} - ${prioritySeats}) - ${currentParticipants} = ${availableSpots}`
+        });
+
+        return {
+          id: classItem.id.toString(),
+          date: classItem.date,
+          time: classItem.time,
+          available_spots: availableSpots,
+          isAlreadyBooked: bookedClassIds.has(classItem.id.toString())
+        };
+      });
 
       // Sort by date and time
       formattedTimeSlots.sort((a, b) => {
@@ -731,6 +831,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       let successCount = 0;
       let failCount = 0;
       let duplicateCount = 0;
+      let lastErrorMessage = '';
 
       for (const slot of slotsToBook) {
         try {
@@ -741,6 +842,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           if (!selectedClassDetails) {
             console.warn(`Skipping slot ${slot.id} - class details not found`);
             failCount++;
+            lastErrorMessage = 'Δεν βρέθηκαν λεπτομέρειες μαθήματος';
             continue;
           }
 
@@ -763,10 +865,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
             notes: `Κράτηση μέσω wizard - ${selectedClass.name} με ${selectedClass.instructor}`
           };
 
+          console.log('📤 Sending booking data:', { ...bookingData, class_details: selectedClassDetails });
+
           const response = await bookingService.create(bookingData);
+
+          // Log the full response for debugging
+          console.log('📋 Booking response for slot', slot.id, ':', response);
+          console.log('📋 Booking data returned:', response.data);
 
           if (response.success) {
             successCount++;
+            console.log('✅ Booking created successfully. Booking ID:', response.data?.id, 'Date:', response.data?.date, 'Time:', response.data?.time);
           } else {
             const errorMessage = response.message || '';
             if (errorMessage.toLowerCase().includes('duplicate') ||
@@ -775,11 +884,13 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
               duplicateCount++;
             } else {
               failCount++;
+              lastErrorMessage = errorMessage;
               console.error('Booking failed for slot:', slot.id, errorMessage);
             }
           }
         } catch (slotError: any) {
           failCount++;
+          lastErrorMessage = slotError.message || 'Σφάλμα κατά την κράτηση';
           console.error('Error booking slot:', slot.id, slotError);
         }
       }
@@ -803,7 +914,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         onClose();
         navigate('/bookings');
       } else {
-        throw new Error(`Αποτυχία δημιουργίας κρατήσεων. Επιτυχείς: ${successCount}, Αποτυχίες: ${failCount}`);
+        // Use the actual error message from backend if available
+        const errorMsg = lastErrorMessage || `Αποτυχία δημιουργίας κρατήσεων. Επιτυχείς: ${successCount}, Αποτυχίες: ${failCount}`;
+        throw new Error(errorMsg);
       }
     } catch (error: any) {
       console.error('Booking failed:', error);
@@ -813,9 +926,29 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         error
       });
 
-      // Show more detailed error message
+      // Check if the error is due to class being full
       const errorMessage = error.message || 'Σφάλμα κατά την κράτηση';
-      toast.error(`Κράτηση απέτυχε: ${errorMessage}`);
+      const isClassFull = errorMessage.toLowerCase().includes('πλήρ') ||
+                         errorMessage.toLowerCase().includes('full') ||
+                         errorMessage.toLowerCase().includes('δεν υπάρχουν διαθέσιμες θέσεις');
+
+      if (isClassFull && selectedClass && selectedTimeSlots.length === 1) {
+        // Class is full - offer waitlist option
+        const slot = selectedTimeSlots[0];
+        setWaitlistClassInfo({
+          classId: parseInt(slot.id, 10),
+          className: selectedClass.name,
+          classDate: slot.date,
+          classTime: slot.time,
+        });
+        setShowWaitlistDialog(true);
+        toast.warning('Το μάθημα είναι πλήρες', {
+          description: 'Θέλετε να προστεθείτε στη λίστα αναμονής;',
+        });
+      } else {
+        // Show general error message
+        toast.error(`Κράτηση απέτυχε: ${errorMessage}`);
+      }
     } finally {
       setBookingInProgress(false);
     }
@@ -1000,10 +1133,21 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           return Object.entries(monthCounts).reduce((a, b) => b[1] > a[1] ? b : a)[0];
         };
 
-        // Generate weeks (Mon-Sun) for next 3 months
+        // Generate weeks (Mon-Sun) based on priority booking status
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayStr = today.toISOString().split('T')[0];
+
+        // Calculate max booking date based on priority
+        const maxBookingDate = new Date(today);
+        if (hasPriorityBooking) {
+          // Priority users: 1 month ahead
+          maxBookingDate.setMonth(maxBookingDate.getMonth() + 1);
+        } else {
+          // Regular users: 2 weeks ahead
+          maxBookingDate.setDate(maxBookingDate.getDate() + 14);
+        }
+        const maxDateStr = maxBookingDate.toISOString().split('T')[0];
 
         // Get current week start (Monday of this week)
         const currentWeekStart = getWeekStart(today);
@@ -1012,16 +1156,27 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         const allWeeks: string[][] = [];
         let weekStart = new Date(currentWeekStart);
 
-        // Generate weeks for approximately 3 months (13 weeks)
-        for (let weekIdx = 0; weekIdx < 13; weekIdx++) {
+        // Calculate number of weeks needed to reach maxBookingDate
+        const weeksNeeded = Math.ceil((maxBookingDate.getTime() - today.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 2;
+
+        // Generate weeks up to max booking date
+        for (let weekIdx = 0; weekIdx < weeksNeeded; weekIdx++) {
           const week: string[] = [];
           for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
             const date = new Date(weekStart);
             date.setDate(weekStart.getDate() + dayIdx);
-            week.push(date.toISOString().split('T')[0]);
+            const dateStr = date.toISOString().split('T')[0];
+            // Only add dates up to maxDateStr
+            if (dateStr <= maxDateStr) {
+              week.push(dateStr);
+            }
           }
-          allWeeks.push(week);
+          if (week.length > 0) {
+            allWeeks.push(week);
+          }
           weekStart.setDate(weekStart.getDate() + 7);
+          // Stop if we've passed the max date
+          if (weekStart > maxBookingDate) break;
         }
 
         // Initialize dateScrollIndex to current week (0) if not set
@@ -1048,9 +1203,18 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           setSelectedDate(todayStr);
         }
 
-        // Filter time slots by selected date
+        // Filter time slots by selected date and exclude past times
         const filteredTimeSlots = selectedDate
-          ? timeSlots.filter(slot => slot.date === selectedDate)
+          ? timeSlots.filter(slot => {
+              if (slot.date !== selectedDate) return false;
+
+              // Check if this time slot is in the past
+              const slotDateTime = new Date(`${slot.date}T${slot.time}`);
+              const now = new Date();
+
+              // Only show future time slots
+              return slotDateTime > now;
+            })
           : [];
 
         // Navigation helpers
@@ -1072,7 +1236,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
             {/* Quick Select Buttons */}
             <Card className="bg-muted/30">
               <CardHeader className="pb-2 pt-3 px-3">
-                <CardTitle className="text-xs font-medium">Γρήγορες Επιλογές</CardTitle>
+                <CardTitle className="text-xs font-medium">Επαναλαμβανόμενη Κράτηση</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 pb-3 px-3">
                 <div className="flex gap-1.5">
@@ -1150,6 +1314,10 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                         currentDate.setMonth(currentDate.getMonth() - 1);
                         const prevMonthKey = currentDate.toISOString().substring(0, 7);
 
+                        // Check if previous month would go before today's month
+                        const todayMonth = todayStr.substring(0, 7);
+                        if (prevMonthKey < todayMonth) return;
+
                         // Find first week of previous month
                         const weekIndex = findFirstWeekOfMonth(prevMonthKey);
                         if (weekIndex >= 0) {
@@ -1157,7 +1325,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                           // currentMonth will auto-update via the logic above
                         }
                       }}
-                      disabled={initializedScrollIndex === 0}
+                      disabled={initializedScrollIndex === 0 || currentMonth === todayStr.substring(0, 7)}
                       className="h-8 w-8"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -1214,16 +1382,29 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                         const isSelected = selectedDate === date;
                         const dateMonth = date.substring(0, 7); // YYYY-MM
                         const isCurrentMonth = dateMonth === currentMonth;
+                        const isPastDate = date < todayStr;
+                        const isBeyondLimit = date > maxDateStr;
+
+                        // Calculate if this is a priority-only date (after 2 weeks but within 1 month)
+                        const regularUserMaxDate = new Date(today);
+                        regularUserMaxDate.setDate(regularUserMaxDate.getDate() + 14);
+                        const regularMaxStr = regularUserMaxDate.toISOString().split('T')[0];
+                        const isPriorityOnlyDate = hasPriorityBooking && date > regularMaxStr && date <= maxDateStr;
 
                         return (
                           <button
                             key={date}
-                            onClick={() => setSelectedDate(date)}
+                            onClick={() => !isPastDate && !isBeyondLimit && setSelectedDate(date)}
+                            disabled={isPastDate || isBeyondLimit}
                             className={`flex flex-col items-center justify-center p-2 rounded-lg border-2 transition-all ${
                               isSelected
                                 ? 'border-primary bg-primary text-primary-foreground'
+                                : isPastDate || isBeyondLimit
+                                ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : isPriorityOnlyDate
+                                ? 'border-purple-300 hover:border-purple-400 shadow-[0_0_8px_rgba(147,51,234,0.3)] hover:shadow-[0_0_12px_rgba(147,51,234,0.4)]'
                                 : 'border-border hover:border-primary/50'
-                            } ${!isCurrentMonth ? 'opacity-40' : ''}`}
+                            } ${!isCurrentMonth && !isPastDate && !isBeyondLimit ? 'opacity-40' : ''}`}
                           >
                             <span className="text-xs font-medium">{dayName}</span>
                             <span className="text-2xl font-bold">{dayNum}</span>
@@ -1451,6 +1632,22 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         }}
         userPoints={userPoints}
       />
+
+      {/* Join Waitlist Dialog */}
+      {waitlistClassInfo && (
+        <JoinWaitlistDialog
+          open={showWaitlistDialog}
+          onOpenChange={setShowWaitlistDialog}
+          classId={waitlistClassInfo.classId}
+          className={waitlistClassInfo.className}
+          classDate={waitlistClassInfo.classDate}
+          classTime={waitlistClassInfo.classTime}
+          onJoined={() => {
+            setShowWaitlistDialog(false);
+            onClose();
+          }}
+        />
+      )}
     </Dialog>
   );
 };

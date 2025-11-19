@@ -138,25 +138,38 @@ export const bookingService = {
   async getAll() {
     // Get user from localStorage
     const userStr = localStorage.getItem('sweat93_user');
+    const token = localStorage.getItem('auth_token');
+
     if (!userStr) {
       return [];
     }
-    
+
     const user = JSON.parse(userStr);
-    
-    // Use direct fetch with user_id parameter
+
+    // Use direct fetch with user_id parameter and auth token
     const url = buildApiUrl(`/bookings?user_id=${user.id}`);
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers,
     });
+
+    console.log('📞 getAll() fetch response status:', response.status);
+
     if (!response.ok) {
+      console.error('📞 getAll() fetch failed:', response.status, response.statusText);
       return [];
     }
     const data = await response.json();
+    console.log('📞 getAll() returned data:', data);
     return Array.isArray(data) ? data : [];
   },
 

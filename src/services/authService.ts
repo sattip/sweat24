@@ -30,6 +30,7 @@ export interface User {
   phone?: string;
   status: string;
   has_signed_terms?: boolean;
+  has_priority_booking?: boolean;
   remaining_sessions?: number;
   total_sessions?: number;
   used_sessions?: number;
