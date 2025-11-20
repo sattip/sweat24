@@ -25,7 +25,9 @@
       "Bash(ssh forge@api.sweat93.gr \"cd /home/forge/api.sweat93.gr && sqlite3 database/database.sqlite \"\"SELECT id, name, email FROM users WHERE email = ''papakonstantinoumarilena@gmail.com'';\"\"\")",
       "Bash(timeout 10 bash:*)",
       "Bash(curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(.gradlew.bat bundleRelease)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

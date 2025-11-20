@@ -37,59 +37,61 @@ export const QuestionnairePromptDialog: React.FC<QuestionnairePromptDialogProps>
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onLater(questionnaire)}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="sm:max-w-lg max-w-[95vw] mx-auto">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="flex items-center gap-2 text-lg">
             📋 {questionnaire.title}
           </DialogTitle>
-          <DialogDescription className="space-y-2">
+          <DialogDescription className="space-y-3">
             {questionnaire.description ? (
-              <p>{questionnaire.description}</p>
+              <p className="text-sm">{questionnaire.description}</p>
             ) : (
-              <p>
+              <p className="text-sm">
                 Έχουμε ένα σύντομο ερωτηματολόγιο για εσένα. Βοήθησέ μας να
                 βελτιώσουμε την εμπειρία σου!
               </p>
             )}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="secondary">{questionnaire.questions.length} ερωτήσεις</Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">{questionnaire.questions.length} ερωτήσεις</Badge>
               {totalRequired > 0 && (
-                <Badge variant="outline">{totalRequired} υποχρεωτικές</Badge>
+                <Badge variant="outline" className="text-xs">{totalRequired} υποχρεωτικές</Badge>
               )}
             </div>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-md bg-muted/50 p-4 text-sm text-muted-foreground space-y-2">
-          <p className="font-medium text-foreground flex items-center gap-2">
+        <div className="rounded-md bg-muted/50 p-3 text-sm text-muted-foreground space-y-2">
+          <p className="font-medium text-foreground text-sm">
             Γιατί αξίζει να το συμπληρώσεις;
           </p>
-          <ul className="list-disc list-inside space-y-1">
+          <ul className="list-disc list-inside space-y-1 text-xs">
             <li>Μοιράζεσαι feedback για να σε υποστηρίξουμε καλύτερα</li>
             <li>Μας βοηθάς να βελτιώσουμε τις υπηρεσίες και τα προγράμματά μας</li>
             <li>Χρειάζονται μόλις λίγα λεπτά</li>
           </ul>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
-          <div className="flex w-full sm:w-auto gap-2">
+        <DialogFooter className="flex-col gap-3 pt-2">
+          <div className="flex w-full gap-2">
             <Button
               variant="ghost"
-              className="flex-1 sm:flex-initial"
+              size="sm"
+              className="flex-1 text-xs"
               onClick={() => onIgnore(questionnaire)}
             >
               Παράβλεψη
             </Button>
             <Button
               variant="outline"
-              className="flex-1 sm:flex-initial"
+              size="sm"
+              className="flex-1 text-xs"
               onClick={() => onLater(questionnaire)}
             >
               Υπενθύμισέ το αργότερα
             </Button>
           </div>
           <Button
-            className="w-full sm:w-auto"
+            className="w-full"
             onClick={() => onStart(questionnaire)}
           >
             Ξεκίνησε τώρα

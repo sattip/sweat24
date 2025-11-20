@@ -23,12 +23,13 @@ import {
   CheckCircle,
   Coins
 } from "lucide-react";
-import { classService, bookingService, userService, loyaltyService } from "@/services/apiService";
+import { classService, bookingService, userService, loyaltyService, profileService } from "@/services/apiService";
 import * as API from "@/config/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { BookWithPointsDialog } from "@/components/BookWithPointsDialog";
 import { JoinWaitlistDialog } from "@/components/JoinWaitlistDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookingWizardProps {
   isOpen: boolean;
@@ -78,8 +79,10 @@ const STEPS = [
 
 export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [hasActivePackage, setHasActivePackage] = useState<boolean | null>(null);
 
   // Step 1: Gym selection
   const [gyms, setGyms] = useState<Gym[]>([]);
@@ -124,8 +127,35 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   } | null>(null);
 
   useEffect(() => {
+    const checkActivePackage = async () => {
+      try {
+        const packages = await profileService.getActivePackages();
+        const activePackage = Array.isArray(packages)
+          ? packages.find((p: any) => {
+              const status = p?.status?.toLowerCase();
+              const isActive = status === 'active' || status === 'ενεργό' || p?.is_active === true;
+              const notFrozen = p?.is_frozen === false || p?.is_frozen === undefined;
+              return isActive && notFrozen;
+            })
+          : null;
+
+        if (!activePackage) {
+          toast.error("Δεν έχετε ενεργό πακέτο. Παρακαλώ επικοινωνήστε με τη γραμματεία για να ανανεώσετε την συνδρομή σας.");
+          onClose();
+          return;
+        }
+
+        setHasActivePackage(true);
+      } catch (error) {
+        console.error("Error checking active package:", error);
+        toast.error("Σφάλμα κατά τον έλεγχο του πακέτου σας.");
+        onClose();
+      }
+    };
+
     if (isOpen) {
       resetWizard();
+      checkActivePackage();
       loadGyms();
       fetchUserPoints();
       fetchPriorityBookingStatus();
