@@ -47,10 +47,12 @@ const formSchema = z.object({
     .max(500, {
       message: "Το μήνυμά σας δεν μπορεί να υπερβαίνει τους 500 χαρακτήρες",
     }),
-  name: z.string().optional(),
+  name: z.string().min(1, {
+    message: "Παρακαλώ εισάγετε το ονοματεπώνυμό σας",
+  }),
   email: z.string().email({
     message: "Παρακαλώ εισάγετε μια έγκυρη διεύθυνση email",
-  }).optional(),
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -103,12 +105,22 @@ const ContactPage = () => {
     defaultValues: {
       subject: "",
       message: "",
-      name: userData.name,
-      email: userData.email,
+      name: "",
+      email: "",
     },
   });
 
-  function onSubmit(data: FormValues) {
+  // Update form values when user data becomes available
+  useEffect(() => {
+    if (user) {
+      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      const email = user.email || '';
+      form.setValue('name', name);
+      form.setValue('email', email);
+    }
+  }, [user, form]);
+
+  async function onSubmit(data: FormValues) {
     setIsSubmitting(true);
 
     // Include selected package info in message if applicable
@@ -121,15 +133,29 @@ const ContactPage = () => {
     }
 
     const submitData = {
-      ...data,
+      name: data.name || userData.name,
+      email: data.email || userData.email,
+      phone: user?.phone || "",
+      subject: data.subject,
       message: finalMessage,
-      selected_package_id: selectedPackageId
     };
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      console.log("Form submitted:", submitData);
-      setIsSubmitting(false);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(buildApiUrl('/contact-messages'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(submitData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
       form.reset();
       setSelectedPackageId(null);
 
@@ -137,7 +163,16 @@ const ContactPage = () => {
         title: "Επιτυχής υποβολή",
         description: "Το μήνυμά σας στάλθηκε επιτυχώς. Θα επικοινωνήσουμε μαζί σας σύντομα.",
       });
-    }, 1000);
+    } catch (error) {
+      console.error('Error sending contact message:', error);
+      toast({
+        title: "Σφάλμα",
+        description: "Δεν ήταν δυνατή η αποστολή του μηνύματος. Παρακαλώ δοκιμάστε ξανά.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   // Watch for subject changes to reset package selection
@@ -271,23 +306,25 @@ const ContactPage = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Ονοματεπώνυμο</FormLabel>
+                          <FormLabel>Ονοματεπώνυμο *</FormLabel>
                           <FormControl>
-                            <Input {...field} readOnly />
+                            <Input {...field} placeholder="Το όνομά σας" />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel>Email *</FormLabel>
                           <FormControl>
-                            <Input {...field} readOnly />
+                            <Input {...field} placeholder="Το email σας" />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />

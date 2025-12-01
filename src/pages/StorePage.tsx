@@ -40,14 +40,19 @@ const ProductCard = ({ product }) => {
   return (
     <Card className="h-full hover:border-primary transition-colors cursor-pointer overflow-hidden" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="aspect-square w-full overflow-hidden bg-muted relative">
-        <img 
-          src={product.image_url || "/logo-light.png"} 
-          alt={product.name} 
+        <img
+          src={product.image_url || "/logo-light.png"}
+          alt={product.name}
           className="h-full w-full object-contain transition-all hover:scale-105 p-4"
           onError={(e) => {
             e.currentTarget.src = "/logo-light.png";
           }}
         />
+        {product.is_preorder && (
+          <Badge className="absolute top-2 left-2 bg-blue-600 text-white">
+            Προπαραγγελία
+          </Badge>
+        )}
         {discountPercentage > 0 && (
           <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground">
             -{discountPercentage}%
@@ -65,13 +70,13 @@ const ProductCard = ({ product }) => {
         </div>
       </CardContent>
       <CardFooter className="p-4">
-        <Button 
-          onClick={handleAddToCart} 
+        <Button
+          onClick={handleAddToCart}
           className="w-full"
-          variant="outline"
+          variant={product.is_preorder ? "default" : "outline"}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Προσθήκη στο Καλάθι
+          {product.is_preorder ? "Προπαραγγελία" : "Προσθήκη στο Καλάθι"}
         </Button>
       </CardFooter>
     </Card>

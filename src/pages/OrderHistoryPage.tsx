@@ -39,6 +39,7 @@ interface OrderItem {
   price: string;
   quantity: number;
   subtotal: string;
+  is_preorder?: boolean;
   product: {
     id: number;
     name: string;
@@ -63,6 +64,7 @@ interface Order {
   ready_at: string | null;
   completed_at: string | null;
   created_at: string;
+  is_preorder?: boolean;
   items: OrderItem[];
 }
 
@@ -269,7 +271,12 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({
                         {formatDate(order.created_at)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {order.is_preorder && (
+                        <Badge className="bg-blue-600 text-white">
+                          Προπαραγγελία
+                        </Badge>
+                      )}
                       {getStatusIcon(order.status)}
                       {getStatusBadge(order.status, order.status_display)}
                     </div>
@@ -343,7 +350,12 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({
                       <Package className="h-4 w-4" />
                       Κατάσταση Παραγγελίας
                     </h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {selectedOrder.is_preorder && (
+                        <Badge className="bg-blue-600 text-white">
+                          Προπαραγγελία
+                        </Badge>
+                      )}
                       {getStatusIcon(selectedOrder.status)}
                       {getStatusBadge(selectedOrder.status, selectedOrder.status_display)}
                     </div>
@@ -388,7 +400,14 @@ const OrderHistoryPage: React.FC<OrderHistoryPageProps> = ({
                         <div key={item.id} className="border rounded-lg p-3">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h4 className="font-medium">{item.product_name}</h4>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-medium">{item.product_name}</h4>
+                                {item.is_preorder && (
+                                  <Badge className="bg-blue-600 text-white text-xs">
+                                    Προπαραγγελία
+                                  </Badge>
+                                )}
+                              </div>
                               <p className="text-sm text-muted-foreground">
                                 {getCategoryLabel(item.product.category)}
                               </p>
