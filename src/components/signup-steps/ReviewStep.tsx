@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Phone, Calendar, Heart, Users, CheckCircle, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { User, Mail, Phone, Calendar, Heart, Users, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { format, parseISO, isValid } from "date-fns";
 import { SignupData } from "../SignupSteps";
 
@@ -12,14 +14,17 @@ interface ReviewStepProps {
   onComplete: () => void;
   onPrev: () => void;
   loading?: boolean;
+  updateData: (updates: Partial<SignupData>) => void;
 }
 
-export const ReviewStep: React.FC<ReviewStepProps> = ({ 
-  data, 
-  onComplete, 
-  onPrev, 
-  loading = false 
+export const ReviewStep: React.FC<ReviewStepProps> = ({
+  data,
+  onComplete,
+  onPrev,
+  loading = false,
+  updateData
 }) => {
+  const [showError, setShowError] = useState(false);
   const formatDate = (dateString: string) => {
     if (!dateString) return "Δεν έχει οριστεί";
     
@@ -305,12 +310,66 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         </CardContent>
       </Card>
 
+      {/* Liability Declaration - Required for ALL users */}
+      <Card className="border-orange-200 bg-orange-50/50">
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <div className="space-y-2">
+                <h4 className="font-semibold text-orange-900">Υπεύθυνη Δήλωση</h4>
+                <p className="text-sm text-orange-800">
+                  Δηλώνω υπεύθυνα ότι όλα τα στοιχεία που παρείχα είναι αληθή και ακριβή.
+                  Κατανοώ ότι η παροχή ψευδών στοιχείων μπορεί να θέσει σε κίνδυνο την υγεία μου
+                  και αναλαμβάνω την πλήρη ευθύνη για την ακρίβεια των πληροφοριών που υπέβαλα.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 pl-8">
+              <Checkbox
+                id="liability-declaration"
+                checked={data.liabilityDeclarationAccepted || false}
+                onCheckedChange={(checked) => {
+                  updateData({ liabilityDeclarationAccepted: checked === true });
+                  setShowError(false);
+                }}
+                className="mt-1"
+              />
+              <Label
+                htmlFor="liability-declaration"
+                className="text-sm font-medium cursor-pointer leading-tight"
+              >
+                Έχω διαβάσει και αποδέχομαι την ανωτέρω Υπεύθυνη Δήλωση
+              </Label>
+            </div>
+
+            {showError && !data.liabilityDeclarationAccepted && (
+              <div className="flex items-center gap-2 text-red-600 text-sm font-medium pl-8">
+                <AlertCircle className="h-4 w-4" />
+                <span>Η αποδοχή της Υπεύθυνης Δήλωσης είναι υποχρεωτική</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Action Buttons */}
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={onPrev} disabled={loading}>
           Πίσω
         </Button>
-        <Button onClick={onComplete} disabled={loading} className="min-w-[120px]">
+        <Button
+          onClick={() => {
+            if (!data.liabilityDeclarationAccepted) {
+              setShowError(true);
+              return;
+            }
+            onComplete();
+          }}
+          disabled={loading}
+          className="min-w-[120px]"
+        >
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

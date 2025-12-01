@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import PackageAlert from "@/components/notifications/PackageAlert";
 import { DashboardAlert } from "@/components/notifications/DashboardAlert";
+import PartialPaymentAlert from "@/components/notifications/PartialPaymentAlert";
 import SessionCountIndicator from "@/components/SessionCountIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSimulation } from "@/hooks/useSimulation";
@@ -15,6 +16,14 @@ import { BookingCalendar } from "@/components/BookingCalendar";
 import { UpcomingBookings } from "@/components/UpcomingBookings";
 import { ApprovedAppointments } from "@/components/ApprovedAppointments";
 import { BookingWizard } from "@/components/BookingWizard";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { updateLocalStorageUserStatus } from "@/utils/updateUserStatus";
 
 // Function to check if it's the user's birthday week
@@ -50,6 +59,7 @@ const DashboardPage = () => {
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBookingWizard, setShowBookingWizard] = useState(false);
+  const [showNoPackageDialog, setShowNoPackageDialog] = useState(false);
   const [activePackages, setActivePackages] = useState<any[]>([]);
   const [availablePackages, setAvailablePackages] = useState<any[]>([]);
   
@@ -250,7 +260,10 @@ const DashboardPage = () => {
         
         {/* High Priority Notifications */}
         <DashboardAlert />
-        
+
+        {/* Partial Payment Alert */}
+        <PartialPaymentAlert />
+
         <div className="grid gap-6">
           {/* Birthday Reward Card - Only shown during birthday week */}
           {birthdayWeek && (
@@ -426,26 +439,6 @@ const DashboardPage = () => {
           </Card>
           )}
 
-          {/* No Active Package - show informative message */}
-          {!hasActivePackage && (
-            <Card className="border-l-4 border-l-red-500 shadow-md">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Το Πακέτο σας Έληξε</CardTitle>
-                <CardDescription>Δεν έχετε ενεργή συνδρομή αυτή τη στιγμή</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Δεν μπορείτε να κλείσετε νέα μαθήματα μέχρι να αγοράσετε νέο πακέτο. Παρακαλούμε
-                  επικοινωνήστε με τη γραμματεία για να ανανεώσετε την συνδρομή σας.
-                </p>
-              </CardContent>
-              <CardFooter className="border-t pt-4 flex justify-end">
-                <Link to="/contact">
-                  <Button variant="outline">Επικοινωνία</Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          )}
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -466,12 +459,18 @@ const DashboardPage = () => {
                 <Button
                   type="button"
                   className="w-full flex items-center justify-center gap-2"
-                  onClick={() => setShowBookingWizard(true)}
+                  onClick={() => {
+                    if (!hasActivePackage) {
+                      setShowNoPackageDialog(true);
+                      return;
+                    }
+                    setShowBookingWizard(true);
+                  }}
                 >
                   Κλείσε Μάθημα Βήμα-Βήμα
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Link to="/workout-history" className="w-full">
+                <Link to="/bookings?tab=history" className="w-full">
                   <Button variant="outline" className="w-full flex items-center justify-center gap-2">
                     Ιστορικό Προπονήσεων
                     <History className="h-4 w-4" />
@@ -607,6 +606,41 @@ const DashboardPage = () => {
         isOpen={showBookingWizard}
         onClose={() => setShowBookingWizard(false)}
       />
+
+      {/* No Active Package Dialog */}
+      <Dialog open={showNoPackageDialog} onOpenChange={setShowNoPackageDialog}>
+        <DialogContent className="sm:max-w-md max-w-[95vw] mx-auto">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Package className="h-5 w-5 text-destructive" />
+              Δεν υπάρχει ενεργό πακέτο
+            </DialogTitle>
+            <DialogDescription className="space-y-2">
+              <p className="text-sm">
+                Για να κλείσετε μάθημα, χρειάζεστε ενεργό πακέτο συνδρομής.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Επικοινωνήστε με τη γραμματεία για να αγοράσετε ή να ανανεώσετε το πακέτο σας.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="flex-col gap-3 pt-4">
+            <Link to="/contact" className="w-full">
+              <Button className="w-full" onClick={() => setShowNoPackageDialog(false)}>
+                Επικοινωνία με Γραμματεία
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowNoPackageDialog(false)}
+            >
+              Κλείσιμο
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

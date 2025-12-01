@@ -29,6 +29,7 @@ interface Product {
   image_url?: string;
   category: string;
   stock_quantity?: number;
+  is_preorder?: boolean;
 }
 
 const ProductDetailsPage = () => {
@@ -142,9 +143,16 @@ const ProductDetailsPage = () => {
           {/* Product Details */}
           <div className="space-y-6">
             <div>
-              <Badge variant="secondary" className="mb-2">
-                {getCategoryLabel(product.category)}
-              </Badge>
+              <div className="flex gap-2 mb-2">
+                <Badge variant="secondary">
+                  {getCategoryLabel(product.category)}
+                </Badge>
+                {product.is_preorder && (
+                  <Badge className="bg-blue-600 text-white">
+                    Προπαραγγελία
+                  </Badge>
+                )}
+              </div>
               <h1 className="text-3xl font-bold">{product.name}</h1>
               <p className="text-3xl font-bold text-primary mt-4">
                 €{Number(product.price).toFixed(2)}
@@ -200,14 +208,18 @@ const ProductDetailsPage = () => {
             </Card>
             
             {/* Add to Cart Button */}
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="w-full"
               onClick={handleAddToCart}
-              disabled={isOutOfStock}
+              disabled={isOutOfStock && !product.is_preorder}
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
-              {isOutOfStock ? "Μη Διαθέσιμο" : "Προσθήκη στο Καλάθι"}
+              {product.is_preorder
+                ? "Προπαραγγελία"
+                : isOutOfStock
+                  ? "Μη Διαθέσιμο"
+                  : "Προσθήκη στο Καλάθι"}
             </Button>
             
             {/* Product Info */}

@@ -57,10 +57,11 @@ const SignupPage: React.FC = () => {
           name: data.emergencyContactName || '',
           phone: data.emergencyContactPhone || ''
         },
+        liability_declaration_accepted: data.liabilityDeclarationAccepted || false,
         ems_interest: data.emsInterest || false,
         ems_contraindications: data.emsInterest ? transformedEmsContraindications : undefined,
         ems_liability_accepted: data.emsLiabilityAccepted || false,
-  
+
         submitted_at: new Date().toISOString()
       };
 
@@ -77,6 +78,7 @@ const SignupPage: React.FC = () => {
         signedAt: new Date().toISOString(),
         documentType: 'terms_and_conditions',
         documentVersion: '1.0',
+        liability_declaration_accepted: data.liabilityDeclarationAccepted || false, // Also at root level
         medicalHistory: medicalHistoryData,
         // How found us data
         howFoundUs: {

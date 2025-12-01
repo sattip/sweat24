@@ -1,9 +1,8 @@
 import React, { useState, useRef } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Clock, FileText, PenTool, CheckCircle, X, AlertTriangle } from "lucide-react";
+import { FileText, PenTool, CheckCircle, X, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import SignaturePad, { SignaturePadRef } from "../SignaturePad";
 
@@ -103,27 +102,25 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
         </p>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - 140px - 140px)' }}>
-        <ScrollArea className="h-full">
-          <div className="p-4 space-y-4">
-            {/* Welcome Alert */}
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-900 text-sm">
-                Ο λογαριασμός σας έχει εγκριθεί! Παρακαλώ διαβάστε και υπογράψτε τους όρους χρήσης.
-              </AlertDescription>
-            </Alert>
+      {/* Scrollable Content - Single ScrollArea to prevent conflicts */}
+      <div className="flex-1 overflow-auto pb-36" style={{ maxHeight: 'calc(100vh - 80px)' }}>
+        <div className="p-4 space-y-4">
+          {/* Welcome Alert */}
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-900 text-sm">
+              Ο λογαριασμός σας έχει εγκριθεί! Παρακαλώ διαβάστε και υπογράψτε τους όρους χρήσης.
+            </AlertDescription>
+          </Alert>
 
-            {/* Terms and Conditions */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                <h3 className="text-lg font-semibold">Εσωτερικός Κανονισμός Λειτουργίας & Όροι Χρήσης</h3>
-              </div>
+          {/* Terms and Conditions */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              <h3 className="text-lg font-semibold">Εσωτερικός Κανονισμός Λειτουργίας & Όροι Χρήσης</h3>
+            </div>
 
-              <div className="border rounded-lg">
-                <ScrollArea className="h-[400px] w-full p-4">
+            <div className="border rounded-lg p-4">
                   <div className="space-y-4 text-sm">
                     <h4 className="font-semibold text-base mb-3">Εσωτερικός Κανονισμός Λειτουργίας & Όροι Χρήσης</h4>
                     
@@ -181,116 +178,114 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
                       β) μπορείτε να ανακαλέσετε τη συγκατάθεσή σας οποτεδήποτε , στέλνοντας e-mail στην διεύθυνση manolis.askou@gmail.com , στην περίπτωση των διαφημιστικών e-mails, πατώντας στο σύνδεσμο απεγγραφής που βρίσκεται πάντα στο τέλος αυτών των μηνυμάτων. Κατά τα λοιπά, ισχύουν όσα προβλέπονται στην Πολιτική Προστασίας Προσωπικών Δεδομένων των Πελατών του γυμναστηρίου μας.
                     </p>
                   </div>
-                </ScrollArea>
-              </div>
             </div>
+          </div>
 
-            {/* GDPR Consent Checkboxes */}
-            <div className="space-y-4 border-t pt-4">
-              <h4 className="font-semibold text-base">Συγκατάθεση για Επεξεργασία Προσωπικών Δεδομένων:</h4>
-              
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <Checkbox 
-                    id="email-consent" 
-                    checked={emailConsent} 
-                    onCheckedChange={(checked) => setEmailConsent(checked === true)}
-                    className="mt-1"
-                  />
-                  <label htmlFor="email-consent" className="text-sm leading-5">
-                    <strong>1.</strong> στην χρήση του e-mail μου για την αποστολή διαφημιστικών μηνυμάτων
-                  </label>
-                </div>
+          {/* GDPR Consent Checkboxes */}
+          <div className="space-y-4 border-t pt-4">
+            <h4 className="font-semibold text-base">Συγκατάθεση για Επεξεργασία Προσωπικών Δεδομένων:</h4>
 
-                <div className="flex items-start space-x-3">
-                  <Checkbox 
-                    id="sms-consent" 
-                    checked={smsConsent} 
-                    onCheckedChange={(checked) => setSmsConsent(checked === true)}
-                    className="mt-1"
-                  />
-                  <label htmlFor="sms-consent" className="text-sm leading-5">
-                    <strong>2.</strong> στην χρήση του αριθμού του κινητού μου τηλεφώνου για την αποστολή διαφημιστικών μηνυμάτων
-                  </label>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <Checkbox 
-                    id="photo-video-consent" 
-                    checked={photoVideoConsent} 
-                    onCheckedChange={(checked) => setPhotoVideoConsent(checked === true)}
-                    className="mt-1"
-                  />
-                  <label htmlFor="photo-video-consent" className="text-sm leading-5">
-                    <strong>3.</strong> στην λήψη της φωτογραφίας μου και στη ολιγόλεπτη βιντεοσκόπησή μου 
-                    κατά τη διάρκεια των προγραμμάτων άθλησης και στη δημοσίευση του υλικού 
-                    αυτού στην ιστοσελίδα του γυμναστηρίου και στους λογαριασμούς του στα 
-                    μέσα κοινωνικής δικτύωσης
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Mandatory Terms Acceptance */}
-            <div className="space-y-3 border-t pt-4">
+            <div className="space-y-3">
               <div className="flex items-start space-x-3">
-                <Checkbox 
-                  id="terms-accepted" 
-                  checked={acceptedTerms} 
-                  onCheckedChange={(checked) => {
-                    setAcceptedTerms(checked === true);
-                    if (checked) setShowError(false);
-                  }}
+                <Checkbox
+                  id="email-consent"
+                  checked={emailConsent}
+                  onCheckedChange={(checked) => setEmailConsent(checked === true)}
                   className="mt-1"
                 />
-                <label htmlFor="terms-accepted" className="text-sm font-medium leading-5">
-                  Δηλώνω ότι έλαβα γνώση των ως άνω κανονισμών και όρων και τους αποδέχομαι πλήρως.
+                <label htmlFor="email-consent" className="text-sm leading-5">
+                  <strong>1.</strong> στην χρήση του e-mail μου για την αποστολή διαφημιστικών μηνυμάτων
                 </label>
               </div>
 
-              {showError && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    Παρακαλούμε αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            {/* Signature Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <PenTool className="h-5 w-5" />
-                <h3 className="text-lg font-semibold">Ψηφιακή Υπογραφή</h3>
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="sms-consent"
+                  checked={smsConsent}
+                  onCheckedChange={(checked) => setSmsConsent(checked === true)}
+                  className="mt-1"
+                />
+                <label htmlFor="sms-consent" className="text-sm leading-5">
+                  <strong>2.</strong> στην χρήση του αριθμού του κινητού μου τηλεφώνου για την αποστολή διαφημιστικών μηνυμάτων
+                </label>
               </div>
-              
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Υπογράφοντας παρακάτω, δηλώνετε ότι έχετε διαβάσει, κατανοήσει και αποδέχεστε 
-                  πλήρως τους όρους και προϋποθέσεις χρήσης του γυμναστηρίου Sweat93.
-                </p>
-                
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 bg-white">
-                  <SignaturePad
-                    ref={signaturePadRef}
-                    title="Η Υπογραφή σας"
-                    description={`Υπογράψτε εδώ για να επιβεβαιώσετε την αποδοχή των όρων - ${userName}`}
-                  />
-                </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="photo-video-consent"
+                  checked={photoVideoConsent}
+                  onCheckedChange={(checked) => setPhotoVideoConsent(checked === true)}
+                  className="mt-1"
+                />
+                <label htmlFor="photo-video-consent" className="text-sm leading-5">
+                  <strong>3.</strong> στην λήψη της φωτογραφίας μου και στη ολιγόλεπτη βιντεοσκόπησή μου
+                  κατά τη διάρκεια των προγραμμάτων άθλησης και στη δημοσίευση του υλικού
+                  αυτού στην ιστοσελίδα του γυμναστηρίου και στους λογαριασμούς του στα
+                  μέσα κοινωνικής δικτύωσης
+                </label>
               </div>
             </div>
+          </div>
 
-            {signatureData && (
-              <Alert className="border-green-200 bg-green-50">
-                <PenTool className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-700 text-sm">
-                  Η υπογραφή σας αποθηκεύτηκε επιτυχώς! Το παράθυρο θα κλείσει αυτόματα...
+          {/* Mandatory Terms Acceptance */}
+          <div className="space-y-3 border-t pt-4">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="terms-accepted"
+                checked={acceptedTerms}
+                onCheckedChange={(checked) => {
+                  setAcceptedTerms(checked === true);
+                  if (checked) setShowError(false);
+                }}
+                className="mt-1"
+              />
+              <label htmlFor="terms-accepted" className="text-sm font-medium leading-5">
+                Δηλώνω ότι έλαβα γνώση των ως άνω κανονισμών και όρων και τους αποδέχομαι πλήρως.
+              </label>
+            </div>
+
+            {showError && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Παρακαλούμε αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε.
                 </AlertDescription>
               </Alert>
             )}
           </div>
-        </ScrollArea>
+
+          {/* Signature Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <PenTool className="h-5 w-5" />
+              <h3 className="text-lg font-semibold">Ψηφιακή Υπογραφή</h3>
+            </div>
+
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground mb-4">
+                Υπογράφοντας παρακάτω, δηλώνετε ότι έχετε διαβάσει, κατανοήσει και αποδέχεστε
+                πλήρως τους όρους και προϋποθέσεις χρήσης του γυμναστηρίου Sweat93.
+              </p>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 bg-white">
+                <SignaturePad
+                  ref={signaturePadRef}
+                  title="Η Υπογραφή σας"
+                  description={`Υπογράψτε εδώ για να επιβεβαιώσετε την αποδοχή των όρων - ${userName}`}
+                />
+              </div>
+            </div>
+          </div>
+
+          {signatureData && (
+            <Alert className="border-green-200 bg-green-50">
+              <PenTool className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700 text-sm">
+                Η υπογραφή σας αποθηκεύτηκε επιτυχώς! Το παράθυρο θα κλείσει αυτόματα...
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
       </div>
 
       {/* Fixed Footer - Always at bottom */}

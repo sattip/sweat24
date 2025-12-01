@@ -1,10 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Send } from "lucide-react";
+import { Send, Package, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { buildApiUrl } from "@/config/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,49 +47,136 @@ const formSchema = z.object({
     .max(500, {
       message: "Το μήνυμά σας δεν μπορεί να υπερβαίνει τους 500 χαρακτήρες",
     }),
-  name: z.string().optional(),
+  name: z.string().min(1, {
+    message: "Παρακαλώ εισάγετε το ονοματεπώνυμό σας",
+  }),
   email: z.string().email({
     message: "Παρακαλώ εισάγετε μια έγκυρη διεύθυνση email",
-  }).optional(),
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
+interface AvailablePackage {
+  id: number;
+  name: string;
+  price: number;
+  sessions?: number;
+  duration_days?: number;
+  description?: string;
+}
+
 const ContactPage = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Note: In a real app, this would come from authentication/user context
+  const [availablePackages, setAvailablePackages] = useState<AvailablePackage[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<number | null>(null);
+
+  // Get user data from auth context
   const userData = {
-    name: "",
-    email: ""
+    name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : "",
+    email: user?.email || ""
   };
+
+  // Fetch available packages when component mounts
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setLoadingPackages(true);
+      try {
+        const response = await fetch(buildApiUrl('/packages'));
+        if (response.ok) {
+          const data = await response.json();
+          const packages = Array.isArray(data) ? data : (data.data || []);
+          setAvailablePackages(packages);
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+      } finally {
+        setLoadingPackages(false);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       subject: "",
       message: "",
-      name: userData.name,
-      email: userData.email,
+      name: "",
+      email: "",
     },
   });
 
-  function onSubmit(data: FormValues) {
+  // Update form values when user data becomes available
+  useEffect(() => {
+    if (user) {
+      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      const email = user.email || '';
+      form.setValue('name', name);
+      form.setValue('email', email);
+    }
+  }, [user, form]);
+
+  async function onSubmit(data: FormValues) {
     setIsSubmitting(true);
-    
-    // Simulate API call with timeout
-    setTimeout(() => {
-      console.log("Form submitted:", data);
-      setIsSubmitting(false);
+
+    // Include selected package info in message if applicable
+    let finalMessage = data.message;
+    if (data.subject === "package_purchase" && selectedPackageId) {
+      const selectedPkg = availablePackages.find(p => p.id === selectedPackageId);
+      if (selectedPkg) {
+        finalMessage = `[Ενδιαφέρομαι για το πακέτο: ${selectedPkg.name} - ${selectedPkg.price}€]\n\n${data.message}`;
+      }
+    }
+
+    const submitData = {
+      name: data.name || userData.name,
+      email: data.email || userData.email,
+      phone: user?.phone || "",
+      subject: data.subject,
+      message: finalMessage,
+    };
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(buildApiUrl('/contact-messages'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(submitData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
       form.reset();
-      
+      setSelectedPackageId(null);
+
       toast({
         title: "Επιτυχής υποβολή",
         description: "Το μήνυμά σας στάλθηκε επιτυχώς. Θα επικοινωνήσουμε μαζί σας σύντομα.",
       });
-    }, 1000);
+    } catch (error) {
+      console.error('Error sending contact message:', error);
+      toast({
+        title: "Σφάλμα",
+        description: "Δεν ήταν δυνατή η αποστολή του μηνύματος. Παρακαλώ δοκιμάστε ξανά.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
+
+  // Watch for subject changes to reset package selection
+  const currentSubject = form.watch("subject");
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,6 +211,7 @@ const ContactPage = () => {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="general">Γενική Ερώτηση</SelectItem>
+                          <SelectItem value="package_purchase">Αγορά Πακέτου</SelectItem>
                           <SelectItem value="complaint">Παράπονο</SelectItem>
                           <SelectItem value="suggestion">Πρόταση Βελτίωσης</SelectItem>
                           <SelectItem value="technical">Τεχνικό Πρόβλημα</SelectItem>
@@ -131,7 +222,60 @@ const ContactPage = () => {
                     </FormItem>
                   )}
                 />
-                
+
+                {/* Package Selection - shown when "Αγορά Πακέτου" is selected */}
+                {currentSubject === "package_purchase" && (
+                  <div className="space-y-3">
+                    <FormLabel>Επιλέξτε Πακέτο</FormLabel>
+                    {loadingPackages ? (
+                      <div className="flex items-center justify-center p-4">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        <span className="ml-2 text-sm text-muted-foreground">Φόρτωση πακέτων...</span>
+                      </div>
+                    ) : availablePackages.length > 0 ? (
+                      <div className="grid gap-2">
+                        {availablePackages.map((pkg) => (
+                          <div
+                            key={pkg.id}
+                            onClick={() => setSelectedPackageId(pkg.id)}
+                            className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                              selectedPackageId === pkg.id
+                                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                                : "hover:border-primary/50 hover:bg-muted/50"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Package className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium text-sm">{pkg.name}</span>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {pkg.price}€
+                              </Badge>
+                            </div>
+                            {(pkg.sessions || pkg.duration_days) && (
+                              <div className="mt-1 text-xs text-muted-foreground ml-6">
+                                {pkg.sessions && <span>{pkg.sessions} συνεδρίες</span>}
+                                {pkg.sessions && pkg.duration_days && <span> • </span>}
+                                {pkg.duration_days && <span>{pkg.duration_days} ημέρες</span>}
+                              </div>
+                            )}
+                            {pkg.description && (
+                              <p className="mt-1 text-xs text-muted-foreground ml-6 line-clamp-2">
+                                {pkg.description}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg">
+                        Δεν βρέθηκαν διαθέσιμα πακέτα. Περιγράψτε το ενδιαφέρον σας στο μήνυμα.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <FormField
                   control={form.control}
                   name="message"
@@ -139,8 +283,11 @@ const ContactPage = () => {
                     <FormItem>
                       <FormLabel>Μήνυμα</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Γράψτε το μήνυμά σας εδώ..." 
+                        <Textarea
+                          placeholder={currentSubject === "package_purchase"
+                            ? "Προαιρετικά, γράψτε επιπλέον πληροφορίες ή ερωτήσεις για το πακέτο..."
+                            : "Γράψτε το μήνυμά σας εδώ..."
+                          }
                           className="min-h-[150px]"
                           {...field}
                         />
@@ -159,23 +306,25 @@ const ContactPage = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Ονοματεπώνυμο</FormLabel>
+                          <FormLabel>Ονοματεπώνυμο *</FormLabel>
                           <FormControl>
-                            <Input {...field} readOnly />
+                            <Input {...field} placeholder="Το όνομά σας" />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel>Email *</FormLabel>
                           <FormControl>
-                            <Input {...field} readOnly />
+                            <Input {...field} placeholder="Το email σας" />
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />

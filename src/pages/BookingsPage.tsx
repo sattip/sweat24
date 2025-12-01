@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Header from "@/components/Header";
-import { Calendar, Clock, MapPin, User, CalendarX, Loader2, X, RefreshCw, Dumbbell, CheckCircle, XCircle, Plus, Users } from "lucide-react";
+import { Calendar, Clock, MapPin, User, CalendarX, Loader2, X, RefreshCw, Dumbbell, CheckCircle, XCircle, Plus, Users, Package } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -18,7 +26,8 @@ import PackageAlert from "@/components/notifications/PackageAlert";
 import { CancellationModal } from "@/components/modals/CancellationModal";
 import RateWorkoutDialog from "@/components/workouts/RateWorkoutDialog";
 import MuscleGroupDialog from "@/components/workouts/MuscleGroupDialog";
-import { bookingService } from "@/services/apiService";
+import { bookingService, profileService } from "@/services/apiService";
+import { buildApiUrl } from "@/config/api";
 import { toast } from "sonner";
 import { BookingWizard } from "@/components/BookingWizard";
 import { waitlistApi, type WaitlistEntry } from "@/services/waitlistApi";
@@ -59,6 +68,8 @@ const groupWorkoutsByMonth = (workouts: Workout[]) => {
 };
 
 const BookingsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "bookings");
   const [showRules, setShowRules] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +79,8 @@ const BookingsPage = () => {
   });
   const [previousBookings, setPreviousBookings] = useState<any[]>([]);
   const [bookingWizardOpen, setBookingWizardOpen] = useState(false);
+  const [hasActivePackage, setHasActivePackage] = useState(true);
+  const [showNoPackageDialog, setShowNoPackageDialog] = useState(false);
 
   // Waitlist state
   const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
@@ -76,6 +89,7 @@ const BookingsPage = () => {
   // History state
   const [filter, setFilter] = useState("all");
   const [attendanceFilter, setAttendanceFilter] = useState("all");
+  const [classTypes, setClassTypes] = useState<{id: number, name: string, slug: string}[]>([]);
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [muscleGroupDialogOpen, setMuscleGroupDialogOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
@@ -86,6 +100,8 @@ const BookingsPage = () => {
     fetchBookings();
     fetchWorkoutHistory();
     fetchWaitlists();
+    checkActivePackage();
+    fetchClassTypes();
 
     // Set up polling every 25 seconds for real-time booking and waitlist updates
     const pollingInterval = setInterval(() => {
@@ -218,6 +234,38 @@ const BookingsPage = () => {
     }
   };
 
+  const checkActivePackage = async () => {
+    try {
+      const packages = await profileService.getActivePackages();
+      const activePackage = Array.isArray(packages)
+        ? packages.find((p: any) => {
+            const status = p?.status?.toLowerCase();
+            const isActive = status === 'active' || status === 'ενεργό' || p?.is_active === true;
+            const notFrozen = p?.is_frozen === false || p?.is_frozen === undefined;
+            return isActive && notFrozen;
+          })
+        : null;
+      setHasActivePackage(!!activePackage);
+    } catch (error) {
+      console.error("Error checking active package:", error);
+      setHasActivePackage(false);
+    }
+  };
+
+  const fetchClassTypes = async () => {
+    try {
+      const response = await fetch(buildApiUrl('/class-types'));
+      if (response.ok) {
+        const data = await response.json();
+        const types = Array.isArray(data) ? data : (data.data || []);
+        console.log('Fetched class types:', types);
+        setClassTypes(types);
+      }
+    } catch (error) {
+      console.error('Error fetching class types:', error);
+    }
+  };
+
   const fetchWaitlists = async () => {
     try {
       setWaitlistLoading(true);
@@ -323,9 +371,9 @@ const BookingsPage = () => {
     // Type filter
     let typeMatch = true;
     if (filter !== "all") {
-      if (filter === "yoga") typeMatch = workout.type.toLowerCase().includes("yoga");
-      else if (filter === "hiit") typeMatch = workout.type.toLowerCase().includes("hiit");
-      else if (filter === "strength") typeMatch = workout.type.toLowerCase().includes("strength");
+      const workoutType = workout.type.toLowerCase();
+      // Match against selected filter (slug or name)
+      typeMatch = workoutType.includes(filter.toLowerCase());
     }
 
     // Attendance filter
@@ -378,7 +426,13 @@ const BookingsPage = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => setBookingWizardOpen(true)} className="gap-1">
+            <Button size="sm" onClick={() => {
+              if (!hasActivePackage) {
+                setShowNoPackageDialog(true);
+                return;
+              }
+              setBookingWizardOpen(true);
+            }} className="gap-1">
               <Plus className="h-4 w-4" />
               Νέα Κράτηση
             </Button>
@@ -388,7 +442,7 @@ const BookingsPage = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="bookings" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="bookings" className="text-xs sm:text-sm px-2">
               Κρατήσεις
@@ -560,7 +614,13 @@ const BookingsPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Όταν ένα μάθημα είναι πλήρες, μπορείτε να προστεθείτε στη λίστα αναμονής
                 </p>
-                <Button onClick={() => setBookingWizardOpen(true)}>
+                <Button onClick={() => {
+                  if (!hasActivePackage) {
+                    setShowNoPackageDialog(true);
+                    return;
+                  }
+                  setBookingWizardOpen(true);
+                }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Κλείσε Μάθημα
                 </Button>
@@ -579,9 +639,11 @@ const BookingsPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Όλοι οι Τύποι</SelectItem>
-                    <SelectItem value="yoga">Yoga</SelectItem>
-                    <SelectItem value="hiit">HIIT</SelectItem>
-                    <SelectItem value="strength">Strength</SelectItem>
+                    {classTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.slug || type.name.toLowerCase()}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
@@ -767,6 +829,41 @@ const BookingsPage = () => {
           fetchBookings();
         }}
       />
+
+      {/* No Active Package Dialog */}
+      <Dialog open={showNoPackageDialog} onOpenChange={setShowNoPackageDialog}>
+        <DialogContent className="sm:max-w-md max-w-[95vw] mx-auto">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Package className="h-5 w-5 text-destructive" />
+              Δεν υπάρχει ενεργό πακέτο
+            </DialogTitle>
+            <DialogDescription className="space-y-2">
+              <p className="text-sm">
+                Για να κλείσετε μάθημα, χρειάζεστε ενεργό πακέτο συνδρομής.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Επικοινωνήστε με τη γραμματεία για να αγοράσετε ή να ανανεώσετε το πακέτο σας.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="flex-col gap-3 pt-4">
+            <Link to="/contact" className="w-full">
+              <Button className="w-full" onClick={() => setShowNoPackageDialog(false)}>
+                Επικοινωνία με Γραμματεία
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowNoPackageDialog(false)}
+            >
+              Κλείσιμο
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

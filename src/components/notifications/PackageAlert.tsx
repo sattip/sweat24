@@ -75,6 +75,15 @@ const PackageAlert: React.FC<PackageAlertProps> = ({ type, daysRemaining = 0 }) 
           <AlertDescription className="mt-1">
             <p className="mb-1">{content.description}</p>
             <p className="mb-3 text-sm opacity-80">{content.greekDescription}</p>
+            <Link to="/contact">
+              <Button
+                size="sm"
+                variant={type === "expired" ? "destructive" : "default"}
+                className="mt-2"
+              >
+                Επικοινωνία με Γραμματεία
+              </Button>
+            </Link>
           </AlertDescription>
         </div>
       </div>

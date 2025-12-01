@@ -70,7 +70,9 @@
       "Bash(wc:*)",
       "Bash(for file in /Users/sattip/Documents/GitHub/claude-code-tutorial/docs/el/part5-practical/chapter-{23,24,25}*.md)",
       "Bash(do)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(.gradlew.bat bundleRelease)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

@@ -142,6 +142,9 @@ const CheckoutPage = () => {
         toast.success(`Παραγγελία και ${rewardResults.length} ανταμοιβές ολοκληρώθηκαν επιτυχώς!`);
       } else if (rewardResults.length > 0) {
         toast.success(`${rewardResults.length} ανταμοιβές εξαργυρώθηκαν επιτυχώς!`);
+      } else if (orderResult?.message) {
+        // Use API message (will be preorder message if applicable)
+        toast.success(orderResult.message);
       } else {
         toast.success("Παραγγελία ολοκληρώθηκε επιτυχώς!");
       }

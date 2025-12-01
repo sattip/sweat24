@@ -112,17 +112,19 @@ export const questionnaireService = {
   },
 
   async submitResponse(payload: QuestionnaireResponsePayload) {
-    // API is now public - user_id is REQUIRED in payload
+    // API requires authentication - user_id is REQUIRED in payload
     if (!payload.user_id) {
       throw new Error("user_id is required for questionnaire submission");
     }
 
+    const authHeaders = buildAuthHeaders();
+    if (!authHeaders) {
+      throw new Error("Δεν είστε συνδεδεμένος. Παρακαλώ συνδεθείτε ξανά.");
+    }
+
     const response = await fetch(buildApiUrl("/questionnaire-responses"), {
       method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
+      headers: authHeaders,
       body: JSON.stringify(payload),
     });
 

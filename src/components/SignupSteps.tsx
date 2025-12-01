@@ -89,7 +89,8 @@ export interface SignupData {
   // Section 8.1: EMS Liability Declaration (only if emsInterest is true)
   emsLiabilityAccepted?: boolean;
 
-
+  // General Liability Declaration (required for ALL users)
+  liabilityDeclarationAccepted?: boolean;
 
   // How found us data
   howFoundUs?: string;
@@ -374,6 +375,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
           {currentStep === 4 && !signupData.isMinor && (
             <ReviewStep
               data={signupData}
+              updateData={updateSignupData}
               onComplete={handleComplete}
               onPrev={prevStep}
               loading={loading}
@@ -382,6 +384,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
           {currentStep === 5 && signupData.isMinor && (
             <ReviewStep
               data={signupData}
+              updateData={updateSignupData}
               onComplete={handleComplete}
               onPrev={prevStep}
               loading={loading}
