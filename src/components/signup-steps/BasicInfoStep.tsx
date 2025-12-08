@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,63 +16,9 @@ interface BasicInfoStepProps {
 
 export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, onNext }) => {
   const [loading, setLoading] = useState(false);
-  const [displayDate, setDisplayDate] = useState("");
 
   // Production ready - χρησιμοποιεί πραγματικό API για έλεγχο ηλικίας
   const USE_MOCK_AGE_CHECK = false;
-
-  // Initialize displayDate from data.birthDate (yyyy-mm-dd -> dd/mm/yyyy)
-  React.useEffect(() => {
-    if (data.birthDate && !displayDate) {
-      const [year, month, day] = data.birthDate.split('-');
-      setDisplayDate(`${day}/${month}/${year}`);
-    }
-  }, [data.birthDate, displayDate]);
-
-  // Convert dd/mm/yyyy to yyyy-mm-dd
-  const convertToISODate = (dateStr: string): string | null => {
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
-
-    const day = parts[0].padStart(2, '0');
-    const month = parts[1].padStart(2, '0');
-    const year = parts[2];
-
-    if (day.length !== 2 || month.length !== 2 || year.length !== 4) return null;
-    if (parseInt(day) < 1 || parseInt(day) > 31) return null;
-    if (parseInt(month) < 1 || parseInt(month) > 12) return null;
-
-    return `${year}-${month}-${day}`;
-  };
-
-  const handleDateChange = (value: string) => {
-    // Allow only numbers and slashes
-    const cleaned = value.replace(/[^\d/]/g, '');
-
-    // Auto-format as user types
-    let formatted = cleaned;
-    if (cleaned.length >= 2 && !cleaned.includes('/')) {
-      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
-    }
-    if (cleaned.length >= 5 && cleaned.split('/').length === 2) {
-      const parts = cleaned.split('/');
-      formatted = parts[0] + '/' + parts[1].slice(0, 2) + '/' + parts[1].slice(2);
-    }
-
-    setDisplayDate(formatted);
-
-    // If complete date (dd/mm/yyyy), convert and update
-    if (formatted.length === 10) {
-      const isoDate = convertToISODate(formatted);
-      if (isoDate) {
-        updateData({ birthDate: isoDate });
-      }
-    } else {
-      // Clear birthDate if incomplete
-      updateData({ birthDate: '' });
-    }
-  };
-
 
   const handleNext = async () => {
     // Validation
@@ -208,11 +154,11 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
           <Label htmlFor="birthDate">Ημερομηνία Γέννησης *</Label>
           <Input
             id="birthDate"
-            type="text"
-            placeholder="ΗΗ/ΜΜ/ΕΕΕΕ"
-            value={displayDate}
-            onChange={(e) => handleDateChange(e.target.value)}
-            maxLength={10}
+            type="date"
+            value={data.birthDate}
+            onChange={(e) => updateData({ birthDate: e.target.value })}
+            max={new Date().toISOString().split('T')[0]}
+            min="1920-01-01"
             required
           />
         </div>

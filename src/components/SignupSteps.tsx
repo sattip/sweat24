@@ -170,6 +170,7 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
     emsInterest: false,
     emsContraindications: {},
     isMinor: false,
+    liabilityDeclarationAccepted: false,
   });
 
   // Load saved data from localStorage or use default
@@ -241,18 +242,19 @@ export const SignupSteps: React.FC<SignupStepsProps> = ({ onComplete, loading = 
   const steps = getSteps();
 
   const updateSignupData = (updates: Partial<SignupData>) => {
-    const newData = (prev: SignupData) => ({ ...prev, ...updates });
-    setSignupData(newData);
-    
-    // Auto-save to localStorage (excluding sensitive data like passwords)
-    const dataToSave = newData(signupData);
-    const { password, confirmPassword, ...safeData } = dataToSave;
-    
-    try {
-      localStorage.setItem('sweat93_signup_data', JSON.stringify(safeData));
-    } catch (error) {
-      console.warn('Failed to save signup data:', error);
-    }
+    setSignupData(prev => {
+      const newData = { ...prev, ...updates };
+
+      // Auto-save to localStorage (excluding sensitive data like passwords)
+      const { password, confirmPassword, ...safeData } = newData;
+      try {
+        localStorage.setItem('sweat93_signup_data', JSON.stringify(safeData));
+      } catch (error) {
+        console.warn('Failed to save signup data:', error);
+      }
+
+      return newData;
+    });
   };
 
   const nextStep = () => {
