@@ -36,13 +36,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    // Check if user has signed terms locally (workaround for backend not updating has_signed_terms)
+    const signatureKey = user?.id ? `sweat93_signature_submitted_${user.id}` : null;
+    const hasSignedLocally = signatureKey ? localStorage.getItem(signatureKey) === 'true' : false;
+
     // Show modal only for approved users who haven't signed terms
-    if (user && user.status === 'active' && !user?.has_signed_terms) {
-      // Always show modal for users who haven't signed terms in backend
-      // Session storage is unreliable for critical functions
+    if (user && user.status === 'active' && !user?.has_signed_terms && !hasSignedLocally) {
+      // Show modal for users who haven't signed terms
       setShowPendingModal(true);
-    } else if (user && user.status === 'active' && user?.has_signed_terms) {
-      // Hide modal when user has signed terms
+    } else if (user && user.status === 'active' && (user?.has_signed_terms || hasSignedLocally)) {
+      // Hide modal when user has signed terms (either from backend or locally)
       setShowPendingModal(false);
     }
   }, [user]);
@@ -202,11 +205,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const responseData = await response.json();
 
-      // Refresh user data to get updated has_signed_terms from backend
-      await refreshUser();
-      
-      // Modal will close automatically when user.has_signed_terms becomes true
-      // No need to manually setShowPendingModal(false) here
+      // Save signature submitted flag to localStorage (persists across refreshes)
+      // This is a workaround for backend not updating has_signed_terms field
+      localStorage.setItem(`sweat93_signature_submitted_${user.id}`, 'true');
+
+      // Update user locally to close the modal immediately
+      const updatedUser = { ...user, has_signed_terms: true };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('sweat93_user', JSON.stringify(updatedUser));
+
+      // Close the modal immediately
+      setShowPendingModal(false);
+
       toast.success('Η υπογραφή σας καταχωρήθηκε επιτυχώς! Μπορείτε τώρα να χρησιμοποιήσετε την εφαρμογή.');
     } catch (error) {
       console.error('Error saving signature:', error);

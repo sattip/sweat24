@@ -43,17 +43,12 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
     if (signature) {
       setIsProcessing(true);
       setSignatureData(signature);
-      
+
       try {
-        // Call the parent handler (AuthContext)
+        // Call the parent handler (AuthContext) - it will close the modal
         await onSignature(signature);
-        
-        // Success feedback - the modal will close automatically when user is refreshed
-        toast.success("Η υπογραφή σας αποθηκεύτηκε επιτυχώς!");
-        
-        // No need for window.location.reload() - AuthContext will handle user refresh
-        // and modal will close when has_signed_terms becomes true
-        
+        // Modal closes automatically via AuthContext setShowPendingModal(false)
+        setIsProcessing(false);
       } catch (error) {
         toast.error("Σφάλμα κατά την αποθήκευση της υπογραφής");
         setIsProcessing(false);
@@ -277,11 +272,11 @@ export const PendingUserModal: React.FC<PendingUserModalProps> = ({
             </div>
           </div>
 
-          {signatureData && (
+          {signatureData && !isProcessing && (
             <Alert className="border-green-200 bg-green-50">
               <PenTool className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-700 text-sm">
-                Η υπογραφή σας αποθηκεύτηκε επιτυχώς! Το παράθυρο θα κλείσει αυτόματα...
+                Η υπογραφή σας αποθηκεύτηκε επιτυχώς! Η σελίδα θα ανανεωθεί αυτόματα...
               </AlertDescription>
             </Alert>
           )}
