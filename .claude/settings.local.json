@@ -75,7 +75,8 @@
       "Bash(copy:*)",
       "Bash(dir \"c:\\Users\\olive\\Documents\\GitHub\\sweat24\")",
       "Bash(dir \"c:\\Users\\olive\\Documents\\GitHub\\sweat24\\src\" /B)",
-      "Bash(timeout 5 bash:*)"
+      "Bash(timeout 5 bash:*)",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []

@@ -54,11 +54,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (authService.isAuthenticated()) {
         // Φόρτωση άμεσα από localStorage για γρήγορο render
-        const storedUser = authService.getStoredUser();
-        if (storedUser) setUser(storedUser);
+        let storedUser = authService.getStoredUser();
+        if (storedUser) {
+          // Preserve has_signed_terms if user has signed locally
+          const signatureKey = `sweat93_signature_submitted_${storedUser.id}`;
+          const hasSignedLocally = localStorage.getItem(signatureKey) === 'true';
+          if (hasSignedLocally && !storedUser.has_signed_terms) {
+            storedUser = { ...storedUser, has_signed_terms: true };
+          }
+          setUser(storedUser);
+        }
 
         // ΠΑΝΤΑ φέρνουμε φρέσκα στοιχεία από backend στο background
-        const currentUser = await authService.getCurrentUser();
+        let currentUser = await authService.getCurrentUser();
+        if (currentUser) {
+          // Also preserve has_signed_terms for fresh user data
+          const signatureKey = `sweat93_signature_submitted_${currentUser.id}`;
+          const hasSignedLocally = localStorage.getItem(signatureKey) === 'true';
+          if (hasSignedLocally && !currentUser.has_signed_terms) {
+            currentUser = { ...currentUser, has_signed_terms: true };
+          }
+        }
         setUser(currentUser);
 
     // NOTIFICATIONS TEMPORARILY DISABLED DUE TO EMULATOR CRASHES
@@ -74,7 +90,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
-    setUser(response.user);
+    let loginUser = response.user;
+
+    // Preserve has_signed_terms if user has signed locally
+    const signatureKey = `sweat93_signature_submitted_${loginUser.id}`;
+    const hasSignedLocally = localStorage.getItem(signatureKey) === 'true';
+    if (hasSignedLocally && !loginUser.has_signed_terms) {
+      loginUser = { ...loginUser, has_signed_terms: true };
+    }
+
+    setUser(loginUser);
     // Αμέσως μετά το login, φέρε φρέσκο user από backend (για πακέτα κ.λπ.)
     await refreshUser();
   };
@@ -114,6 +139,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data.success && data.user) {
         let updatedUser = data.user;
+
+        // Preserve has_signed_terms if user has signed locally (workaround for backend not updating the field)
+        const signatureKey = `sweat93_signature_submitted_${updatedUser.id}`;
+        const hasSignedLocally = localStorage.getItem(signatureKey) === 'true';
+        if (hasSignedLocally && !updatedUser.has_signed_terms) {
+          updatedUser = { ...updatedUser, has_signed_terms: true };
+        }
 
         // Backend already sends full URL for avatar, no need to modify it
 
