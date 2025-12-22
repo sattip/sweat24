@@ -72,7 +72,10 @@
       "Bash(do)",
       "Bash(done)",
       "Bash(.gradlew.bat bundleRelease)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(dir \"c:\\Users\\olive\\Documents\\GitHub\\sweat24\")",
+      "Bash(dir \"c:\\Users\\olive\\Documents\\GitHub\\sweat24\\src\" /B)",
+      "Bash(timeout 5 bash:*)"
     ],
     "deny": [],
     "ask": []

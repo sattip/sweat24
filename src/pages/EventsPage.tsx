@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Users, Bell } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Bell, CalendarDays, Loader2 } from "lucide-react";
 import EventNotification from "@/components/notifications/EventNotification";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -91,28 +91,30 @@ const EventsPage = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        
-        <main className="container px-4 py-6 max-w-5xl mx-auto">
-          <div className="mb-6 flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold">Εκδηλώσεις</h1>
-              <p className="text-muted-foreground mt-1">Ελάτε στις εκδηλώσεις μας και γίνετε μέλος της κοινότητάς μας!</p>
+
+        {/* Hero Header */}
+        <div className="bg-red-800 text-white px-4 py-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <CalendarDays className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Εκδηλώσεις</h1>
+                <p className="text-red-200 text-sm">
+                  Γίνετε μέλος της κοινότητάς μας
+                </p>
+              </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsNotificationOpen(true)}
-              className="gap-2"
-            >
-              <Bell className="h-4 w-4" />
-              Προσομοίωση Ειδοποίησης
-            </Button>
           </div>
-          
+        </div>
+
+        <main className="container px-4 py-6 max-w-5xl mx-auto">
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="text-lg">Φόρτωση εκδηλώσεων...</div>
+              <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
             <div className="space-y-8">

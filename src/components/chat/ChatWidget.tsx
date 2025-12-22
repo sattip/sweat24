@@ -51,6 +51,13 @@ export function ChatWidget() {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
+  // Listen for header chat button event
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('openChat', handleOpenChat);
+    return () => window.removeEventListener('openChat', handleOpenChat);
+  }, []);
+
   // Initialize Pusher and fetch initial conversation when authenticated
   useEffect(() => {
     if (isAuthenticated && user?.id) {
@@ -240,6 +247,15 @@ export function ChatWidget() {
 
   return (
     <>
+      {/* Backdrop overlay with blur */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setIsOpen(false)}
+      />
+
       {/* Floating Chat Button */}
       <Button
         onClick={() => setIsOpen(true)}

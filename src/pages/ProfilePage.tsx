@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Calendar, Edit, Users, User, Settings, Package, Loader2, FileText, Activity, Camera, ArrowRight, Gift } from "lucide-react";
+import {
+  Calendar, Edit, Users, Settings, Package, Loader2,
+  Camera, ChevronRight, Gift, ShoppingBag, Dumbbell,
+  CalendarDays, UserPlus, Building, Bell, LogOut
+} from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { profileService } from "@/services/apiService";
 import { Badge } from "@/components/ui/badge";
-// Αφαιρέθηκαν mock ειδοποιήσεις/loyalty
 import { useAuth } from "@/contexts/AuthContext";
 import { userService } from "@/services/apiService";
 import { BookingRequests } from "@/components/BookingRequests";
@@ -16,22 +19,58 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { validateProfileData } from "@/utils/validation";
 import { format, parseISO, differenceInYears } from "date-fns";
 
+interface MenuItem {
+  icon: React.ReactNode;
+  label: string;
+  to: string;
+  badge?: string;
+  badgeVariant?: 'default' | 'secondary' | 'coming-soon';
+  disabled?: boolean;
+}
+
+const MenuItemRow: React.FC<MenuItem> = ({ icon, label, to, badge, badgeVariant, disabled }) => {
+  const content = (
+    <div className={`flex items-center justify-between px-4 py-2.5 transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/30'}`}>
+      <div className="flex items-center gap-3">
+        <div className="text-muted-foreground">{icon}</div>
+        <span className="font-medium">{label}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {badge && (
+          <Badge variant={badgeVariant === 'coming-soon' ? 'secondary' : 'default'} className="text-xs">
+            {badge}
+          </Badge>
+        )}
+        {!disabled && <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+      </div>
+    </div>
+  );
+
+  if (disabled) {
+    return <div className="block">{content}</div>;
+  }
+
+  return <Link to={to} className="block">{content}</Link>;
+};
+
 const ProfilePage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const activeTab = queryParams.get('tab');
-  
+
   const [loadingPackages, setLoadingPackages] = useState(false);
   const [activePackages, setActivePackages] = useState<any[]>([]);
-  const { user, refreshUser } = useAuth();
-  // Αν δεν υπάρχει χρήστης, μην αποδίδεις τίποτα (το ProtectedRoute θα χειριστεί redirect)
+  const { user, refreshUser, logout } = useAuth();
+
   if (!user) {
     return null;
   }
-  
+
   // Edit profile modal state
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -40,11 +79,8 @@ const ProfilePage = () => {
   const [editPhone, setEditPhone] = useState("");
   const [editGender, setEditGender] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
-  const [avatarKey, setAvatarKey] = useState(Date.now()); // Force re-render key
+  const [avatarKey, setAvatarKey] = useState(Date.now());
 
-  // Δεν φορτώνουμε πλέον mock πακέτα. Θα βασιστούμε μόνο στα πραγματικά πεδία του χρήστη από το auth context.
-
-  // Prefill edit form when user changes
   useEffect(() => {
     if (user) {
       setEditName(user.name || "");
@@ -54,7 +90,6 @@ const ProfilePage = () => {
     }
   }, [user]);
 
-  // Fetch active packages from profile API
   useEffect(() => {
     const loadPackages = async () => {
       try {
@@ -69,9 +104,7 @@ const ProfilePage = () => {
     };
     loadPackages();
   }, []);
-  
 
-  // Helper functions
   const isNameLocked = () => {
     return (user as any)?.registration_status === 'completed' && (user as any)?.approved_at !== null;
   };
@@ -82,7 +115,6 @@ const ProfilePage = () => {
       const date = parseISO(dateString);
       return format(date, 'dd/MM/yyyy');
     } catch (error) {
-      console.warn('Date parsing error:', error);
       return "Μη έγκυρη ημερομηνία";
     }
   };
@@ -93,7 +125,6 @@ const ProfilePage = () => {
       const birthDate = parseISO(dateOfBirth);
       return differenceInYears(new Date(), birthDate);
     } catch (error) {
-      console.warn('Age calculation error:', error);
       return null;
     }
   };
@@ -107,66 +138,61 @@ const ProfilePage = () => {
     return genderMap[gender] || "Δεν έχει οριστεί";
   };
 
-
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast({ 
-        title: "Μη έγκυρο αρχείο", 
+      toast({
+        title: "Μη έγκυρο αρχείο",
         description: "Παρακαλώ επιλέξτε μια εικόνα",
-        variant: "destructive" 
+        variant: "destructive"
       });
       return;
     }
 
-    // Validate file size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
-      toast({ 
-        title: "Πολύ μεγάλο αρχείο", 
+      toast({
+        title: "Πολύ μεγάλο αρχείο",
         description: "Η εικόνα δεν μπορεί να ξεπερνά τα 2MB",
-        variant: "destructive" 
+        variant: "destructive"
       });
       return;
     }
 
     try {
       setAvatarUploading(true);
-      const result = await userService.uploadAvatar(file);
-      
-      
-      // No need to update localStorage manually, refreshUser will handle it
-      
-      // Update the user's avatar in the auth context
+      await userService.uploadAvatar(file);
       await refreshUser();
-      
-      // Force re-render of avatar image
       setAvatarKey(Date.now());
-      
-      toast({ 
-        title: "Επιτυχία!", 
-        description: "Η φωτογραφία προφίλ ενημερώθηκε επιτυχώς" 
+      toast({
+        title: "Επιτυχία!",
+        description: "Η φωτογραφία προφίλ ενημερώθηκε επιτυχώς"
       });
     } catch (error) {
-      console.error('Avatar upload error:', error);
-      toast({ 
-        title: "Σφάλμα", 
+      toast({
+        title: "Σφάλμα",
         description: error instanceof Error ? error.message : "Αποτυχία ενημέρωσης φωτογραφίας",
-        variant: "destructive" 
+        variant: "destructive"
       });
     } finally {
       setAvatarUploading(false);
-      // Reset the input
       event.target.value = '';
     }
   };
 
-  // Πραγματικά δεδομένα χρήστη από το auth context (χωρίς mock sections)
-  const activePkg = (Array.isArray(activePackages) && activePackages.length > 0)
-    ? activePackages.find((p: any) => p?.status === 'active')
-    : ((user as any)?.active_package || (Array.isArray((user as any)?.user_packages) ? (user as any).user_packages.find((p: any) => p?.status === 'active') : null));
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      toast({
+        title: "Σφάλμα",
+        description: "Αποτυχία αποσύνδεσης",
+        variant: "destructive"
+      });
+    }
+  };
 
   const userData = {
     name: user?.name || "Χρήστης",
@@ -174,654 +200,335 @@ const ProfilePage = () => {
     gender: (user as any)?.gender || null,
     phone: (user as any)?.phone || "",
     dateOfBirth: (user as any)?.date_of_birth || "",
-    activePackage: {
-      exists: Boolean(activePkg) || (user?.remaining_sessions === null) || ((user?.remaining_sessions ?? 0) > 0),
-      name: "Συνδρομή",
-      type: activePkg?.package?.name || activePkg?.package_name || user?.membership_type || "",
-      remaining: (activePkg?.remaining_sessions !== undefined ? activePkg.remaining_sessions : (user as any)?.remaining_sessions) ?? null,
-      bonusSessions: (activePkg?.bonus_sessions !== undefined ? activePkg.bonus_sessions : user?.bonus_sessions) ?? 0,
-      bonusSessionsUsed: (activePkg?.bonus_sessions_used !== undefined ? activePkg.bonus_sessions_used : user?.bonus_sessions_used) ?? 0,
-      expiresAt: activePkg?.expires_at || user?.package_end_date || null,
-    },
-  } as const;
-
-  const fitnessGoals: string[] = Array.isArray((user as any)?.fitness_goals)
-    ? (user as any).fitness_goals
-    : [];
+  };
 
   // Show booking requests if tab parameter is set
   if (activeTab === 'booking-requests') {
     return (
-      <>
-        <div className="min-h-screen bg-background">
-          <Header />
-          
-          <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div>
-                <Link to="/profile" className="text-muted-foreground hover:text-foreground text-sm mb-2 inline-block">
-                  ← Πίσω στο προφίλ
-                </Link>
-                <h1 className="text-2xl sm:text-3xl font-bold">Αιτήματα Ραντεβού</h1>
-              </div>
-              <Link to="/services">
-                <Button className="flex items-center gap-2">
-                  Νέο Αίτημα
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div>
+              <Link to="/profile" className="text-muted-foreground hover:text-foreground text-sm mb-2 inline-block">
+                ← Πίσω στο προφίλ
               </Link>
+              <h1 className="text-2xl sm:text-3xl font-bold">Αιτήματα Ραντεβού</h1>
             </div>
-
-            <BookingRequests />
-          </main>
-        </div>
-      </>
+            <Link to="/services">
+              <Button className="flex items-center gap-2">
+                Νέο Αίτημα
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+          <BookingRequests />
+        </main>
+      </div>
     );
   }
 
+  // Activities tab menu items
+  const activitiesMenuItems: MenuItem[] = [
+    { icon: <Calendar className="h-5 w-5" />, label: "Προπονήσεις", to: "/bookings" },
+    { icon: <Package className="h-5 w-5" />, label: "Πακέτα", to: "/profile/packages" },
+    { icon: <Gift className="h-5 w-5" />, label: "Πρόγραμμα ανταμοιβής", to: "/rewards" },
+    { icon: <Dumbbell className="h-5 w-5" />, label: "Προπονητικό κομμάτι", to: "/progress" },
+    { icon: <UserPlus className="h-5 w-5" />, label: "Προσκάλεσε έναν φίλο", to: "/referrals" },
+    { icon: <ShoppingBag className="h-5 w-5" />, label: "Παραγγελίες", to: "/orders" },
+    { icon: <CalendarDays className="h-5 w-5" />, label: "Εκδηλώσεις", to: "/events" },
+    {
+      icon: <Building className="h-5 w-5" />,
+      label: "Συνεργαζόμενες επιχειρήσεις",
+      to: "/partners",
+      badge: "Σύντομα",
+      badgeVariant: 'coming-soon',
+      disabled: true
+    },
+  ];
+
+  const additionalMenuItems: MenuItem[] = [];
+
   return (
-    <>
-      <div className="min-h-screen bg-background">
-        <Header />
-        
-        <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold">Το Προφίλ μου</h1>
-          </div>
-          
-          <div className="space-y-6">
-            {/* Profile Header */}
-            <Card className="border shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-primary to-secondary h-32 relative">
-                <div className="absolute -bottom-16 left-6 flex items-end">
-                  <div className="relative">
-                    <Avatar className="h-24 w-24 border-4 border-background" key={avatarKey}>
-                      <AvatarImage 
-                        src={(user as any)?.avatar || "/placeholder.svg"} 
-                        alt={userData.name} 
-                      />
-                      <AvatarFallback className="text-2xl">
-                        {userData.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    {/* Camera button for avatar upload */}
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-                      onClick={() => document.getElementById('avatar-upload')?.click()}
-                      disabled={avatarUploading}
-                    >
-                      {avatarUploading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Camera className="h-4 w-4" />
-                      )}
-                    </Button>
-                    {/* Hidden file input */}
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-4 right-4 bg-background/20 hover:bg-background/40 text-white"
-                  onClick={() => setIsEditOpen(true)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </div>
-              <CardContent className="pt-20 pb-6">
-                <h2 className="text-2xl font-bold">{userData.name}</h2>
-              </CardContent>
-            </Card>
+    <div className="min-h-screen bg-background">
+      <Header />
 
-            {/* Edit Profile Dialog */}
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Επεξεργασία Προσωπικών Στοιχείων</DialogTitle>
-                  <DialogDescription>
-                    Ενημερώστε το ονοματεπώνυμο, το email και το τηλέφωνο σας.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Ονοματεπώνυμο</Label>
-                    <Input 
-                      id="name" 
-                      value={editName} 
-                      onChange={(e) => setEditName(e.target.value)}
-                      disabled={isNameLocked()}
-                      placeholder={isNameLocked() ? "Το όνομα είναι κλειδωμένο μετά την έγκριση" : ""}
-                    />
-                    {isNameLocked() && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Το όνομα δεν μπορεί να αλλάξει μετά την έγκριση του λογαριασμού
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Τηλέφωνο</Label>
-                    <Input id="phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="gender">Φύλο</Label>
-                    <Select value={editGender} onValueChange={setEditGender}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Επιλέξτε φύλο" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="male">Άνδρας</SelectItem>
-                        <SelectItem value="female">Γυναίκα</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                </div>
-                <DialogFooter className="gap-2 sm:gap-2">
-                  <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={savingProfile}>Ακύρωση</Button>
-                  <Button
-                    onClick={async () => {
-                      if (!user) return;
-                      
-                      // Client-side validation
-                      const validationData = {
-                        name: isNameLocked() ? undefined : editName,
-                        email: editEmail,
-                        phone: editPhone,
-                        gender: editGender,
-                      };
-                      
-                      const validationErrors = validateProfileData(validationData);
-                      
-                      if (Object.keys(validationErrors).length > 0) {
-                        const firstError = Object.values(validationErrors)[0];
-                        toast({ 
-                          title: "Μη έγκυρα δεδομένα", 
-                          description: firstError,
-                          variant: "destructive" 
-                        });
-                        return;
-                      }
-                      
-                      try {
-                        setSavingProfile(true);
-                        // Prepare update data - only include non-empty values
-                        const updateData: any = {
-                          email: editEmail,
-                          phone: editPhone,
-                        };
-
-                        // Only add name if it's not locked
-                        if (!isNameLocked()) {
-                          updateData.name = editName;
-                        }
-
-                        // Add optional fields only if they have values
-                        if (editGender) {
-                          updateData.gender = editGender;
-                        }
-
-                        await userService.updateProfile(user.id, updateData);
-                        toast({ title: "Το προφίλ ενημερώθηκε επιτυχώς" });
-                        await refreshUser();
-                        setIsEditOpen(false);
-                      } catch (error) {
-                        console.error(error);
-                        
-                        // Handle specific error cases
-                        let errorMessage = "Παρακαλώ δοκιμάστε ξανά";
-                        let errorTitle = "Σφάλμα ενημέρωσης προφίλ";
-
-                        if (error instanceof Error) {
-                          if (error.message.includes('Το όνομα δεν μπορεί να αλλάξει')) {
-                            errorTitle = "Όνομα κλειδωμένο";
-                            errorMessage = "Το όνομα δεν μπορεί να αλλάξει μετά την έγκριση του λογαριασμού";
-                          } else if (error.message.includes('Validation failed')) {
-                            errorTitle = "Μη έγκυρα δεδομένα";
-                            errorMessage = "Παρακαλώ ελέγξτε τα στοιχεία που εισάγατε";
-                          } else if (error.message.includes('email χρησιμοποιείται')) {
-                            errorTitle = "Email σε χρήση";
-                            errorMessage = "Αυτό το email χρησιμοποιείται ήδη από άλλον χρήστη";
-                          } else {
-                            errorMessage = error.message;
-                          }
-                        }
-
-                        toast({ 
-                          title: errorTitle, 
-                          description: errorMessage, 
-                          variant: "destructive" 
-                        });
-                      } finally {
-                        setSavingProfile(false);
-                      }
-                    }}
-                    disabled={savingProfile}
-                  >
-                    {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : "Αποθήκευση"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            {/* My Packages Section - χωρίς mock */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <Package className="h-5 w-5 text-primary" />
-                  Τα Πακέτα μου
-                </CardTitle>
-                <CardDescription>Τα ενεργά πακέτα προπονήσεων και το υπόλοιπό τους.</CardDescription>
-              </CardHeader>
-            <CardContent className="space-y-4">
-                {loadingPackages ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : userData.activePackage.exists ? (
-                  <div className="p-4 rounded-lg border bg-muted/20">
-                    <div className="flex flex-col md:flex-row justify-between md:items-center">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-lg">{userData.activePackage.name}</h3>
-                          {userData.activePackage.type && (
-                            <Badge variant="outline">{userData.activePackage.type}</Badge>
-                          )}
-                        </div>
-                        {userData.activePackage.expiresAt && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Λήγει στις: {new Date(userData.activePackage.expiresAt).toLocaleDateString('el-GR')}
-                          </p>
-                        )}
-                      </div>
-                      <div className="mt-2 md:mt-0 text-right">
-                        {userData.activePackage.remaining === null || userData.activePackage.remaining === undefined ? (
-                          <>
-                            <p className="text-2xl font-bold text-primary">Απεριόριστο</p>
-                            <p className="text-sm text-muted-foreground">πακέτο</p>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex items-center justify-end gap-2">
-                              <p className="text-2xl font-bold text-primary">{userData.activePackage.remaining}</p>
-                              {userData.activePackage.bonusSessions > userData.activePackage.bonusSessionsUsed && (
-                                <Badge className="bg-purple-100 text-purple-700 border-purple-200">
-                                  <Gift className="h-3 w-3 mr-1" />
-                                  +{userData.activePackage.bonusSessions - userData.activePackage.bonusSessionsUsed}
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">συνεδρίες</p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+      <main className="container px-0 sm:px-4 py-0 sm:py-6 max-w-5xl mx-auto">
+        {/* User Info Section */}
+        <div className="bg-red-800 text-white px-4 py-6">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold uppercase tracking-wide">
+                {userData.name}
+              </h2>
+            </div>
+            <div className="relative">
+              <Avatar className="h-20 w-20 border-2 border-white" key={avatarKey}>
+                <AvatarImage
+                  src={(user as any)?.avatar || "/placeholder.svg"}
+                  alt={userData.name}
+                />
+                <AvatarFallback className="text-xl bg-gray-100">
+                  {userData.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              {/* Green online dot */}
+              <div className="absolute bottom-1 right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white"></div>
+              {/* Camera button for avatar upload */}
+              <Button
+                size="sm"
+                variant="secondary"
+                className="absolute -bottom-1 -left-1 h-7 w-7 rounded-full p-0"
+                onClick={() => document.getElementById('avatar-upload')?.click()}
+                disabled={avatarUploading}
+              >
+                {avatarUploading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Δεν έχετε ενεργά πακέτα.
-                  </div>
+                  <Camera className="h-3 w-3" />
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Financial Information Section */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  Οικονομικά Στοιχεία
-                </CardTitle>
-                <CardDescription>Η κατάσταση των πληρωμών και των δόσεων σας.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {Array.isArray((user as any)?.financialInfo?.packages) && (user as any).financialInfo.packages.length > 0 ? (
-                  <div className="space-y-6">
-                    {(user as any).financialInfo.packages.map((pkg: any) => {
-                      const paymentProgress = (pkg.paidAmount / pkg.totalAmount) * 100;
-                      const isNextDueSoon = new Date(pkg.nextInstallment.dueDate) <= new Date(new Date().setDate(new Date().getDate() + 7));
-                      
-                      return (
-                        <div key={pkg.id} className="p-4 rounded-lg border bg-muted/20">
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-medium text-lg">{pkg.packageName}</h3>
-                            <Badge variant={pkg.remainingAmount > 0 ? "destructive" : "default"}>
-                              {pkg.remainingAmount > 0 ? "Εκκρεμεί Πληρωμή" : "Πληρωμένο"}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="text-center p-3 bg-background rounded-md">
-                              <div className="flex items-center justify-center gap-1 text-lg font-bold">
-                                €{pkg.totalAmount}
-                              </div>
-                              <p className="text-sm text-muted-foreground">Συνολικό Ποσό</p>
-                            </div>
-                            <div className="text-center p-3 bg-green-50 rounded-md">
-                              <div className="flex items-center justify-center gap-1 text-lg font-bold text-green-700">
-                                €{pkg.paidAmount}
-                              </div>
-                              <p className="text-sm text-green-600">Πληρωμένο</p>
-                            </div>
-                            <div className="text-center p-3 bg-red-50 rounded-md">
-                              <div className="flex items-center justify-center gap-1 text-lg font-bold text-red-700">
-                                €{pkg.remainingAmount}
-                              </div>
-                              <p className="text-sm text-red-600">Υπόλοιπο</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 mb-4">
-                            <div className="flex justify-between text-sm">
-                              <span>Πρόοδος πληρωμής</span>
-                              <span>{Math.round(paymentProgress)}%</span>
-                            </div>
-                            <Progress value={paymentProgress} className="h-2" />
-                          </div>
-
-                          {pkg.remainingAmount > 0 && (
-                            <div className={`p-3 rounded-md ${isNextDueSoon ? 'bg-orange-50 border border-orange-200' : 'bg-blue-50 border border-blue-200'}`}>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium">Επόμενη Δόση</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    Λήξη: {new Date(pkg.nextInstallment.dueDate).toLocaleDateString('el-GR')}
-                                  </p>
-                                  {isNextDueSoon && (
-                                    <p className="text-xs text-orange-600 font-medium mt-1">
-                                      ⚠️ Λήγει σύντομα
-                                    </p>
-                                  )}
-                                </div>
-                                <div className="text-right">
-                                  <div className="flex items-center gap-1 text-xl font-bold">
-                                    €{pkg.nextInstallment.amount}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          <details className="mt-4">
-                            <summary className="cursor-pointer text-sm font-medium text-primary hover:underline">
-                              Προβολή αναλυτικών δόσεων
-                            </summary>
-                            <div className="mt-3 space-y-2">
-                              {pkg.installments.map((installment, index) => (
-                                <div key={index} className="flex justify-between items-center py-2 px-3 bg-background rounded text-sm">
-                                  <div>
-                                    <span>Δόση {index + 1}</span>
-                                    <span className="text-muted-foreground ml-2">
-                                      ({new Date(installment.date).toLocaleDateString('el-GR')})
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">€{installment.amount}</span>
-                                    <Badge variant={installment.status === "Πληρώθηκε" ? "default" : "secondary"} className="text-xs">
-                                      {installment.status}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Δεν υπάρχουν οικονομικά στοιχεία προς εμφάνιση.
-                    </div>
-                )}
-              </CardContent>
-              <CardFooter className="border-t pt-4">
-                <p className="text-xs text-muted-foreground">
-                  💡 Για οποιαδήποτε απορία σχετικά με τις πληρωμές σας, επικοινωνήστε μαζί μας.
-                </p>
-              </CardFooter>
-            </Card>
-            
-            {/* My Rewards Section */}
-            <Card className="shadow-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      Πρόγραμμα Πιστότητας
-                    </CardTitle>
-                    <CardDescription>Οι πόντοι και τα διαθέσιμα δώρα σας</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <h4 className="font-medium text-md text-foreground">Τα Δώρα μου</h4>
-                {Array.isArray((user as any)?.rewards) && (user as any).rewards.length > 0 ? (
-                  <div className="divide-y">
-                    {(user as any).rewards.map((reward: any) => (
-                      <div 
-                        key={reward.id} 
-                        className={`py-3 first:pt-0 last:pb-0 ${
-                          reward.status === "Διαθέσιμο" ? "cursor-pointer hover:bg-muted/50 rounded-lg p-2 transition-colors" : ""
-                        }`}
-                        onClick={() => handleRedeemReward(reward)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium">{reward.name}</h3>
-                              {reward.type === "birthday" && (
-                                <div className="bg-secondary/10 text-secondary text-xs px-2 py-0.5 rounded-full">
-                                  Γενέθλια
-                                </div>
-                              )}
-                              {reward.type === "referral" && (
-                                <div className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
-                                  Σύσταση
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">Κωδικός: {reward.code}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Λήγει: {new Date(reward.expiresAt).toLocaleDateString()}
-                            </p>
-                            {reward.status === "Διαθέσιμο" && (
-                              <p className="text-xs text-primary font-medium mt-1">👆 Κλικ για εξαργύρωση</p>
-                            )}
-                          </div>
-                          <div className="flex items-center">
-                            <div className={`px-3 py-1 rounded-full text-sm ${
-                              reward.status === "Διαθέσιμο" 
-                                ? "bg-green-100 text-green-800" 
-                                : "bg-muted text-muted-foreground"
-                            }`}>
-                              {reward.status}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Δεν υπάρχουν διαθέσιμα δώρα αυτή τη στιγμή.</p>
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter className="border-t pt-4 flex flex-col sm:flex-row gap-2">
-                <Button 
-                  variant="secondary" 
-                  className="w-full sm:w-auto"
-                  onClick={() => setIsRewardAlertOpen(true)}
-                >
-                  Προσομοίωση Ειδοποίησης Δώρου
-                </Button>
-                <Link to="/referrals" className="w-full sm:w-auto">
-                  <Button variant="outline" className="w-full">
-                    Παράπεμψε Φίλους & Κέρδισε Περισσότερα Δώρα
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-            
-            {/* Personal Details Section */}
-            <Card className="shadow-sm">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">Προσωπικές Λεπτομέρειες</CardTitle>
-                    <CardDescription>Οι στοιχεία επικοινωνίας και προσωπικές πληροφορίες σας</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{userData.email}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Τηλέφωνο</p>
-                    <p className="font-medium">{userData.phone}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Ημερομηνία Γέννησης</p>
-                    <p className="font-medium">{formatDate(userData.dateOfBirth)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Ηλικία</p>
-                    <p className="font-medium">
-                      {(() => {
-                        const age = calculateAge(userData.dateOfBirth);
-                        return age !== null ? `${age} χρόνια` : 'Άγνωστη ηλικία';
-                      })()}
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Φύλο</p>
-                    <p className="font-medium">{formatGender(userData.gender)}</p>
-                  </div>
-                </div>
-                {fitnessGoals.length > 0 && (
-                  <div className="space-y-1 pt-2">
-                    <p className="text-sm text-muted-foreground">Στόχοι Φυσικής Κατάστασης</p>
-                    <div className="flex flex-wrap gap-2">
-                      {fitnessGoals.map((goal, index) => (
-                        <div key={index} className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium">
-                          {goal}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {/* Activity Summary - αφαιρέθηκε (mock data) */}
-            
-            {/* Navigation Links */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link to="/profile?tab=booking-requests" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <FileText className="h-5 w-5 mr-4 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Αιτήματα Ραντεβού</h3>
-                      <p className="text-sm text-muted-foreground">Παρακολουθήστε την κατάσταση των αιτημάτων EMS/Personal Training</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/bookings" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <Calendar className="h-5 w-5 mr-4 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Επερχόμενα Μαθήματα</h3>
-                      <p className="text-sm text-muted-foreground">Προβολή και διαχείριση των κρατήσεων μαθημάτων σας</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/progress" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <Activity className="h-5 w-5 mr-4 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Έλεγχος Προόδου</h3>
-                      <p className="text-sm text-muted-foreground">Παρακολουθήστε την πρόοδό σας με φωτογραφίες και μετρήσεις</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/services" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <User className="h-5 w-5 mr-4 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Personal & EMS</h3>
-                      <p className="text-sm text-muted-foreground">Κλείστε ραντεβού για εξειδικευμένες υπηρεσίες</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/rewards" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <span className="h-5 w-5 mr-4 text-primary">🎁</span>
-                    <div>
-                      <h3 className="font-medium">Πρόγραμμα Ανταμοιβής</h3>
-                      <p className="text-sm text-muted-foreground">Κερδίστε πόντους και εξαργυρώστε υπέροχα δώρα</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/referrals" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <Users className="h-5 w-5 mr-4 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Πρόγραμμα Συστάσεων</h3>
-                      <p className="text-sm text-muted-foreground">Προσκαλέστε φίλους και κερδίστε δώρα</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/settings" className="block">
-                <Card className="shadow-sm hover:border-primary transition-colors h-full">
-                  <CardContent className="flex items-center p-4">
-                    <Settings className="h-5 w-5 mr-4 text-primary" />
-                    <div>
-                      <h3 className="font-medium">Ρυθμίσεις</h3>
-                      <p className="text-sm text-muted-foreground">Διαχειριστείτε τις προτιμήσεις της εφαρμογής</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+              </Button>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
             </div>
           </div>
-        </main>
-      </div>
-      {/* LoyaltyRewardAlert αφαιρέθηκε */}
-    </>
+
+          {/* Edit Profile Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 rounded-full bg-transparent border-white text-white hover:bg-white/10"
+            onClick={() => setIsEditOpen(true)}
+          >
+            Επεξεργασία στοιχείων
+          </Button>
+        </div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="activities" className="w-full">
+          <TabsList className="w-full grid grid-cols-2 rounded-none border-b bg-white h-auto p-0">
+            <TabsTrigger
+              value="activities"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+            >
+              Οι δραστηριότητές μου
+            </TabsTrigger>
+            <TabsTrigger
+              value="account"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+            >
+              Λογαριασμός
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Activities Tab */}
+          <TabsContent value="activities" className="mt-0">
+            <div className="bg-white pb-24">
+              {/* Subtitle */}
+              <p className="text-sm text-muted-foreground px-4 py-3">
+                Δείτε όλη τη δραστηριότητά σας ως μέλος της επιχείρησης SWEAT 93
+              </p>
+
+              {/* Main menu items */}
+              <div>
+                {activitiesMenuItems.map((item, index) => (
+                  <MenuItemRow key={index} {...item} />
+                ))}
+              </div>
+
+              {/* Additional items */}
+              <div>
+                {additionalMenuItems.map((item, index) => (
+                  <MenuItemRow key={index} {...item} />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Account Tab */}
+          <TabsContent value="account" className="mt-0">
+            <div className="bg-white pb-24">
+              {/* Personal Details */}
+              <div className="p-4 space-y-4">
+                <h3 className="font-semibold text-lg">Προσωπικά Στοιχεία</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex justify-between py-2">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-medium">{userData.email}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-muted-foreground">Τηλέφωνο</span>
+                    <span className="font-medium">{userData.phone || "-"}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-muted-foreground">Ημερομηνία Γέννησης</span>
+                    <span className="font-medium">{formatDate(userData.dateOfBirth)}</span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-muted-foreground">Φύλο</span>
+                    <span className="font-medium">{formatGender(userData.gender)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Settings links */}
+              <MenuItemRow
+                icon={<Settings className="h-5 w-5" />}
+                label="Ρυθμίσεις"
+                to="/settings"
+              />
+              <MenuItemRow
+                icon={<Bell className="h-5 w-5" />}
+                label="Ειδοποιήσεις"
+                to="/notifications"
+              />
+
+              {/* Logout */}
+              <div className="p-4 mt-4">
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Αποσύνδεση
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Επεξεργασία Προσωπικών Στοιχείων</DialogTitle>
+            <DialogDescription>
+              Ενημερώστε το ονοματεπώνυμο, το email και το τηλέφωνο σας.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Ονοματεπώνυμο</Label>
+              <Input
+                id="name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                disabled={isNameLocked()}
+                placeholder={isNameLocked() ? "Το όνομα είναι κλειδωμένο μετά την έγκριση" : ""}
+              />
+              {isNameLocked() && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Το όνομα δεν μπορεί να αλλάξει μετά την έγκριση του λογαριασμού
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="phone">Τηλέφωνο</Label>
+              <Input id="phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="gender">Φύλο</Label>
+              <Select value={editGender} onValueChange={setEditGender}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Επιλέξτε φύλο" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Άνδρας</SelectItem>
+                  <SelectItem value="female">Γυναίκα</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={savingProfile}>
+              Ακύρωση
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!user) return;
+
+                const validationData = {
+                  name: isNameLocked() ? undefined : editName,
+                  email: editEmail,
+                  phone: editPhone,
+                  gender: editGender,
+                };
+
+                const validationErrors = validateProfileData(validationData);
+
+                if (Object.keys(validationErrors).length > 0) {
+                  const firstError = Object.values(validationErrors)[0];
+                  toast({
+                    title: "Μη έγκυρα δεδομένα",
+                    description: firstError,
+                    variant: "destructive"
+                  });
+                  return;
+                }
+
+                try {
+                  setSavingProfile(true);
+                  const updateData: any = {
+                    email: editEmail,
+                    phone: editPhone,
+                  };
+
+                  if (!isNameLocked()) {
+                    updateData.name = editName;
+                  }
+
+                  if (editGender) {
+                    updateData.gender = editGender;
+                  }
+
+                  await userService.updateProfile(user.id, updateData);
+                  toast({ title: "Το προφίλ ενημερώθηκε επιτυχώς" });
+                  await refreshUser();
+                  setIsEditOpen(false);
+                } catch (error) {
+                  let errorMessage = "Παρακαλώ δοκιμάστε ξανά";
+                  let errorTitle = "Σφάλμα ενημέρωσης προφίλ";
+
+                  if (error instanceof Error) {
+                    if (error.message.includes('Το όνομα δεν μπορεί να αλλάξει')) {
+                      errorTitle = "Όνομα κλειδωμένο";
+                      errorMessage = "Το όνομα δεν μπορεί να αλλάξει μετά την έγκριση του λογαριασμού";
+                    } else if (error.message.includes('email χρησιμοποιείται')) {
+                      errorTitle = "Email σε χρήση";
+                      errorMessage = "Αυτό το email χρησιμοποιείται ήδη από άλλον χρήστη";
+                    } else {
+                      errorMessage = error.message;
+                    }
+                  }
+
+                  toast({
+                    title: errorTitle,
+                    description: errorMessage,
+                    variant: "destructive"
+                  });
+                } finally {
+                  setSavingProfile(false);
+                }
+              }}
+              disabled={savingProfile}
+            >
+              {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : "Αποθήκευση"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
