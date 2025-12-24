@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle,
@@ -9,7 +8,9 @@ import {
   ChevronUp,
   Calendar,
   CreditCard,
-  Package
+  CheckCircle2,
+  Clock,
+  AlertCircle
 } from "lucide-react";
 import { buildApiUrl } from "@/config/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +22,7 @@ interface Installment {
   due_date: string;
   status: string;
   paid_at?: string;
+  installment_number?: number;
 }
 
 interface PartialPaymentPackage {
@@ -30,6 +32,12 @@ interface PartialPaymentPackage {
   amount_paid: number;
   amount_remaining: number;
   installments: Installment[];
+  installments_summary?: {
+    total: number;
+    paid: number;
+    pending: number;
+    overdue: number;
+  };
 }
 
 interface PartialPaymentData {
@@ -67,7 +75,6 @@ const PartialPaymentAlert: React.FC = () => {
 
         if (!response.ok) {
           if (response.status === 404) {
-            // Endpoint doesn't exist yet or no data
             setData(null);
             setLoading(false);
             return;
@@ -79,7 +86,6 @@ const PartialPaymentAlert: React.FC = () => {
         const paymentData = result.data || result;
         setData(paymentData);
       } catch (err) {
-        console.error("Error fetching partial payments:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
@@ -89,19 +95,21 @@ const PartialPaymentAlert: React.FC = () => {
     fetchPartialPayments();
   }, [user?.id]);
 
-  // Don't render if loading, error, no data, or no pending payments
   if (loading || error || !data || !data.has_pending_payments) {
     return null;
   }
 
-  const isOverdue = data.next_installment_due
-    ? new Date(data.next_installment_due) < new Date()
-    : false;
+  const hasOverdue = data.packages.some(pkg =>
+    pkg.installments?.some(inst =>
+      inst.status !== "paid" && new Date(inst.due_date) < new Date()
+    )
+  );
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("el-GR", {
-      day: "numeric",
-      month: "long",
+    const date = new Date(dateString);
+    return date.toLocaleDateString("el-GR", {
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
     });
   };
@@ -113,80 +121,112 @@ const PartialPaymentAlert: React.FC = () => {
     }).format(amount);
   };
 
-  const getPaymentPercentage = (pkg: PartialPaymentPackage) => {
-    if (pkg.total_amount === 0) return 100;
-    return Math.round((pkg.amount_paid / pkg.total_amount) * 100);
-  };
+  // Count totals across all packages
+  const totalInstallments = data.packages.reduce((sum, pkg) =>
+    sum + (pkg.installments_summary?.total || pkg.installments?.length || 0), 0
+  );
+  const paidInstallments = data.packages.reduce((sum, pkg) =>
+    sum + (pkg.installments_summary?.paid || pkg.installments?.filter(i => i.status === "paid").length || 0), 0
+  );
+  const overdueInstallments = data.packages.reduce((sum, pkg) =>
+    sum + (pkg.installments_summary?.overdue || pkg.installments?.filter(i =>
+      i.status !== "paid" && new Date(i.due_date) < new Date()
+    ).length || 0), 0
+  );
 
   return (
     <Card
       className={cn(
-        "mb-6 border-l-4 shadow-md animate-fade-in",
-        isOverdue
-          ? "border-l-red-500 bg-red-50 dark:bg-red-950/20"
-          : "border-l-amber-500 bg-amber-50 dark:bg-amber-950/20"
+        "mb-6 border-0 shadow-lg bg-white overflow-hidden",
+        hasOverdue ? "ring-2 ring-red-200" : "ring-1 ring-amber-200"
       )}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
+      {/* Top accent bar */}
+      <div className={cn(
+        "h-1",
+        hasOverdue
+          ? "bg-gradient-to-r from-red-500 to-red-400"
+          : "bg-gradient-to-r from-amber-500 to-amber-400"
+      )} />
+
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <div
               className={cn(
-                "p-2 rounded-full",
-                isOverdue
-                  ? "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400"
-                  : "bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400"
+                "p-2 rounded-lg",
+                hasOverdue
+                  ? "bg-red-100 text-red-600"
+                  : "bg-amber-100 text-amber-600"
               )}
             >
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg flex items-center gap-2">
-                Εκκρεμείς Πληρωμές
-                {isOverdue && (
-                  <Badge variant="destructive" className="text-xs">
-                    Σε καθυστέρηση
-                  </Badge>
+              <CardTitle className="text-lg">Εκκρεμείς Πληρωμές</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {paidInstallments}/{totalInstallments} δόσεις πληρωμένες
+                {overdueInstallments > 0 && (
+                  <span className="text-red-600 font-medium ml-2">
+                    ({overdueInstallments} εκπρόθεσμες)
+                  </span>
                 )}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Έχετε ανεξόφλητες δόσεις που χρειάζονται την προσοχή σας
               </p>
             </div>
           </div>
+          {hasOverdue && (
+            <Badge variant="destructive" className="text-xs">
+              Καθυστέρηση
+            </Badge>
+          )}
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Summary Info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3 p-3 bg-background/80 rounded-lg">
-            <CreditCard className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-xs text-muted-foreground">Συνολικό Υπόλοιπο</p>
-              <p className="font-semibold text-lg">
-                {formatCurrency(data.total_amount_remaining)}
-              </p>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className={cn(
+            "p-3 rounded-lg",
+            hasOverdue ? "bg-red-50" : "bg-amber-50"
+          )}>
+            <div className="flex items-center gap-2 mb-1">
+              <CreditCard className={cn(
+                "h-4 w-4",
+                hasOverdue ? "text-red-500" : "text-amber-500"
+              )} />
+              <span className="text-xs text-muted-foreground">Υπόλοιπο</span>
             </div>
+            <p className={cn(
+              "font-bold text-xl",
+              hasOverdue ? "text-red-700" : "text-amber-700"
+            )}>
+              {formatCurrency(data.total_amount_remaining)}
+            </p>
           </div>
 
           {data.next_installment_due && (
-            <div className="flex items-center gap-3 p-3 bg-background/80 rounded-lg">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Επόμενη Δόση</p>
-                <p className={cn(
-                  "font-semibold",
-                  isOverdue && "text-red-600 dark:text-red-400"
-                )}>
-                  {formatDate(data.next_installment_due)}
-                </p>
-                {data.next_installment_amount && (
-                  <p className="text-sm text-muted-foreground">
-                    {formatCurrency(data.next_installment_amount)}
-                  </p>
-                )}
+            <div className={cn(
+              "p-3 rounded-lg",
+              hasOverdue ? "bg-red-50" : "bg-amber-50"
+            )}>
+              <div className="flex items-center gap-2 mb-1">
+                <Calendar className={cn(
+                  "h-4 w-4",
+                  hasOverdue ? "text-red-500" : "text-amber-500"
+                )} />
+                <span className="text-xs text-muted-foreground">Επόμενη δόση</span>
               </div>
+              <p className={cn(
+                "font-bold",
+                hasOverdue ? "text-red-700" : "text-amber-700"
+              )}>
+                {formatDate(data.next_installment_due)}
+              </p>
+              {data.next_installment_amount && (
+                <p className="text-sm text-muted-foreground">
+                  {formatCurrency(data.next_installment_amount)}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -195,112 +235,107 @@ const PartialPaymentAlert: React.FC = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full flex items-center justify-center gap-2"
+          className="w-full flex items-center justify-center gap-2 hover:bg-muted/50"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? (
-            <>
-              Απόκρυψη Λεπτομερειών <ChevronUp className="h-4 w-4" />
-            </>
+            <>Απόκρυψη <ChevronUp className="h-4 w-4" /></>
           ) : (
-            <>
-              Προβολή Λεπτομερειών <ChevronDown className="h-4 w-4" />
-            </>
+            <>Προβολή Αναλυτικά <ChevronDown className="h-4 w-4" /></>
           )}
         </Button>
 
         {/* Expanded Details */}
         {expanded && (
-          <div className="space-y-4 pt-2 border-t">
-            {/* Packages with Progress */}
-            {data.packages.map((pkg) => (
-              <div key={pkg.id} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium text-sm">{pkg.package_name}</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {getPaymentPercentage(pkg)}% πληρωμένο
-                  </span>
-                </div>
-                <Progress
-                  value={getPaymentPercentage(pkg)}
-                  className="h-2"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Πληρωμένο: {formatCurrency(pkg.amount_paid)}</span>
-                  <span>Υπόλοιπο: {formatCurrency(pkg.amount_remaining)}</span>
-                </div>
+          <div className="space-y-4 pt-2">
+            {data.packages.map((pkg) => {
+              const paidCount = pkg.installments?.filter(i => i.status === "paid").length || 0;
+              const totalCount = pkg.installments?.length || 0;
 
-                {/* Installments for this package */}
-                {pkg.installments && pkg.installments.length > 0 && (
-                  <div className="ml-4 mt-2 space-y-2">
-                    {pkg.installments.map((inst) => {
-                      const instOverdue =
-                        inst.status !== "paid" &&
-                        new Date(inst.due_date) < new Date();
+              return (
+                <div key={pkg.id} className="border rounded-lg overflow-hidden">
+                  {/* Package Header */}
+                  <div className="bg-muted/30 px-3 py-2 flex items-center justify-between">
+                    <span className="font-medium text-sm">{pkg.package_name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {paidCount}/{totalCount} δόσεις
+                    </span>
+                  </div>
+
+                  {/* Installments List */}
+                  <div className="divide-y">
+                    {pkg.installments?.map((inst, idx) => {
+                      const isPaid = inst.status === "paid";
+                      const isOverdue = !isPaid && new Date(inst.due_date) < new Date();
+                      const isPending = !isPaid && !isOverdue;
 
                       return (
                         <div
-                          key={inst.id}
+                          key={inst.id ?? `inst-${pkg.id}-${idx}`}
                           className={cn(
-                            "flex items-center justify-between p-2 rounded text-sm",
-                            inst.status === "paid"
-                              ? "bg-green-50 dark:bg-green-950/20"
-                              : instOverdue
-                              ? "bg-red-100 dark:bg-red-900/30"
-                              : "bg-muted/50"
+                            "flex items-center justify-between px-3 py-2",
+                            isPaid && "bg-green-50/50",
+                            isOverdue && "bg-red-50",
+                            isPending && "bg-white"
                           )}
                         >
                           <div className="flex items-center gap-2">
-                            <span>{formatDate(inst.due_date)}</span>
-                            {inst.status === "paid" && (
-                              <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                                Πληρωμένο
-                              </Badge>
+                            {isPaid && (
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
                             )}
-                            {instOverdue && (
-                              <Badge variant="destructive" className="text-xs">
-                                Εκπρόθεσμο
+                            {isOverdue && (
+                              <AlertCircle className="h-4 w-4 text-red-500" />
+                            )}
+                            {isPending && (
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <div>
+                              <span className={cn(
+                                "text-sm",
+                                isPaid && "text-green-700",
+                                isOverdue && "text-red-700 font-medium"
+                              )}>
+                                Δόση {inst.installment_number || idx + 1}
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-2">
+                                {formatDate(inst.due_date)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "font-medium text-sm",
+                              isPaid && "text-green-700",
+                              isOverdue && "text-red-700"
+                            )}>
+                              {formatCurrency(inst.amount)}
+                            </span>
+                            {isOverdue && (
+                              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                                Εκπρόθεσμη
                               </Badge>
                             )}
                           </div>
-                          <span className="font-medium">
-                            {formatCurrency(inst.amount)}
-                          </span>
                         </div>
                       );
                     })}
                   </div>
-                )}
-              </div>
-            ))}
 
-            {/* Upcoming Installments Summary */}
-            {data.upcoming_installments && data.upcoming_installments.length > 0 && (
-              <div className="pt-3 border-t">
-                <h4 className="font-medium text-sm mb-2">Επερχόμενες Δόσεις</h4>
-                <div className="space-y-2">
-                  {data.upcoming_installments.slice(0, 3).map((inst) => (
-                    <div
-                      key={inst.id}
-                      className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm"
-                    >
-                      <span>{formatDate(inst.due_date)}</span>
-                      <span className="font-medium">
-                        {formatCurrency(inst.amount)}
-                      </span>
-                    </div>
-                  ))}
+                  {/* Package Summary */}
+                  <div className="bg-muted/20 px-3 py-2 flex justify-between text-xs text-muted-foreground">
+                    <span>Πληρωμένο: {formatCurrency(pkg.amount_paid)}</span>
+                    <span className="font-medium text-foreground">
+                      Υπόλοιπο: {formatCurrency(pkg.amount_remaining)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         )}
 
         {/* Action hint */}
-        <p className="text-xs text-muted-foreground text-center pt-2">
+        <p className="text-xs text-muted-foreground text-center border-t pt-3">
           Για πληρωμή, επικοινωνήστε με τη γραμματεία ή επισκεφθείτε το studio
         </p>
       </CardContent>

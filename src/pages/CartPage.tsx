@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft, Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import Header from "@/components/Header";
 import { useCart } from "@/hooks/use-cart";
 import { isRewardCartItem } from "@/utils/rewardUtils";
@@ -40,18 +40,27 @@ const CartPage = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      <main className="container px-4 py-6 max-w-5xl mx-auto">
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/store")}>
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Συνέχεια Αγορών
-          </Button>
+
+      {/* Hero Header */}
+      <div className="bg-red-800 text-white px-4 py-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg">
+              <ShoppingCart className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Το Καλάθι σας</h1>
+              <p className="text-red-200 text-sm">
+                Ολοκληρώστε την παραγγελία σας
+              </p>
+            </div>
+          </div>
         </div>
-        
-        <h1 className="text-3xl font-bold mb-6">Το Καλάθι σας</h1>
+      </div>
+
+      <main className="container px-4 py-6 max-w-5xl mx-auto">
         
         {items.length === 0 ? (
           <Card className="text-center p-8">

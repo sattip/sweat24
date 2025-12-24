@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, User, Dumbbell, ShoppingCart, Gift, Loader2, Package, CheckCircle, ClipboardList, History, Sparkles } from "lucide-react";
+import { ArrowRight, User, Dumbbell, Loader2, Package, CheckCircle, Calendar, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import PackageAlert from "@/components/notifications/PackageAlert";
@@ -11,10 +11,8 @@ import SessionCountIndicator from "@/components/SessionCountIndicator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSimulation } from "@/hooks/useSimulation";
 import { dashboardService, bookingService, profileService, packageService } from "@/services/apiService";
+import { buildApiUrl } from "@/config/api";
 import { toast } from "sonner";
-import { BookingCalendar } from "@/components/BookingCalendar";
-import { UpcomingBookings } from "@/components/UpcomingBookings";
-import { ApprovedAppointments } from "@/components/ApprovedAppointments";
 import { BookingWizard } from "@/components/BookingWizard";
 import {
   Dialog,
@@ -25,6 +23,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { updateLocalStorageUserStatus } from "@/utils/updateUserStatus";
+
+// Helper function to format date as dd/mm/yyyy
+const formatDate = (dateString: string | Date): string => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+// Helper function to format currency
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat("el-GR", {
+    style: "currency",
+    currency: "EUR",
+  }).format(amount);
+};
 
 // Function to check if it's the user's birthday week
 const isBirthdayWeek = (birthDate: string | undefined): boolean => {
@@ -62,6 +77,14 @@ const DashboardPage = () => {
   const [showNoPackageDialog, setShowNoPackageDialog] = useState(false);
   const [activePackages, setActivePackages] = useState<any[]>([]);
   const [availablePackages, setAvailablePackages] = useState<any[]>([]);
+  const [installmentData, setInstallmentData] = useState<{
+    has_pending_payments?: boolean;
+    total_amount_remaining?: number;
+    next_installment_due?: string;
+    next_installment_amount?: number;
+    packages?: any[];
+    upcoming_installments?: any[];
+  } | null>(null);
   
   useEffect(() => {
     fetchDashboardData();
@@ -116,6 +139,24 @@ const DashboardPage = () => {
       // Process and set available packages
       const packages = Array.isArray(packagesData) ? packagesData : (packagesData?.data || []);
       setAvailablePackages(packages);
+
+      // Fetch installment data
+      try {
+        const token = localStorage.getItem("auth_token");
+        const installmentResponse = await fetch(buildApiUrl("/my-partial-payments"), {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (installmentResponse.ok) {
+          const result = await installmentResponse.json();
+          setInstallmentData(result.data || result);
+        }
+      } catch (e) {
+        // Silently ignore - installment data is optional
+      }
     } catch (error) {
       toast.error("Σφάλμα κατά τη φόρτωση δεδομένων");
       console.error(error);
@@ -202,20 +243,24 @@ const DashboardPage = () => {
   }
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
-        <div className="mb-4 sm:mb-6">
+
+      {/* Hero Banner */}
+      <div className="bg-red-800 text-white px-4 py-6">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-red-200 text-sm mb-1">Καλώς ήρθες πίσω</p>
           <h1 className="text-2xl sm:text-3xl font-bold">
-            Καλώς ήρθες πίσω, {displayUser?.name?.split(' ')[0] || 'φίλε'}!
+            {displayUser?.name?.split(' ')[0] || 'φίλε'}! 👋
           </h1>
         </div>
-        
+      </div>
 
+      <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
         {/* Admin Controls - Only visible to admin users */}
         {user?.email === 'admin@sweat93.gr' && (
-          <Card className="mb-6 border-l-4 border-l-blue-500 shadow-md">
+          <Card className="mb-6 border-0 shadow-lg bg-white overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-blue-600 to-blue-400" />
             <CardHeader className="pb-2">
               <CardTitle className="text-xl flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -267,7 +312,8 @@ const DashboardPage = () => {
         <div className="grid gap-6">
           {/* Birthday Reward Card - Only shown during birthday week */}
           {birthdayWeek && (
-            <Card className="border-l-4 border-l-secondary bg-gradient-to-r from-secondary/10 to-background shadow-md animate-fade-in">
+            <Card className="border-0 shadow-lg bg-white overflow-hidden animate-fade-in">
+              <div className="h-1 bg-gradient-to-r from-yellow-500 to-orange-500" />
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">🎉 Χρόνια Πολλά!</CardTitle>
@@ -279,7 +325,7 @@ const DashboardPage = () => {
                 <div className="space-y-3">
                   <p className="font-medium text-lg">Απόλαυσε μια <span className="text-secondary font-bold">ΔΩΡΕΑΝ</span> προσωπική προπόνηση</p>
                   <p className="text-sm text-muted-foreground">
-                    Ισχύει έως: {new Date(new Date().setDate(new Date().getDate() + 14)).toLocaleDateString()}
+                    Ισχύει έως: {formatDate(new Date(new Date().setDate(new Date().getDate() + 14)))}
                   </p>
                   <div className="bg-secondary/10 text-secondary font-medium rounded-full px-4 py-2 inline-block mt-2">
                     Κωδικός Κράτησης: <span className="font-bold">BDAYPT2023</span>
@@ -298,51 +344,95 @@ const DashboardPage = () => {
           
           {/* Active Package Status - show only when there is an active package */}
           {hasActivePackage && (
-          <Card className="border-l-4 border-l-primary shadow-md">
+          <Card className="border-0 shadow-lg bg-white overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-green-500 to-green-400" />
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Ενεργή Συνδρομή</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl">Ενεργή Συνδρομή</CardTitle>
+                <div className="bg-green-100 text-green-700 font-medium rounded-full px-3 py-1 text-sm">
+                  ✓ Ενεργή
+                </div>
+              </div>
               <CardDescription>Η τρέχουσα κατάσταση της συνδρομής σας</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col md:flex-row justify-between md:items-center space-y-3 md:space-y-0">
-                <div>
-                  <h3 className="font-medium text-lg flex items-center gap-2">
-                    Συνδρομή
-                    {(
-                      (apiActivePackage?.total_sessions ?? displayUser?.total_sessions) !== undefined ||
-                      (apiActivePackage?.remaining_sessions ?? displayUser?.remaining_sessions) !== undefined
-                    ) && (
-                      <SessionCountIndicator
-                        totalSessions={(apiActivePackage?.total_sessions ?? displayUser.total_sessions) ?? null}
-                        remainingSessions={(apiActivePackage?.remaining_sessions ?? displayUser.remaining_sessions) ?? null}
-                        bonusSessions={(apiActivePackage?.bonus_sessions ?? displayUser.bonus_sessions) ?? 0}
-                        bonusSessionsUsed={(apiActivePackage?.bonus_sessions_used ?? displayUser.bonus_sessions_used) ?? 0}
-                        membershipType="Μηνιαίο"
-                      />
-                    )}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {displayUser?.join_date ? (
-                      <>Μέλος από {new Date(displayUser.join_date).toLocaleDateString()}</>
-                    ) : (
-                      <>Νέο μέλος</>
-                    )}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium text-lg">Συνδρομή</h3>
+                  {(
+                    (apiActivePackage?.total_sessions ?? displayUser?.total_sessions) !== undefined ||
+                    (apiActivePackage?.remaining_sessions ?? displayUser?.remaining_sessions) !== undefined
+                  ) && (
+                    <SessionCountIndicator
+                      totalSessions={(apiActivePackage?.total_sessions ?? displayUser.total_sessions) ?? null}
+                      remainingSessions={(apiActivePackage?.remaining_sessions ?? displayUser.remaining_sessions) ?? null}
+                      bonusSessions={(apiActivePackage?.bonus_sessions ?? displayUser.bonus_sessions) ?? 0}
+                      bonusSessionsUsed={(apiActivePackage?.bonus_sessions_used ?? displayUser.bonus_sessions_used) ?? 0}
+                      membershipType="Μηνιαίο"
+                    />
+                  )}
                 </div>
-                <div className="bg-primary/10 text-primary font-medium rounded-full px-4 py-1 text-center">
-                  {displayUser?.status === 'active' ? 'Ενεργή' : 'Ανενεργή'}
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  {displayUser?.join_date ? (
+                    <>Μέλος από {formatDate(displayUser.join_date)}</>
+                  ) : (
+                    <>Νέο μέλος</>
+                  )}
+                </p>
               </div>
               {displayUser?.package_start_date && displayUser?.package_end_date && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  Περίοδος πακέτου: {new Date(displayUser.package_start_date).toLocaleDateString()} - {new Date(displayUser.package_end_date).toLocaleDateString()}
+                  Περίοδος πακέτου: {formatDate(displayUser.package_start_date)} - {formatDate(displayUser.package_end_date)}
                 </p>
               )}
               {displayUser?.last_visit && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Τελευταία επίσκεψη: {new Date(displayUser.last_visit).toLocaleDateString()}
+                  Τελευταία επίσκεψη: {formatDate(displayUser.last_visit)}
                 </p>
               )}
+
+              {/* Installment Info */}
+              {(() => {
+                // Check multiple conditions for pending installments
+                const hasPending = installmentData?.has_pending_payments ||
+                  (installmentData?.total_amount_remaining && installmentData.total_amount_remaining > 0) ||
+                  (installmentData?.packages && installmentData.packages.length > 0) ||
+                  (installmentData?.upcoming_installments && installmentData.upcoming_installments.length > 0);
+
+                if (!hasPending) return null;
+
+                // Get next installment info from various sources
+                const nextDue = installmentData?.next_installment_due ||
+                  installmentData?.upcoming_installments?.[0]?.due_date;
+                const nextAmount = installmentData?.next_installment_amount ||
+                  installmentData?.upcoming_installments?.[0]?.amount;
+                const totalRemaining = installmentData?.total_amount_remaining ||
+                  installmentData?.packages?.reduce((sum, pkg) => sum + (pkg.amount_remaining || 0), 0) || 0;
+
+                return (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-amber-700">
+                      <CreditCard className="h-4 w-4" />
+                      <span className="font-medium text-sm">Εκκρεμείς Δόσεις</span>
+                    </div>
+                    <div className="mt-2 space-y-1">
+                      {totalRemaining > 0 && (
+                        <p className="text-sm">
+                          Υπόλοιπο: <span className="font-semibold">{formatCurrency(totalRemaining)}</span>
+                        </p>
+                      )}
+                      {nextDue && (
+                        <p className="text-sm">
+                          Επόμενη δόση: <span className="font-semibold">{formatDate(nextDue)}</span>
+                          {nextAmount && (
+                            <span className="text-muted-foreground"> ({formatCurrency(nextAmount)})</span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Package renewal suggestions when expiring */}
               {(packageStatus === "expiring-soon" || packageStatus === "last-session") && (() => {
@@ -421,12 +511,13 @@ const DashboardPage = () => {
                       </div>
 
                       <div className="mt-4 flex justify-center">
-                        <Link to="/contact">
-                          <Button className="w-full sm:w-auto">
-                            <Package className="h-4 w-4 mr-2" />
-                            Επικοινωνήστε για Ανανέωση
-                          </Button>
-                        </Link>
+                        <Button
+                          className="w-full sm:w-auto"
+                          onClick={() => window.dispatchEvent(new CustomEvent('openChat'))}
+                        >
+                          <Package className="h-4 w-4 mr-2" />
+                          Επικοινωνήστε για Ανανέωση
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -440,164 +531,48 @@ const DashboardPage = () => {
           )}
 
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Κλείσε Μάθημα</CardTitle>
-                <CardDescription>Δες το πρόγραμμα και κλείσε την επόμενη προπόνησή σου</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <Dumbbell className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Περιηγήσου σε όλα τα διαθέσιμα μαθήματα και κλείσε την προπόνησή σου</p>
-                  </div>
+          {/* Προπονήσεις */}
+          <Card className="border-0 shadow-lg bg-white overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-red-600 to-red-500" />
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Dumbbell className="h-6 w-6 text-red-600" />
                 </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2"
-                  onClick={() => {
-                    if (!hasActivePackage) {
-                      setShowNoPackageDialog(true);
-                      return;
-                    }
-                    setShowBookingWizard(true);
-                  }}
-                >
-                  Κλείσε Μάθημα Βήμα-Βήμα
-                  <ArrowRight className="h-4 w-4" />
+                <div>
+                  <CardTitle className="text-xl">Προπονήσεις</CardTitle>
+                  <CardDescription>Κλείσε την επόμενη προπόνησή σου</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-3">
+              <p className="text-sm text-muted-foreground">
+                Περιηγήσου σε όλα τα διαθέσιμα μαθήματα και διάλεξε αυτό που σου ταιριάζει.
+              </p>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-2 pt-0">
+              <Button
+                type="button"
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  if (!hasActivePackage) {
+                    setShowNoPackageDialog(true);
+                    return;
+                  }
+                  setShowBookingWizard(true);
+                }}
+              >
+                Κλείσε Προπόνηση
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Link to="/bookings" className="w-full">
+                <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                  Οι προπονήσεις μου
+                  <Calendar className="h-4 w-4" />
                 </Button>
-                <Link to="/bookings?tab=history" className="w-full">
-                  <Button variant="outline" className="w-full flex items-center justify-center gap-2">
-                    Ιστορικό Προπονήσεων
-                    <History className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </div>
-
-          {/* Approved Appointments - Right after booking card */}
-          <ApprovedAppointments />
-
-          {/* Referral & Questionnaires - Side by side */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-6">
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base sm:text-xl">Συστήστε έναν Φίλο</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Κάντε δώρο μια προπόνηση γνωριμίας</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-32 sm:h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-2 sm:p-4">
-                    <Gift className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-xs sm:text-sm hidden sm:block">Μοιραστείτε την αγάπη για τη γυμναστική και κερδίστε ανταμοιβές</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link to="/referrals" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm" variant="outline">
-                    <span className="hidden sm:inline">Μάθετε Περισσότερα</span>
-                    <span className="sm:hidden">Περισσότερα</span>
-                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base sm:text-xl">Ερωτηματολόγια</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Συμπλήρωσε τα ερωτηματολόγιά σου</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-32 sm:h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-2 sm:p-4">
-                    <ClipboardList className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-xs sm:text-sm hidden sm:block">Βοήθησέ μας να βελτιώσουμε την εμπειρία σου συμπληρώνοντας ερωτηματολόγια</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link to="/questionnaires" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm" variant="outline">
-                    <span className="hidden sm:inline">Προβολή Ερωτηματολογίων</span>
-                    <span className="sm:hidden">Προβολή</span>
-                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </div>
-
-          {/* More Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Κατάστημα & Παραγγελίες</CardTitle>
-                <CardDescription>Περιήγηση και διαχείριση παραγγελιών</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Ψώνισε προϊόντα και παρακολούθησε τις παραγγελίες σου</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link to="/store" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Επίσκεψη Καταστήματος
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link to="/store?tab=orders" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Οι Παραγγελίες μου
-                    <Package className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Οδηγός Νέου Μέλους</CardTitle>
-                <CardDescription>Όλα όσα πρέπει να γνωρίζεις</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-40 flex items-center justify-center bg-muted rounded-md">
-                  <div className="text-center p-4">
-                    <Sparkles className="h-12 w-12 mx-auto mb-2 text-primary/70" />
-                    <p className="text-sm">Κανόνες, οφέλη, πρόγραμμα και όλες οι πληροφορίες που χρειάζεσαι</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link to="/new-member-info" className="w-full">
-                  <Button className="w-full flex items-center justify-center gap-2" variant="outline">
-                    Προβολή Οδηγού
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          </div>
-
-          {/* Personal Booking Calendar & Upcoming Bookings */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <BookingCalendar />
-            </div>
-            <div className="lg:col-span-1">
-              <UpcomingBookings />
-            </div>
-          </div>
+              </Link>
+            </CardFooter>
+          </Card>
         </div>
       </main>
 
@@ -626,11 +601,15 @@ const DashboardPage = () => {
           </DialogHeader>
 
           <DialogFooter className="flex-col gap-3 pt-4">
-            <Link to="/contact" className="w-full">
-              <Button className="w-full" onClick={() => setShowNoPackageDialog(false)}>
-                Επικοινωνία με Γραμματεία
-              </Button>
-            </Link>
+            <Button
+              className="w-full"
+              onClick={() => {
+                setShowNoPackageDialog(false);
+                window.dispatchEvent(new CustomEvent('openChat'));
+              }}
+            >
+              Επικοινωνία με Γραμματεία
+            </Button>
             <Button
               variant="outline"
               className="w-full"

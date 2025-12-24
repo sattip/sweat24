@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
-import { Copy, Facebook, Instagram, Mail, Share2, Twitter, Loader2 } from "lucide-react";
+import { Copy, Facebook, Instagram, Mail, Share2, Twitter, Loader2, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -106,8 +106,21 @@ const ReferralProgramPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gray-50">
         <Header />
+        <div className="bg-red-800 text-white px-4 py-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <UserPlus className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Προσκάλεσε Φίλους</h1>
+                <p className="text-red-200 text-sm">Κέρδισε δώρα με κάθε σύσταση</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <main className="container px-4 py-6 max-w-5xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -119,11 +132,24 @@ const ReferralProgramPage = () => {
 
   if (!referralData) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gray-50">
         <Header />
+        <div className="bg-red-800 text-white px-4 py-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <UserPlus className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Προσκάλεσε Φίλους</h1>
+                <p className="text-red-200 text-sm">Κέρδισε δώρα με κάθε σύσταση</p>
+              </div>
+            </div>
+          </div>
+        </div>
         <main className="container px-4 py-6 max-w-5xl mx-auto">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold">Σφάλμα φόρτωσης</h1>
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold">Σφάλμα φόρτωσης</h2>
             <p className="text-muted-foreground mt-2">Παρακαλώ δοκιμάστε ξανά.</p>
           </div>
         </main>
@@ -132,17 +158,25 @@ const ReferralProgramPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      <main className="container px-4 py-6 max-w-5xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Προσκάλεσε Φίλους & Κέρδισε Δώρα</h1>
-          <p className="text-muted-foreground mt-2">
-            Δείτε τι μπορείτε να κερδίσετε με κάθε σύσταση
-          </p>
+
+      {/* Hero Header */}
+      <div className="bg-red-800 text-white px-4 py-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg">
+              <UserPlus className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Προσκάλεσε Φίλους</h1>
+              <p className="text-red-200 text-sm">Κέρδισε δώρα με κάθε σύσταση</p>
+            </div>
+          </div>
         </div>
-        
+      </div>
+
+      <main className="container px-4 py-6 max-w-5xl mx-auto">
         {/* Program Explanation Card */}
         <Card className="mb-6 shadow-sm">
           <CardHeader className="pb-4">

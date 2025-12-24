@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, ShoppingBag, Loader2, Plus } from "lucide-react";
 import Header from "@/components/Header";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import * as API from "@/config/api";
 import { format } from "date-fns";
@@ -94,60 +95,103 @@ const OrdersPage = () => {
     return false;
   });
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="bg-red-800 text-white px-4 py-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <ShoppingBag className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Οι Παραγγελίες μου</h1>
+                <p className="text-red-200 text-sm">Παρακολουθήστε τις παραγγελίες σας</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <main className="container px-4 py-6 max-w-5xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      <main className="container px-4 py-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Οι Παραγγελίες μου</h1>
+
+      {/* Hero Header */}
+      <div className="bg-red-800 text-white px-4 py-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg">
+              <ShoppingBag className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Οι Παραγγελίες μου</h1>
+              <p className="text-red-200 text-sm">Παρακολουθήστε τις παραγγελίες σας</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main className="container px-4 py-6 max-w-5xl mx-auto">
+        {/* Shop Button */}
+        <Link to="/store" className="block mb-4">
+          <Button className="w-full gap-2">
+            <Plus className="h-4 w-4" />
+            Προϊόντα
+          </Button>
+        </Link>
 
         <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="all">Όλες</TabsTrigger>
             <TabsTrigger value="active">Ενεργές</TabsTrigger>
             <TabsTrigger value="completed">Ολοκληρωμένες</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        {loading ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Φόρτωση παραγγελιών...</p>
+        {filteredOrders.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="bg-muted/40 rounded-full p-6 mb-4 inline-block">
+              <Package className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Δεν υπάρχουν παραγγελίες</h3>
+            <p className="text-muted-foreground mb-4">
+              {activeTab === "all"
+                ? "Δεν έχετε κάνει ακόμα καμία παραγγελία."
+                : activeTab === "active"
+                ? "Δεν έχετε ενεργές παραγγελίες αυτή τη στιγμή."
+                : "Δεν έχετε ολοκληρωμένες παραγγελίες."}
+            </p>
+            <Button onClick={() => window.location.href = "/store"}>
+              Μετάβαση στο Κατάστημα
+            </Button>
           </div>
-        ) : filteredOrders.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Δεν υπάρχουν παραγγελίες</h3>
-              <p className="text-muted-foreground mb-4">
-                {activeTab === "all" 
-                  ? "Δεν έχετε κάνει ακόμα καμία παραγγελία."
-                  : activeTab === "active"
-                  ? "Δεν έχετε ενεργές παραγγελίες αυτή τη στιγμή."
-                  : "Δεν έχετε ολοκληρωμένες παραγγελίες."}
-              </p>
-              <Button onClick={() => window.location.href = "/store"}>
-                Μετάβαση στο Κατάστημα
-              </Button>
-            </CardContent>
-          </Card>
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => (
               <Card key={order.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(order.status)}
-                      <div>
-                        <CardTitle className="text-lg">
-                          Παραγγελία #{order.order_number}
-                        </CardTitle>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(order.status)}
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">
+                        Παραγγελία #{order.order_number}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(order.created_at), "dd MMM yyyy, HH:mm", { locale: el })}
                         </p>
+                        {getStatusBadge(order.status)}
                       </div>
                     </div>
-                    {getStatusBadge(order.status)}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -158,7 +202,7 @@ const OrdersPage = () => {
                       {order.items.map((item, index) => (
                         <div key={index} className="flex justify-between text-sm">
                           <span>{item.quantity}x {item.product_name}</span>
-                          <span className="font-medium">${item.subtotal.toFixed(2)}</span>
+                          <span className="font-medium">{Number(item.subtotal || 0).toFixed(2)}€</span>
                         </div>
                       ))}
                     </div>
@@ -167,7 +211,7 @@ const OrdersPage = () => {
                     <div className="pt-2 border-t">
                       <div className="flex justify-between font-medium">
                         <span>Σύνολο</span>
-                        <span>${order.total.toFixed(2)}</span>
+                        <span>{Number(order.total || 0).toFixed(2)}€</span>
                       </div>
                     </div>
 

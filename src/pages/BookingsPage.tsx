@@ -413,39 +413,50 @@ const BookingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      
-      <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Οι Κρατήσεις μου</h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              Διαχειριστείτε τις επερχόμενες κρατήσεις και δείτε το ιστορικό προπονήσεών σας
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" onClick={() => {
-              if (!hasActivePackage) {
-                setShowNoPackageDialog(true);
-                return;
-              }
-              setBookingWizardOpen(true);
-            }} className="gap-1">
-              <Plus className="h-4 w-4" />
-              Νέα Κράτηση
-            </Button>
-            <Button size="sm" onClick={() => setShowRules(true)} variant="outline">
-              Κανόνες Γυμναστηρίου
-            </Button>
+
+      {/* Hero Header */}
+      <div className="bg-red-800 text-white px-4 py-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <Dumbbell className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Οι Προπονήσεις μου</h1>
+                <p className="text-red-200 text-sm">
+                  Διαχειριστείτε τις προπονήσεις και το ιστορικό σας
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (!hasActivePackage) {
+                    setShowNoPackageDialog(true);
+                    return;
+                  }
+                  setBookingWizardOpen(true);
+                }}
+                className="gap-1 bg-white text-red-800 hover:bg-red-100"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Νέα Προπόνηση</span>
+                <span className="sm:hidden">Νέα</span>
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
+      <main className="container px-3 sm:px-4 py-4 sm:py-6 max-w-5xl mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="bookings" className="text-xs sm:text-sm px-2">
-              Κρατήσεις
+              Προπονήσεις
             </TabsTrigger>
             <TabsTrigger value="waitlist" className="text-xs sm:text-sm px-2 flex items-center justify-center gap-1">
               <Users className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -527,9 +538,9 @@ const BookingsPage = () => {
             ) : (
               <div className="text-center py-12">
                 <CalendarX className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Δεν έχετε κρατήσεις</h3>
+                <h3 className="text-lg font-semibold mb-2">Δεν έχετε προπονήσεις</h3>
                 <p className="text-muted-foreground mb-4">
-                  Εξερευνήστε το πρόγραμμα μαθημάτων και κάντε την πρώτη σας κράτηση.
+                  Εξερευνήστε το πρόγραμμα μαθημάτων και κλείστε την πρώτη σας προπόνηση.
                 </p>
                 <Link to="/schedule">
                   <Button>Δείτε το Πρόγραμμα</Button>

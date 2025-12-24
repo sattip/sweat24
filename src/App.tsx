@@ -36,9 +36,9 @@ import ReferralProgramPage from "./pages/ReferralProgramPage";
 import TrainersListPage from "./pages/TrainersListPage";
 import TrainerDetailsPage from "./pages/TrainerDetailsPage";
 import SettingsPage from "./pages/SettingsPage";
-import ContactPage from "./pages/ContactPage";
 import PartnersPage from "./pages/PartnersPage";
 import EventsPage from "./pages/EventsPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import EvaluationPage from "./pages/EvaluationPage";
 import { CartProvider } from "./hooks/use-cart";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -48,12 +48,12 @@ import { NotificationManager } from "./components/notifications/NotificationMana
 import PointsDashboard from "./pages/PointsDashboard";
 import RewardsCatalog from "./pages/RewardsCatalog";
 import PointsHistory from "./pages/PointsHistory";
-import HybridFCMNotificationSettings from "./components/notifications/HybridFCMNotificationSettings";
 import { QuestionnairePromptManager } from "./components/questionnaires/QuestionnairePromptManager";
 import QuestionnairesPage from "./pages/QuestionnairesPage";
 import QuestionnaireDetailPage from "./pages/QuestionnaireDetailPage";
 import NewMemberInfoPage from "./pages/NewMemberInfoPage";
-import { BottomNavigation } from "./components/BottomNavigation";
+import PackagesPage from "./pages/PackagesPage";
+import { FloatingBackButton } from "./components/FloatingBackButton";
 
 const queryClient = new QueryClient();
 
@@ -92,20 +92,6 @@ function BackButtonHandler() {
   return null;
 }
 
-function ConditionalBottomNav() {
-  const location = useLocation();
-  const publicRoutes = ['/', '/login', '/signup', '/signup-success', '/evaluation'];
-
-  // Don't show bottom nav on login, signup, or public pages
-  const showBottomNav = !publicRoutes.some(route =>
-    location.pathname === route || location.pathname.startsWith('/evaluation')
-  );
-
-  if (!showBottomNav) return null;
-
-  return <BottomNavigation />;
-}
-
 const App = () => {
   useStatusBar();
   
@@ -129,7 +115,8 @@ const App = () => {
             <Route path="/schedule" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
             <Route path="/class/:classId" element={<ProtectedRoute><ClassDetailsPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            
+            <Route path="/profile/packages" element={<ProtectedRoute><PackagesPage /></ProtectedRoute>} />
+
             {/* Updated bookings route - now includes history */}
             <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
             
@@ -159,7 +146,7 @@ const App = () => {
             <Route path="/points/history" element={<ProtectedRoute><PointsHistory /></ProtectedRoute>} />
             
             {/* Notification routes */}
-            <Route path="/notifications" element={<ProtectedRoute><HybridFCMNotificationSettings /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
             <Route path="/questionnaires" element={<ProtectedRoute><QuestionnairesPage /></ProtectedRoute>} />
             <Route path="/questionnaires/:id" element={<ProtectedRoute><QuestionnaireDetailPage /></ProtectedRoute>} />
             
@@ -180,7 +167,6 @@ const App = () => {
             <Route path="/trainers/:trainerId" element={<ProtectedRoute><TrainerDetailsPage /></ProtectedRoute>} /> */}
             
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="/contact" element={<ProtectedRoute><ContactPage /></ProtectedRoute>} />
             <Route path="/partners" element={<ProtectedRoute><PartnersPage /></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
             <Route path="/evaluation/:token" element={<EvaluationPage />} />
@@ -189,7 +175,7 @@ const App = () => {
           <ChatWidget />
           <NotificationManager />
           <QuestionnairePromptManager />
-          <ConditionalBottomNav />
+          <FloatingBackButton position="left" />
         </BrowserRouter>
           </PointsProvider>
         </CartProvider>
