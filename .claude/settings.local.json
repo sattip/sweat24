@@ -72,7 +72,8 @@
       "Bash(do)",
       "Bash(done)",
       "Bash(.gradlew.bat bundleRelease)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(/usr/libexec/java_home:*)"
     ],
     "deny": [],
     "ask": []
