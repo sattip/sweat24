@@ -27,11 +27,6 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       return;
     }
 
-    if (!data.birthDate) {
-      toast.error("Παρακαλώ συμπληρώστε την ημερομηνία γέννησης");
-      return;
-    }
-
     if (data.password !== data.confirmPassword) {
       toast.error("Οι κωδικοί πρόσβασης δεν ταιριάζουν");
       return;
@@ -42,9 +37,20 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       return;
     }
 
-    // Check age via backend API for security and legal validity
+    // Check age via backend API for security and legal validity (only if birthdate is provided)
     setLoading(true);
     try {
+      if (!data.birthDate) {
+        // Skip age verification if no birthdate provided
+        updateData({
+          isMinor: false,
+          serverVerifiedAge: null
+        });
+        onNext();
+        setLoading(false);
+        return;
+      }
+
       if (USE_MOCK_AGE_CHECK) {
         // ΠΡΟΣΩΡΙΝΗ ΛΟΓΙΚΗ ΓΙΑ TESTING
         await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
@@ -151,7 +157,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="birthDate">Ημερομηνία Γέννησης *</Label>
+          <Label htmlFor="birthDate">Ημερομηνία Γέννησης</Label>
           <Input
             id="birthDate"
             type="date"
@@ -159,7 +165,6 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
             onChange={(e) => updateData({ birthDate: e.target.value })}
             max={new Date().toISOString().split('T')[0]}
             min="1920-01-01"
-            required
           />
         </div>
         <div className="space-y-2">

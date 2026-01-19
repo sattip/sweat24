@@ -76,7 +76,16 @@
       "Bash(dir \"c:\\Users\\olive\\Documents\\GitHub\\sweat24\")",
       "Bash(dir \"c:\\Users\\olive\\Documents\\GitHub\\sweat24\\src\" /B)",
       "Bash(timeout 5 bash:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(dir:*)",
+      "Bash(adb devices:*)",
+      "Bash(emulator -list-avds:*)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\emulator\\\\emulator.exe\" -list-avds)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" wait-for-device)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell getprop sys.boot_completed)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" uninstall com.sweat93.app)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell am start -n com.sweat93.app/.MainActivity)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" devices)"
     ],
     "deny": [],
     "ask": []

@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { userService } from "@/services/apiService";
 import { BookingRequests } from "@/components/BookingRequests";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -80,6 +81,10 @@ const ProfilePage = () => {
   const [editGender, setEditGender] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarKey, setAvatarKey] = useState(Date.now());
+
+  // Delete account state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -191,6 +196,27 @@ const ProfilePage = () => {
         description: "Αποτυχία αποσύνδεσης",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeletingAccount(true);
+      await userService.deleteAccount();
+      toast({
+        title: "Επιτυχής διαγραφή",
+        description: "Ο λογαριασμός σας διαγράφηκε επιτυχώς"
+      });
+      navigate('/login');
+    } catch (error) {
+      toast({
+        title: "Σφάλμα",
+        description: error instanceof Error ? error.message : "Αποτυχία διαγραφής λογαριασμού",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingAccount(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -399,6 +425,17 @@ const ProfilePage = () => {
                   Αποσύνδεση
                 </Button>
               </div>
+
+              {/* Delete Account */}
+              <div className="p-4 pt-2">
+                <Button
+                  variant="outline"
+                  className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  Διαγραφή Λογαριασμού
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
@@ -528,6 +565,36 @@ const ProfilePage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Είστε σίγουροι;</AlertDialogTitle>
+            <AlertDialogDescription>
+              Αυτή η ενέργεια δεν μπορεί να αναιρεθεί. Ο λογαριασμός σας θα διαγραφεί οριστικά
+              μαζί με όλα τα δεδομένα σας, συμπεριλαμβανομένων των κρατήσεων, των πόντων και του ιστορικού σας.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingAccount}>Ακύρωση</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={isDeletingAccount}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeletingAccount ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Διαγραφή...
+                </>
+              ) : (
+                'Διαγραφή Λογαριασμού'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

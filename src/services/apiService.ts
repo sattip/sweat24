@@ -1323,6 +1323,41 @@ export const userService = {
       console.error('Error uploading avatar:', error);
       throw error;
     }
+  },
+
+  async deleteAccount() {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(buildApiUrl('/profile/delete'), {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to delete account');
+      }
+
+      const result = await response.json();
+
+      // Clear all local storage data
+      localStorage.removeItem('sweat93_user');
+      localStorage.removeItem('user');
+      localStorage.removeItem('auth_token');
+
+      return result;
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
+    }
   }
 };
 
