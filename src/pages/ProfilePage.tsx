@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import {
   Calendar, Edit, Users, Settings, Package, Loader2,
   Camera, ChevronRight, Gift, ShoppingBag, Dumbbell,
-  CalendarDays, UserPlus, Building, Bell, LogOut
+  CalendarDays, UserPlus, Building, Bell, LogOut, Zap
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { profileService } from "@/services/apiService";
@@ -257,6 +257,7 @@ const ProfilePage = () => {
   // Activities tab menu items
   const activitiesMenuItems: MenuItem[] = [
     { icon: <Calendar className="h-5 w-5" />, label: "Προπονήσεις", to: "/bookings" },
+    { icon: <Zap className="h-5 w-5" />, label: "Αιτήματα Ραντεβού", to: "/services" },
     { icon: <Package className="h-5 w-5" />, label: "Πακέτα", to: "/profile/packages" },
     { icon: <Gift className="h-5 w-5" />, label: "Πρόγραμμα ανταμοιβής", to: "/rewards" },
     { icon: <Dumbbell className="h-5 w-5" />, label: "Προπονητικό κομμάτι", to: "/progress" },

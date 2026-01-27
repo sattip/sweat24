@@ -8,6 +8,7 @@ import { Calendar, Clock, MapPin, User, BarChart, Loader2, Users, AlertTriangle,
 import { classService, bookingService, waitlistService, userService, profileService } from "@/services/apiService";
 import { CancellationModal } from "@/components/modals/CancellationModal";
 import { toast } from "sonner";
+import { buildApiUrl } from "@/config/api";
 
 const ClassDetailsPage = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const ClassDetailsPage = () => {
   const [userBookingId, setUserBookingId] = useState<number | null>(null);
   const [userBooking, setUserBooking] = useState<any>(null);
   const [cancellationModalOpen, setCancellationModalOpen] = useState(false);
+  const [bookingPolicy, setBookingPolicy] = useState<any>(null);
 
 
   useEffect(() => {
@@ -33,8 +35,6 @@ const ClassDetailsPage = () => {
 
       // Fetch class details
       const classData = await classService.getById(classId!);
-      console.log('Class Details API Response:', classData);
-      console.log('Class ID requested:', classId);
       setClassDetails(classData);
       
       
@@ -49,12 +49,17 @@ const ClassDetailsPage = () => {
           const existingBooking = userBookings.find((booking: any) =>
             booking.class_id === parseInt(classId!) &&
             booking.status !== 'cancelled' &&
+            booking.status !== 'canceled' &&
             booking.status !== 'rejected'
           );
+
           if (existingBooking) {
             setUserHasBooking(true);
             setUserBookingId(existingBooking.id);
             setUserBooking(existingBooking);
+
+            // Fetch cancellation policy for this booking
+            fetchCancellationPolicy(existingBooking.id);
           }
         } catch (err) {
           console.log('Error checking user bookings:', err);
@@ -77,7 +82,30 @@ const ClassDetailsPage = () => {
     }
   };
 
+  const fetchCancellationPolicy = async (bookingId: number) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
 
+      const response = await fetch(
+        buildApiUrl(`/bookings/${bookingId}/policy-check`),
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setBookingPolicy(data);
+      }
+    } catch (error) {
+      console.error('Error fetching cancellation policy:', error);
+    }
+  };
 
   const handleBooking = async () => {
     if (!currentUser) {
@@ -250,13 +278,13 @@ const ClassDetailsPage = () => {
       <Header />
       
       <main className="container px-4 py-6 max-w-5xl mx-auto">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => navigate("/schedule")}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/bookings")}
           className="mb-4"
         >
-          &larr; Πίσω στο Πρόγραμμα
+          &larr; Πίσω στις Κρατήσεις
         </Button>
         
         {/* Class Header */}
@@ -375,22 +403,65 @@ const ClassDetailsPage = () => {
         )}
         
         {/* Cancellation Policy Notice */}
-        <Card className="mb-6 border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-blue-800 mb-2">Πολιτική Ακύρωσης & Μετάθεσης</h3>
-                <div className="space-y-1 text-sm text-blue-700">
-                  <p>Κάθε μάθημα έχει τη δική του πολιτική ακύρωσης και μετάθεσης.</p>
-                  <p className="text-xs text-blue-600 mt-2">
-                    Οι λεπτομερείς κανόνες θα εμφανιστούν όταν προβείτε σε κράτηση.
-                  </p>
+        {userHasBooking && bookingPolicy ? (
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="w-full">
+                  <h3 className="font-semibold text-blue-800 mb-3">Πολιτική Ακύρωσης & Μετάθεσης για την Κράτησή σας</h3>
+                  <div className="space-y-2 text-sm text-blue-700">
+                    <div className="flex justify-between items-center">
+                      <span>Ακύρωση:</span>
+                      <span className="font-medium">
+                        Τουλάχιστον {bookingPolicy?.policy?.hours_before || 'N/A'} ώρες πριν
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Μετάθεση:</span>
+                      <span className="font-medium">
+                        Τουλάχιστον {bookingPolicy?.policy?.reschedule_hours_before || 'N/A'} ώρες πριν
+                      </span>
+                    </div>
+                    {bookingPolicy?.policy?.penalty_percentage > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span>Χρέωση καθυστερημένης ακύρωσης:</span>
+                        <span className="font-medium">{bookingPolicy.policy.penalty_percentage}%</span>
+                      </div>
+                    )}
+                    <div className="mt-3 pt-3 border-t border-blue-300">
+                      <div className="flex justify-between items-center font-medium">
+                        <span>Χρόνος μέχρι το μάθημα:</span>
+                        <span className="text-blue-900">
+                          {bookingPolicy?.hours_until_class ?
+                            `${Math.floor(bookingPolicy.hours_until_class)} ώρες` :
+                            'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : !userHasBooking ? (
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-blue-800 mb-2">Πολιτική Ακύρωσης & Μετάθεσης</h3>
+                  <div className="space-y-1 text-sm text-blue-700">
+                    <p>Κάθε μάθημα έχει τη δική του πολιτική ακύρωσης και μετάθεσης.</p>
+                    <p className="text-xs text-blue-600 mt-2">
+                      Οι λεπτομερείς κανόνες θα εμφανιστούν όταν προβείτε σε κράτηση.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Action Button */}
         {!waitlistStatus?.in_waitlist && !userHasBooking && (
@@ -412,25 +483,18 @@ const ClassDetailsPage = () => {
           </div>
         )}
 
-        {/* Already Booked Message */}
+        {/* Already Booked - Show Cancel/Reschedule Button */}
         {userHasBooking && (
-          <Card className="mt-8 border-green-200 bg-green-50">
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-center gap-2 text-green-800">
-                  <CheckCircle className="h-5 w-5" />
-                  <p className="font-semibold">Έχετε ήδη κάνει κράτηση για αυτό το μάθημα</p>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
-                  onClick={handleCancelClick}
-                >
-                  Ακύρωση/Μετάθεση
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mt-8 sticky bottom-4 bg-background/80 backdrop-blur-sm rounded-lg p-4 shadow-lg">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+              onClick={handleCancelClick}
+            >
+              Ακύρωση/Μετάθεση
+            </Button>
+          </div>
         )}
       </main>
 

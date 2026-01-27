@@ -68,13 +68,14 @@ interface TimeSlot {
   time: string;
   available_spots: number;
   isAlreadyBooked?: boolean;
+  className?: string;
+  instructor?: string;
 }
 
 const STEPS = [
   { id: 1, title: "Επιλογή Γυμναστηρίου", description: "Διάλεξε το γυμναστήριο που θες να προπονηθείς" },
   { id: 2, title: "Κατηγορία Μαθήματος", description: "Επίλεξε το είδος του μαθήματος" },
-  { id: 3, title: "Επιλογή Μαθήματος", description: "Διάλεξε το συγκεκριμένο μάθημα" },
-  { id: 4, title: "Ημερομηνία & Ώρα", description: "Επίλεξε πότε θες να κάνεις το μάθημα" }
+  { id: 3, title: "Ημερομηνία & Ώρα", description: "Επίλεξε πότε θες να κάνεις το μάθημα" }
 ];
 
 export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose }) => {
@@ -425,7 +426,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   };
 
   const loadTimeSlots = async () => {
-    if (!selectedClass || !selectedCategory) return;
+    if (!selectedCategory) return;
 
     setLoading(true);
     try {
@@ -468,16 +469,12 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         console.log('BookingWizard: Extracted classesData:', classesData.length, 'classes');
       }
 
-      console.log('BookingWizard: Selected class to match:', selectedClass);
+      console.log('BookingWizard: Loading all classes for category:', selectedCategory.value);
       console.log('BookingWizard: First class from API for comparison:', classesData[0]);
 
-      // Filter classes that match the selected class (by name and instructor)
+      // Filter classes that match the selected category and are in the future
       const matchingClasses = classesData.filter((classItem: any) => {
-        const nameMatch = classItem.name === selectedClass.name;
-        const instructorMatch =
-          classItem.instructor === selectedClass.instructor ||
-          classItem.instructor_name === selectedClass.instructor ||
-          classItem.trainer_name === selectedClass.instructor;
+        const typeMatch = classItem.type === selectedCategory.value;
         const statusMatch = classItem.status === 'active';
 
         // Compare dates without time - only check if class date is today or in the future
@@ -487,25 +484,10 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         classDate.setHours(0, 0, 0, 0);
         const dateMatch = classDate >= today;
 
-        if (classItem.id === 76) {
-          console.log(`Detailed check for class ${classItem.id}:`, {
-            'classItem.name': classItem.name,
-            'selectedClass.name': selectedClass.name,
-            nameMatch,
-            'classItem.instructor': classItem.instructor,
-            'classItem.instructor_name': classItem.instructor_name,
-            'classItem.trainer_name': classItem.trainer_name,
-            'selectedClass.instructor': selectedClass.instructor,
-            instructorMatch,
-            statusMatch,
-            'classItem.date': classItem.date,
-            'today': today.toISOString().split('T')[0],
-            'classDate': classDate.toISOString().split('T')[0],
-            dateMatch
-          });
-        }
+        // If gym is selected, filter by gym too
+        const gymMatch = !selectedGym || classItem.store_id === selectedGym.id;
 
-        return nameMatch && instructorMatch && statusMatch && dateMatch;
+        return typeMatch && statusMatch && dateMatch && gymMatch;
       });
 
       console.log('BookingWizard: Matching classes found:', matchingClasses.length);
@@ -583,7 +565,9 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
           date: classItem.date,
           time: classItem.time,
           available_spots: availableSpots,
-          isAlreadyBooked: bookedClassIds.has(classItem.id.toString())
+          isAlreadyBooked: bookedClassIds.has(classItem.id.toString()),
+          className: classItem.name,
+          instructor: classItem.instructor_name || classItem.trainer_name || classItem.instructor
         };
       });
 
@@ -621,12 +605,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       return;
     }
 
-    if (currentStep === 3 && !selectedClass) {
-      toast.error('Παρακαλώ επιλέξτε μάθημα');
-      return;
-    }
-
-    if (currentStep === 4 && !selectedTimeSlot && selectedTimeSlots.length === 0) {
+    if (currentStep === 3 && !selectedTimeSlot && selectedTimeSlots.length === 0) {
       toast.error('Παρακαλώ επιλέξτε τουλάχιστον μία ημερομηνία και ώρα');
       return;
     }
@@ -639,8 +618,6 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
       if (nextStep === 2) {
         loadCategories();
       } else if (nextStep === 3) {
-        loadClasses();
-      } else if (nextStep === 4) {
         loadTimeSlots();
       }
     } else {
@@ -659,7 +636,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
     payment_method: 'full_points' | 'partial' | 'cash_only';
     points_to_use?: number;
   }) => {
-    if (!selectedClass || !selectedGym || !selectedTimeSlot) return;
+    if (!selectedCategory || !selectedGym || !selectedTimeSlot) return;
 
     try {
       setBookingInProgress(true);
@@ -674,12 +651,42 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
 
       const user = JSON.parse(userStr);
 
+      // Fetch the complete class details to get all required fields
+      let classesResponse = await API.apiRequest('/fitness-classes?status=active');
+      let classesData: any[] = [];
+
+      // If 403 or 404, fallback to old endpoint
+      if (classesResponse.status === 403 || classesResponse.status === 404) {
+        console.warn('fitness-classes endpoint not available, falling back to /classes');
+        classesResponse = await API.apiRequest(API.API_ENDPOINTS.classes.list);
+
+        if (!classesResponse.ok) {
+          throw new Error('Failed to fetch class details from fallback endpoint');
+        }
+
+        const data = await classesResponse.json();
+        classesData = Array.isArray(data) ? data : [];
+      } else if (!classesResponse.ok) {
+        throw new Error('Failed to fetch class details');
+      } else {
+        const result = await classesResponse.json();
+        classesData = result.success && result.data ? result.data : [];
+      }
+
+      const selectedClassDetails = Array.isArray(classesData)
+        ? classesData.find((classItem: any) => classItem.id.toString() === selectedTimeSlot.id)
+        : null;
+
+      if (!selectedClassDetails) {
+        throw new Error('Δεν βρέθηκαν λεπτομέρειες μαθήματος');
+      }
+
       // Prepare booking data
       const bookingData = {
         class_id: parseInt(selectedTimeSlot.id, 10),
         store_id: selectedGym.id,
-        class_name: selectedClass.name,
-        instructor: selectedClass.instructor,
+        class_name: selectedClassDetails.name,
+        instructor: selectedClassDetails.instructor_name || selectedClassDetails.trainer_name || selectedClassDetails.instructor,
         date: selectedTimeSlot.date,
         time: selectedTimeSlot.time,
         type: selectedCategory?.value || '',
@@ -722,7 +729,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   };
 
   const handleBooking = async () => {
-    if (!selectedClass || !selectedGym) return;
+    if (!selectedCategory || !selectedGym) return;
     if (!selectedTimeSlot && selectedTimeSlots.length === 0) return;
 
     setBookingInProgress(true);
@@ -892,7 +899,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
             customer_email: user.email,
             status: 'confirmed',
             attended: 0,
-            notes: `Κράτηση μέσω wizard - ${selectedClass.name} με ${selectedClass.instructor}`
+            notes: `Κράτηση μέσω wizard - ${selectedClassDetails.name} με ${selectedClassDetails.instructor_name || selectedClassDetails.trainer_name || selectedClassDetails.instructor}`
           };
 
           console.log('📤 Sending booking data:', { ...bookingData, class_details: selectedClassDetails });
@@ -962,14 +969,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                          errorMessage.toLowerCase().includes('full') ||
                          errorMessage.toLowerCase().includes('δεν υπάρχουν διαθέσιμες θέσεις');
 
-      if (isClassFull && selectedClass && selectedTimeSlots.length === 1) {
+      if (isClassFull && selectedTimeSlot) {
         // Class is full - offer waitlist option
-        const slot = selectedTimeSlots[0];
+        // Get class details from the selected time slot
+        const classDetails = classesData.find((c: any) => c.id.toString() === selectedTimeSlot.id);
+        const className = classDetails?.name || 'Μάθημα';
+
         setWaitlistClassInfo({
-          classId: parseInt(slot.id, 10),
-          className: selectedClass.name,
-          classDate: slot.date,
-          classTime: slot.time,
+          classId: parseInt(selectedTimeSlot.id, 10),
+          className: className,
+          classDate: selectedTimeSlot.date,
+          classTime: selectedTimeSlot.time,
         });
         setShowWaitlistDialog(true);
         toast.warning('Το μάθημα είναι πλήρες', {
@@ -1081,58 +1091,6 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         );
 
       case 3:
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Επιλέξτε Μάθημα</h3>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {classes.map((classItem) => (
-                  <Card
-                    key={classItem.id}
-                    className={`cursor-pointer transition-all ${
-                      selectedClass?.id === classItem.id
-                        ? 'border-primary bg-primary/5'
-                        : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => setSelectedClass(classItem)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium">{classItem.name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              με {classItem.instructor}
-                            </p>
-                          </div>
-                          {selectedClass?.id === classItem.id && (
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {classItem.duration}min
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            {classItem.current_bookings}/{classItem.max_capacity}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
-      case 4:
         const daysOfWeek = [
           { value: 1, label: 'Δευ', fullLabel: 'Δευτέρα' },
           { value: 2, label: 'Τρί', fullLabel: 'Τρίτη' },
@@ -1392,19 +1350,19 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                   </div>
 
                   {/* Date Navigation and Buttons */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-[5px]">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setDateScrollIndex(Math.max(0, initializedScrollIndex - 1))}
                       disabled={!canScrollLeft}
-                      className="h-10 w-8 flex-shrink-0"
+                      className="h-10 w-fit flex-shrink-0"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
 
                     {/* Date Buttons */}
-                    <div className="grid grid-cols-7 gap-2 flex-1">
+                    <div className="grid grid-cols-7 gap-[5px] flex-1">
                       {visibleDates.map((date) => {
                         const dateObj = new Date(date);
                         const dayName = dateObj.toLocaleDateString('el-GR', { weekday: 'short' });
@@ -1448,7 +1406,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                       size="icon"
                       onClick={() => setDateScrollIndex(initializedScrollIndex + 1)}
                       disabled={!canScrollRight}
-                      className="h-10 w-8 flex-shrink-0"
+                      className="h-10 w-fit flex-shrink-0"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -1471,7 +1429,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                         Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+                      <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto">
                         {filteredTimeSlots.map((slot) => {
                           const isSelected = selectedTimeSlot?.id === slot.id;
 
@@ -1484,7 +1442,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                                 }
                               }}
                               disabled={slot.isAlreadyBooked}
-                              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                              className={`flex flex-col items-start justify-center p-3 rounded-lg border-2 transition-all ${
                                 slot.isAlreadyBooked
                                   ? 'opacity-50 cursor-not-allowed border-muted bg-muted/30'
                                   : isSelected
@@ -1492,7 +1450,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
                                   : 'border-border hover:border-primary/50'
                               }`}
                             >
-                              <div className="flex items-center gap-2">
+                              {slot.className && (
+                                <div className="text-sm font-medium mb-1 w-full text-left">
+                                  {slot.className}
+                                </div>
+                              )}
+                              {slot.instructor && (
+                                <div className="text-xs text-muted-foreground mb-2 w-full text-left">
+                                  με {slot.instructor}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 w-full">
                                 <Clock className="h-4 w-4" />
                                 <span className={`font-semibold ${slot.isAlreadyBooked ? 'line-through' : ''}`}>
                                   {slot.time}
@@ -1571,7 +1539,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-xl max-h-[90vh] flex flex-col rounded-xl p-0 overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-6 pt-6">
+        <div className="flex-1 overflow-y-auto px-2 pt-6">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Dumbbell className="h-5 w-5" />
@@ -1623,7 +1591,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         </div>
 
         {/* Navigation Buttons - Sticky at bottom */}
-        <div className="sticky bottom-0 flex justify-between px-6 py-4 border-t bg-white">
+        <div className="sticky bottom-0 flex justify-between px-2 py-4 border-t bg-white">
           <Button
             variant="outline"
             onClick={handleBack}
@@ -1657,7 +1625,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({ isOpen, onClose })
         onConfirm={handleBookWithPoints}
         classInfo={{
           id: selectedTimeSlot ? parseInt(selectedTimeSlot.id) : 0,
-          name: selectedClass?.name || '',
+          name: selectedTimeSlot?.className || '',
           price: 15, // Default price - should come from class data
         }}
         userPoints={userPoints}

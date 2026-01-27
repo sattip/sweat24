@@ -138,7 +138,12 @@ const BookingsPage = () => {
           return false;
         }
 
-        // Second filter: must be future booking
+        // Second filter: exclude cancelled bookings
+        if (b.status === 'cancelled' || b.status === 'canceled') {
+          return false;
+        }
+
+        // Third filter: must be future booking
         // Handle different date formats
         if (!b.date) {
           console.warn('Booking missing date:', b);

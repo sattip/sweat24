@@ -75,34 +75,39 @@ const AppointmentRequestPage = () => {
 
       try {
         setServiceLoading(true);
-        
-        // Fetch all specialized services
-        const response = await fetch(buildApiUrl('/specialized-services'), {
+
+        // Fetch all active class types (no user filter - show all categories)
+        const response = await fetch(buildApiUrl('/class-types?active_only=1'), {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
         });
-        
+
         if (!response.ok) {
-          throw new Error('Failed to fetch services');
+          throw new Error('Failed to fetch class types');
         }
-        
-        const services = await response.json();
-        const servicesArray = Array.isArray(services) ? services : (services.data || []);
-        
-        // Find the matching service by slug
-        const matchedService = servicesArray.find((s: ServiceData) => s.slug === serviceId);
-        
-        if (matchedService) {
-          setService(matchedService);
+
+        const data = await response.json();
+        const classTypes = Array.isArray(data) ? data : (data.data || []);
+
+        // Find the matching class type by value (slug)
+        const matchedClassType = classTypes.find((ct: any) => ct.value === serviceId);
+
+        if (matchedClassType) {
+          setService({
+            id: matchedClassType.id,
+            name: matchedClassType.name,
+            description: matchedClassType.description || '',
+            slug: matchedClassType.value,
+          });
         } else {
-          toast.error("Η υπηρεσία δεν βρέθηκε");
+          toast.error("Η κατηγορία δεν βρέθηκε");
           navigate('/services');
         }
       } catch (error) {
-        console.error('Error fetching service data:', error);
-        toast.error("Σφάλμα κατά τη φόρτωση των δεδομένων υπηρεσίας");
+        console.error('Error fetching class type data:', error);
+        toast.error("Σφάλμα κατά τη φόρτωση των δεδομένων");
         navigate('/services');
       } finally {
         setServiceLoading(false);

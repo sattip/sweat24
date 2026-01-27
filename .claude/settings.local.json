@@ -86,7 +86,17 @@
       "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell getprop sys.boot_completed)",
       "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" uninstall com.sweat93.app)",
       "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell am start -n com.sweat93.app/.MainActivity)",
-      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" devices)"
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" devices)",
+      "Bash(gradlew.bat installDebug:*)",
+      "Bash(where:*)",
+      "Bash(echo:*)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\emulator\\\\emulator.exe\" -avd Pixel_5_API_30 -netdelay none -netspeed full)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" install -r androidappbuildoutputsapkdebugapp-debug.apk)",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" install -r \"android/app/build/outputs/apk/debug/app-debug.apk\")",
+      "Bash(\"C:\\\\Users\\\\olive\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" shell am start -n com.sweat93.app/com.sweat93.app.MainActivity)",
+      "Bash(gradlew.bat assembleDebug:*)",
+      "Bash(explorer.exe \"C:\\\\Users\\\\olive\\\\Documents\\\\GitHub\\\\sweat24\\\\android\\\\app\\\\build\\\\outputs\\\\bundle\\\\release\")",
+      "Bash(explorer \"c:\\\\Users\\\\olive\\\\Documents\\\\GitHub\\\\sweat24\\\\android\\\\app\\\\build\\\\outputs\\\\bundle\\\\release\")"
     ],
     "deny": [],
     "ask": []

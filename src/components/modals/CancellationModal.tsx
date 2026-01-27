@@ -72,14 +72,19 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
   const [selectedNewClass, setSelectedNewClass] = useState<string>("");
   const [acceptCharge, setAcceptCharge] = useState(false);
 
+  // Check policy only when modal opens or booking changes
   useEffect(() => {
     if (isOpen && booking) {
       checkPolicy();
-      if (action === "reschedule") {
-        fetchAvailableClasses();
-      }
     }
-  }, [isOpen, booking, action]);
+  }, [isOpen, booking]);
+
+  // Fetch available classes when action changes to reschedule
+  useEffect(() => {
+    if (isOpen && booking && action === "reschedule") {
+      fetchAvailableClasses();
+    }
+  }, [action]);
 
   const checkPolicy = async () => {
     try {
@@ -183,66 +188,56 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    console.log("🔥 DEBUG: handleSubmit called - NEW CODE VERSION 2");
-    toast.info("🔍 Ξεκινά η διαδικασία ακύρωσης...");
-    toast.info(`🔍 Action: ${action}, Booking ID: ${booking?.id}`);
+    console.log("DEBUG: handleSubmit called");
 
     // Check if booking exists
     if (!booking || !booking.id) {
-      toast.error("❌ Σφάλμα: Δεν βρέθηκε η κράτηση!");
+      toast.error("Σφάλμα: Δεν βρέθηκε η κράτηση!");
       return;
     }
 
     // Check policy
     if (!policy) {
-      toast.error("❌ Σφάλμα: Δεν βρέθηκε πολιτική ακύρωσης!");
+      toast.error("Σφάλμα: Δεν βρέθηκε πολιτική ακύρωσης!");
       return;
     }
-
-    toast.info(`🔍 Policy: ${policy.hours_until_class} ώρες μέχρι το μάθημα`);
 
     // Enforce policy restrictions
     const requiredHoursForCancel = policy?.policy?.hours_before || 6;
     const requiredHoursForReschedule = policy?.policy?.reschedule_hours_before || 3;
 
-    toast.info(`🔍 Απαιτούνται ${requiredHoursForCancel} ώρες για ακύρωση`);
-
     if (action === "cancel" && policy?.hours_until_class < requiredHoursForCancel) {
-      toast.error(`❌ Η ακύρωση δεν επιτρέπεται - απαιτούνται τουλάχιστον ${requiredHoursForCancel} ώρες πριν το μάθημα`);
+      toast.error(`Η ακύρωση δεν επιτρέπεται - απαιτούνται τουλάχιστον ${requiredHoursForCancel} ώρες πριν το μάθημα`);
       return;
     }
 
     if (action === "reschedule" && policy?.hours_until_class < requiredHoursForReschedule) {
-      toast.error(`❌ Η μετάθεση δεν επιτρέπεται - απαιτούνται τουλάχιστον ${requiredHoursForReschedule} ώρες πριν το μάθημα`);
+      toast.error(`Η μετάθεση δεν επιτρέπεται - απαιτούνται τουλάχιστον ${requiredHoursForReschedule} ώρες πριν το μάθημα`);
       return;
     }
 
-    toast.info("✅ Ελέγχοι περάστηκαν - κάνω κλήση στο API...");
     setLoading(true);
     try {
       if (action === "cancel" || action === "cancel_charged") {
-        toast.info("🔍 Ακυρώνω την κράτηση...");
         const data = await bookingService.cancel(booking.id, reason);
-        toast.info("✅ Η κλήση στο API ολοκληρώθηκε!");
 
         if (action === "cancel_charged") {
-          toast.warning("💰 Η κράτηση ακυρώθηκε με χρέωση");
+          toast.warning("Η κράτηση ακυρώθηκε με χρέωση");
         } else if (data.penalty_percentage > 0) {
-          toast.warning(`💰 Η κράτηση ακυρώθηκε με χρέωση ${data.penalty_percentage}%`);
+          toast.warning(`Η κράτηση ακυρώθηκε με χρέωση ${data.penalty_percentage}%`);
         } else {
-          toast.success("✅ Η κράτηση ακυρώθηκε επιτυχώς");
+          toast.success("Η κράτηση ακυρώθηκε επιτυχώς");
         }
       } else {
         if (!selectedNewClass) {
-          toast.error("❌ Παρακαλώ επιλέξτε νέο μάθημα");
+          toast.error("Παρακαλώ επιλέξτε νέο μάθημα");
           return;
         }
 
         const data = await bookingService.reschedule(booking.id, selectedNewClass, reason);
-        toast.success("✅ Η κράτηση μετατέθηκε επιτυχώς");
+        toast.success("Η κράτηση μετατέθηκε επιτυχώς");
       }
 
-      toast.info("🔄 Ανανέωση λίστας...");
       onSuccess();
       onClose();
     } catch (error) {
@@ -250,10 +245,19 @@ export const CancellationModal: React.FC<CancellationModalProps> = ({
         ? error.message
         : "Σφάλμα κατά την επεξεργασία του αιτήματος";
 
-      toast.error(`❌ ${message}`);
-      console.error('Cancellation error details:', error);
+      // Check if booking is already cancelled
+      const isAlreadyCancelled = message.toLowerCase().includes('already cancelled') ||
+                                  message.toLowerCase().includes('ήδη ακυρωμέν');
+
+      if (isAlreadyCancelled) {
+        toast.info("Η κράτηση είχε ήδη ακυρωθεί");
+        onSuccess(); // Refresh the list
+        onClose(); // Close the modal
+      } else {
+        toast.error(message);
+        console.error('Cancellation error details:', error);
+      }
     } finally {
-      toast.info("🔚 Τέλος διαδικασίας");
       setLoading(false);
     }
   };
