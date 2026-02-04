@@ -63,20 +63,21 @@ const LoginPage: React.FC = () => {
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center rounded-md border border-input bg-background focus-within:border-primary">
+                  <Mail className="ml-3 h-4 w-4 text-muted-foreground shrink-0" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="το@email.σας"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
+                    className="!border-0 !bg-transparent !shadow-none focus:!border-0"
+                    style={{ border: 'none', background: 'transparent', boxShadow: 'none', outline: 'none' }}
                     required
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label htmlFor="password">Κωδικός Πρόσβασης</Label>
@@ -84,22 +85,23 @@ const LoginPage: React.FC = () => {
                     Ξεχάσατε τον κωδικό;
                   </Link>
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center rounded-md border border-input bg-background focus-within:border-primary">
+                  <Lock className="ml-3 h-4 w-4 text-muted-foreground shrink-0" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="!border-0 !bg-transparent !shadow-none focus:!border-0"
+                    style={{ border: 'none', background: 'transparent', boxShadow: 'none', outline: 'none' }}
                     required
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-2 h-8 w-8 p-0"
+                    className="mr-1 h-8 w-8 p-0 shrink-0"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (

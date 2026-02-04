@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, CardFooter } from "@/components/ui/card";
+
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
 import { SignupSteps, SignupData } from "@/components/SignupSteps";
@@ -143,16 +143,12 @@ const SignupPage: React.FC = () => {
           loading={loading}
         />
         
-        <Card className="mt-8">
-          <CardFooter className="flex justify-center">
-            <div className="text-center text-sm">
-              Έχετε ήδη λογαριασμό;{" "}
-              <Link to="/" className="text-primary font-medium hover:underline">
-                Σύνδεση
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+        <div className="text-center text-sm mt-6">
+          Έχετε ήδη λογαριασμό;{" "}
+          <Link to="/" className="text-primary font-medium hover:underline">
+            Σύνδεση
+          </Link>
+        </div>
       </div>
     </div>
   );

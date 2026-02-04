@@ -21,6 +21,8 @@ import WorkoutDetailsPage from "./pages/WorkoutDetailsPage";
 import BodyMeasurementsPage from "./pages/BodyMeasurementsPage";
 import ProgressPage from "./pages/ProgressPage";
 import RewardsPage from "./pages/RewardsPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 import SpecializedServicesPage from "./pages/SpecializedServicesPage";
 import AppointmentRequestPage from "./pages/AppointmentRequestPage";
@@ -53,7 +55,6 @@ import QuestionnairesPage from "./pages/QuestionnairesPage";
 import QuestionnaireDetailPage from "./pages/QuestionnaireDetailPage";
 import NewMemberInfoPage from "./pages/NewMemberInfoPage";
 import PackagesPage from "./pages/PackagesPage";
-import { FloatingBackButton } from "./components/FloatingBackButton";
 
 const queryClient = new QueryClient();
 
@@ -108,6 +109,8 @@ const App = () => {
             <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/signup-success" element={<SignupSuccessPage />} />
             <Route path="/new-member-info" element={<ProtectedRoute><NewMemberInfoPage /></ProtectedRoute>} />
@@ -175,7 +178,6 @@ const App = () => {
           <ChatWidget />
           <NotificationManager />
           <QuestionnairePromptManager />
-          <FloatingBackButton position="left" />
         </BrowserRouter>
           </PointsProvider>
         </CartProvider>

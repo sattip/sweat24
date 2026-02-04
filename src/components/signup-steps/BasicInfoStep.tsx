@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Lock, Phone, User, Loader2 } from "lucide-react";
+import { Mail, Lock, Phone, User, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { SignupData } from "../SignupSteps";
 import { ageVerificationService } from "@/services/ageVerificationService";
@@ -16,6 +16,7 @@ interface BasicInfoStepProps {
 
 export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, onNext }) => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Production ready - χρησιμοποιεί πραγματικό API για έλεγχο ηλικίας
   const USE_MOCK_AGE_CHECK = false;
@@ -32,8 +33,8 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       return;
     }
 
-    if (data.password.length < 6) {
-      toast.error("Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 6 χαρακτήρες");
+    if (data.password.length < 8) {
+      toast.error("Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 8 χαρακτήρες");
       return;
     }
 
@@ -126,15 +127,16 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
 
       <div className="space-y-2">
         <Label htmlFor="email">Email *</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center rounded-md border border-input bg-background focus-within:border-primary">
+          <Mail className="ml-3 h-4 w-4 text-muted-foreground shrink-0" />
           <Input
             id="email"
             type="email"
             placeholder="το@email.σας"
             value={data.email}
             onChange={(e) => updateData({ email: e.target.value })}
-            className="pl-10"
+            className="!border-0 !bg-transparent !shadow-none focus:!border-0"
+            style={{ border: 'none', background: 'transparent', boxShadow: 'none', outline: 'none' }}
             required
           />
         </div>
@@ -142,15 +144,16 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
 
       <div className="space-y-2">
         <Label htmlFor="phone">Τηλέφωνο</Label>
-        <div className="relative">
-          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center rounded-md border border-input bg-background focus-within:border-primary">
+          <Phone className="ml-3 h-4 w-4 text-muted-foreground shrink-0" />
           <Input
             id="phone"
             type="tel"
             placeholder="6901234567"
             value={data.phone}
             onChange={(e) => updateData({ phone: e.target.value })}
-            className="pl-10"
+            className="!border-0 !bg-transparent !shadow-none focus:!border-0"
+            style={{ border: 'none', background: 'transparent', boxShadow: 'none', outline: 'none' }}
           />
         </div>
       </div>
@@ -183,33 +186,61 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
 
       <div className="space-y-2">
         <Label htmlFor="password">Κωδικός Πρόσβασης *</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center rounded-md border border-input bg-background focus-within:border-primary">
+          <Lock className="ml-3 h-4 w-4 text-muted-foreground shrink-0" />
           <Input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={data.password}
             onChange={(e) => updateData({ password: e.target.value })}
-            className="pl-10"
+            className="!border-0 !bg-transparent !shadow-none focus:!border-0"
+            style={{ border: 'none', background: 'transparent', boxShadow: 'none', outline: 'none' }}
             required
           />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mr-1 h-8 w-8 p-0 shrink-0"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Επιβεβαίωση Κωδικού *</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center rounded-md border border-input bg-background focus-within:border-primary">
+          <Lock className="ml-3 h-4 w-4 text-muted-foreground shrink-0" />
           <Input
             id="confirmPassword"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={data.confirmPassword}
             onChange={(e) => updateData({ confirmPassword: e.target.value })}
-            className="pl-10"
+            className="!border-0 !bg-transparent !shadow-none focus:!border-0"
+            style={{ border: 'none', background: 'transparent', boxShadow: 'none', outline: 'none' }}
             required
           />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mr-1 h-8 w-8 p-0 shrink-0"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 

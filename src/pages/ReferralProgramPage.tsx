@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
-import { Copy, Facebook, Instagram, Mail, Share2, Twitter, Loader2, UserPlus } from "lucide-react";
+import { Copy, Share2, Loader2, UserPlus } from "lucide-react";
+import { Share } from '@capacitor/share';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -270,37 +271,23 @@ const ReferralProgramPage = () => {
               )}
             </CardContent>
             <CardFooter className="pt-2">
-              <div className="flex gap-2 w-full">
-                {referralData.link && (
-                  <>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                      const text = `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
-                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralData.link)}&quote=${encodeURIComponent(text)}`, '_blank');
-                    }}>
-                      <Facebook className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                      const text = `Ελα στο Sweat93! 💪 Κωδικός: ${referralData.code} Link: ${referralData.link}`;
-                      window.open(`https://www.instagram.com/?url=${encodeURIComponent(referralData.link)}`, '_blank');
-                    }}>
-                      <Instagram className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                      const text = `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
-                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
-                    }}>
-                      <Twitter className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                      const subject = "Έλα στο Sweat93!";
-                      const body = `Γεια σου!\n\nΘα ήθελα να σε προσκαλέσω στο Sweat93. Χρησιμοποίησε τον κωδικό μου ${referralData.code} κατά την εγγραφή σου.\n\nΕναλλακτικά, μπορείς να κάνεις κλικ εδώ: ${referralData.link}\n\nΤα λέμε στο γυμναστήριο! 💪`;
-                      window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
-                    }}>
-                      <Mail className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-              </div>
+              {referralData.link && (
+                <Button variant="outline" size="sm" className="w-full" onClick={async () => {
+                  try {
+                    await Share.share({
+                      title: 'Έλα στο Sweat93!',
+                      text: `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} κατά την εγγραφή σου.`,
+                      url: referralData.link,
+                      dialogTitle: 'Κοινοποίηση',
+                    });
+                  } catch {
+                    toast.error('Δεν ήταν δυνατή η κοινοποίηση');
+                  }
+                }}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Κοινοποίηση
+                </Button>
+              )}
             </CardFooter>
           </Card>
         </div>

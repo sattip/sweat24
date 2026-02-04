@@ -19,6 +19,7 @@
     "@capacitor/ios": "^6.1.2",
     "@capacitor/keyboard": "^6.0.3",
     "@capacitor/push-notifications": "^6.0.4",
+    "@capacitor/share": "^6.0.4",
     "@capacitor/status-bar": "^6.0.2",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
