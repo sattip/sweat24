@@ -55,7 +55,7 @@ const LoginPage: React.FC = () => {
         
         <Card className="w-full shadow-lg border-t-4 border-t-primary">
           <CardHeader>
-                          <CardTitle className="text-2xl font-bold text-center">Καλώς ήρθατε στο Sweat93</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Καλώς ήρθατε στο Sweat93</CardTitle>
             <CardDescription className="text-center">Συνδεθείτε για να αποκτήσετε πρόσβαση στο ταξίδι του fitness σας</CardDescription>
           </CardHeader>
           
@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -85,7 +85,7 @@ const LoginPage: React.FC = () => {
                   </Link>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -99,7 +99,7 @@ const LoginPage: React.FC = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-2 h-8 w-8 p-0"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (

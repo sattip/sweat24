@@ -239,17 +239,25 @@ const ReferralProgramPage = () => {
               <div className="flex gap-2 w-full">
                 {referralData.link && (
                   <>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={async () => {
+                      const text = `Έλα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
+                      if (navigator.share) {
+                        try {
+                          await navigator.share({ title: "Έλα στο Sweat93!", text, url: referralData.link });
+                        } catch (e) {
+                          if ((e as Error).name !== 'AbortError') copyToClipboard(referralData.link);
+                        }
+                      } else {
+                        copyToClipboard(referralData.link);
+                      }
+                    }}>
+                      <Share2 className="h-4 w-4" />
+                    </Button>
                     <Button variant="outline" size="sm" className="flex-1" onClick={() => {
                       const text = `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
                       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralData.link)}&quote=${encodeURIComponent(text)}`, '_blank');
                     }}>
                       <Facebook className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => {
-                      const text = `Ελα στο Sweat93! 💪 Κωδικός: ${referralData.code} Link: ${referralData.link}`;
-                      window.open(`https://www.instagram.com/?url=${encodeURIComponent(referralData.link)}`, '_blank');
-                    }}>
-                      <Instagram className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="sm" className="flex-1" onClick={() => {
                       const text = `Ελα στο Sweat93! Χρησιμοποίησε τον κωδικό μου ${referralData.code} ή το link: ${referralData.link}`;
@@ -460,7 +468,7 @@ const ReferralProgramPage = () => {
         
         {/* Terms & Conditions */}
         <div className="mt-6 text-center">
-          <Link to="/terms-referral" className="text-sm text-primary underline">
+          <Link to="/terms" className="text-sm text-primary underline">
             Προβολή Όρων & Προϋποθέσεων
           </Link>
         </div>

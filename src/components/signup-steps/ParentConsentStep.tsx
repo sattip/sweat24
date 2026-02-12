@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Calendar, CreditCard, Phone, MapPin, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { SignaturePad, SignaturePadRef } from "@/components/SignaturePad";
@@ -64,28 +63,6 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
     setParentData(prev => ({ ...prev, ...updates }));
   };
 
-  // Quick fill function for testing
-  const fillTestData = () => {
-    setParentData({
-      parentFullName: "",
-      fatherFirstName: "",
-      fatherLastName: "",
-      motherFirstName: "Μαρία",
-      motherLastName: "Γεωργίου",
-      parentBirthDate: "1978-08-09",
-      parentIdNumber: "ΑΙ908388",
-      parentPhone: "6945678901",
-      parentLocation: "Αθήνα",
-      parentStreet: "Πανεπιστημίου",
-      parentStreetNumber: "42",
-      parentPostalCode: "10434",
-      parentEmail: "parent.test@example.com",
-      consentAccepted: true,
-      signature: ""
-    });
-    toast.success("Συμπληρώθηκαν στοιχεία γονέα για δοκιμή");
-  };
-
   const handleNext = () => {
     // Validation
     if (!parentData.parentFullName || !parentData.fatherFirstName || !parentData.fatherLastName ||
@@ -125,31 +102,17 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
         </AlertDescription>
       </Alert>
 
-      {/* Test button for quick fill */}
-      <div className="flex gap-2 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-        <div className="text-xs text-yellow-800 dark:text-yellow-200 mr-2">Δοκιμή:</div>
-        <Button 
-          type="button"
-          variant="outline" 
-          size="sm"
-          onClick={fillTestData}
-          className="text-xs"
-        >
-          Συμπλήρωση Στοιχείων Γονέα
-        </Button>
+      <div className="space-y-1">
+        <h3 className="text-base font-semibold flex items-center gap-2">
+          <User className="h-4 w-4" />
+          Στοιχεία Γονέα/Κηδεμόνα
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Συμπληρώστε τα στοιχεία του γονέα/κηδεμόνα που δίνει τη συγκατάθεση
+        </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Στοιχεία Γονέα/Κηδεμόνα
-          </CardTitle>
-          <CardDescription>
-            Συμπληρώστε τα στοιχεία του γονέα/κηδεμόνα που δίνει τη συγκατάθεση
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="parentFullName">Ονοματεπώνυμο Γονέα/Κηδεμόνα *</Label>
             <Input
@@ -162,7 +125,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fatherFirstName">Όνομα Πατέρα *</Label>
               <Input
@@ -187,7 +150,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="motherFirstName">Όνομα Μητέρας *</Label>
               <Input
@@ -212,11 +175,11 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="parentBirthDate">Ημερομηνία Γέννησης *</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="parentBirthDate"
                   type="date"
@@ -230,7 +193,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
             <div className="space-y-2">
               <Label htmlFor="parentIdNumber">Αριθμός Δελτίου Ταυτότητας *</Label>
               <div className="relative">
-                <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="parentIdNumber"
                   type="text"
@@ -247,7 +210,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
           <div className="space-y-2">
             <Label htmlFor="parentPhone">Τηλέφωνο *</Label>
             <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="parentPhone"
                 type="tel"
@@ -266,7 +229,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
               Διεύθυνση
             </Label>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="parentLocation">Τόπος *</Label>
                 <Input
@@ -291,8 +254,8 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2 space-y-2">
                 <Label htmlFor="parentStreet">Οδός *</Label>
                 <Input
                   id="parentStreet"
@@ -320,7 +283,7 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
           <div className="space-y-2">
             <Label htmlFor="parentEmail">Email *</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="parentEmail"
                 type="email"
@@ -332,17 +295,16 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Υπεύθυνη Δήλωση</CardTitle>
-          <CardDescription>
-            Διαβάστε προσεκτικά και αποδεχτείτε την υπεύθυνη δήλωση
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="border-t pt-6 space-y-1">
+        <h3 className="text-base font-semibold">Υπεύθυνη Δήλωση</h3>
+        <p className="text-sm text-muted-foreground">
+          Διαβάστε προσεκτικά και αποδεχτείτε την υπεύθυνη δήλωση
+        </p>
+      </div>
+
+      <div className="space-y-4">
           <ScrollArea className="h-48 w-full rounded-md border p-4">
             <div className="space-y-4 text-sm">
               <p className="font-medium">ΥΠΕΥΘΥΝΗ ΔΗΛΩΣΗ (άρθρο 8 Ν.1599/1986)</p>
@@ -381,11 +343,10 @@ export const ParentConsentStep: React.FC<ParentConsentStepProps> = ({
             <Label>Υπογραφή Γονέα/Κηδεμόνα *</Label>
             <SignaturePad
               ref={signaturePadRef}
-              onClear={() => updateParentData({ signature: "" })}
+              compact
             />
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>

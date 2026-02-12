@@ -134,8 +134,8 @@ const SignupPage: React.FC = () => {
           loading={loading}
         />
         
-        <Card className="mt-8">
-          <CardFooter className="flex justify-center">
+        <Card className="mt-8 max-w-2xl mx-auto">
+          <CardFooter className="flex justify-center py-4">
             <div className="text-center text-sm">
               Έχετε ήδη λογαριασμό;{" "}
               <Link to="/" className="text-primary font-medium hover:underline">

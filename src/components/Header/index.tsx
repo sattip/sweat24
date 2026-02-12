@@ -7,6 +7,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import MobileNavigation from "./MobileNavigation";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { useCart } from "@/hooks/use-cart";
+import { Capacitor } from "@capacitor/core";
 import {
   Sheet,
   SheetContent,
@@ -22,13 +23,14 @@ const Header: React.FC = () => {
   const { itemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Don't show back button on dashboard or home page
-  const showBackButton = location.pathname !== '/dashboard' && location.pathname !== '/';
+
+  // Don't show back button on dashboard, home page, or on Android (has native back)
+  const isAndroid = Capacitor.getPlatform() === 'android';
+  const showBackButton = !isAndroid && location.pathname !== '/dashboard' && location.pathname !== '/';
   
   return (
     <header
-      className="bg-white border-b sticky top-0 z-10"
+      className="bg-white border-b sticky top-0 z-50"
       style={{
         paddingTop: 'max(20px, env(safe-area-inset-top))',
         minHeight: 'calc(64px + max(20px, env(safe-area-inset-top)))'

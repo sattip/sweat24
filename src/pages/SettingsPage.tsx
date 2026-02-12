@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState({
     bookings: true,
     promotions: true,
@@ -93,7 +95,7 @@ const SettingsPage = () => {
             <Button
               variant="ghost"
               className="w-full justify-between p-4 h-auto font-normal text-base"
-              onClick={() => toast.info("Οι Όροι Χρήσης θα είναι σύντομα διαθέσιμοι!")}
+              onClick={() => navigate("/terms")}
             >
               <span>Όροι Χρήσης</span>
               <ChevronRight className="h-5 w-5" />

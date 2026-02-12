@@ -269,7 +269,7 @@ const QuestionnaireDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container px-4 py-6 max-w-4xl mx-auto space-y-6">
+      <main className="relative z-0 container px-4 py-6 max-w-4xl mx-auto space-y-6">
         {isLoading && !questionnaire ? (
           <Card>
             <CardHeader>

@@ -10,6 +10,7 @@ import { useMobileKeyboardFix } from "@/hooks/use-keyboard";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import SignupSuccessPage from "./pages/SignupSuccessPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import ClassSchedulePage from "./pages/ClassSchedulePage";
@@ -52,6 +53,7 @@ import HybridFCMNotificationSettings from "./components/notifications/HybridFCMN
 import { QuestionnairePromptManager } from "./components/questionnaires/QuestionnairePromptManager";
 import QuestionnairesPage from "./pages/QuestionnairesPage";
 import QuestionnaireDetailPage from "./pages/QuestionnaireDetailPage";
+import TermsPage from "./pages/TermsPage";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +109,7 @@ const App = () => {
             <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/signup-success" element={<SignupSuccessPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><ClassSchedulePage /></ProtectedRoute>} />
@@ -161,6 +164,7 @@ const App = () => {
             {/* <Route path="/trainers" element={<ProtectedRoute><TrainersListPage /></ProtectedRoute>} />
             <Route path="/trainers/:trainerId" element={<ProtectedRoute><TrainerDetailsPage /></ProtectedRoute>} /> */}
             
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/contact" element={<ProtectedRoute><ContactPage /></ProtectedRoute>} />
             <Route path="/partners" element={<ProtectedRoute><PartnersPage /></ProtectedRoute>} />
