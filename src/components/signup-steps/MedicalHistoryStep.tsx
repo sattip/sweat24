@@ -280,8 +280,7 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
         </Button>
       </div>
       
-      <div className="space-y-6 max-h-[60vh] md:max-h-[70vh] overflow-y-auto pr-2 md:pr-4 -webkit-overflow-scrolling-touch">
-        <div className="space-y-6">
+      <div className="space-y-6">
           {/* Section 1: Medical Conditions */}
           <Card>
             <CardHeader>
@@ -827,7 +826,6 @@ export const MedicalHistoryStep: React.FC<MedicalHistoryStepProps> = ({
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
 
       {/* Navigation Buttons */}

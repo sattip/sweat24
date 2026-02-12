@@ -8,6 +8,7 @@ interface SignaturePadProps {
   onSave?: (signature: string) => void;
   title?: string;
   description?: string;
+  compact?: boolean;
 }
 
 export interface SignaturePadRef {
@@ -18,7 +19,7 @@ export interface SignaturePadRef {
 }
 
 const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
-  ({ onSave, title = "Ψηφιακή Υπογραφή", description = "Παρακαλώ υπογράψτε στο παρακάτω πλαίσιο" }, ref) => {
+  ({ onSave, title = "Ψηφιακή Υπογραφή", description = "Παρακαλώ υπογράψτε στο παρακάτω πλαίσιο", compact = false }, ref) => {
     const sigCanvas = useRef<SignatureCanvas>(null);
 
     useImperativeHandle(ref, () => ({
@@ -54,49 +55,59 @@ const SignaturePad = forwardRef<SignaturePadRef, SignaturePadProps>(
       }
     };
 
+    const content = (
+      <div className="space-y-4">
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 bg-white">
+          <SignatureCanvas
+            ref={sigCanvas}
+            canvasProps={{
+              className: 'w-full h-48 touch-none',
+              style: { width: '100%', height: '192px' }
+            }}
+            backgroundColor="white"
+            penColor="black"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClear}
+            className="flex items-center gap-2"
+          >
+            <Eraser className="h-4 w-4" />
+            Καθαρισμός
+          </Button>
+
+          {onSave && (
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSave}
+              className="flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              Αποθήκευση
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+
+    if (compact) {
+      return content;
+    }
+
     return (
       <Card className="w-full">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 bg-white">
-            <SignatureCanvas
-              ref={sigCanvas}
-              canvasProps={{
-                className: 'w-full h-48 touch-none',
-                style: { width: '100%', height: '192px' }
-              }}
-              backgroundColor="white"
-              penColor="black"
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleClear}
-              className="flex items-center gap-2"
-            >
-              <Eraser className="h-4 w-4" />
-              Καθαρισμός
-            </Button>
-            
-            {onSave && (
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleSave}
-                className="flex items-center gap-2"
-              >
-                <Save className="h-4 w-4" />
-                Αποθήκευση
-              </Button>
-            )}
-          </div>
+        <CardContent>
+          {content}
         </CardContent>
       </Card>
     );

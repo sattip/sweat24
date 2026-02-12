@@ -77,12 +77,12 @@ export const QuestionnairePromptManager: React.FC = () => {
   const handleStart = useCallback(
     (questionnaire: QuestionnaireType) => {
       deferQuestionnaire(questionnaire.id);
+      setCurrent(null);
       navigate(`/questionnaires/${questionnaire.id}`, {
         state: { questionnaire },
       });
-      setCurrent(pickNextQuestionnaire());
     },
-    [navigate, pickNextQuestionnaire]
+    [navigate]
   );
 
   return (

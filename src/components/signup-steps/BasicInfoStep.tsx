@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Lock, Phone, User, Loader2 } from "lucide-react";
+import { Mail, Lock, Phone, User, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { SignupData } from "../SignupSteps";
 import { ageVerificationService } from "@/services/ageVerificationService";
@@ -16,6 +16,8 @@ interface BasicInfoStepProps {
 
 export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, onNext }) => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   // Production ready - χρησιμοποιεί πραγματικό API για έλεγχο ηλικίας
   const USE_MOCK_AGE_CHECK = false;
@@ -38,8 +40,8 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       return;
     }
 
-    if (data.password.length < 6) {
-      toast.error("Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 6 χαρακτήρες");
+    if (data.password.length < 8) {
+      toast.error("Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 8 χαρακτήρες");
       return;
     }
 
@@ -122,7 +124,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       <div className="space-y-2">
         <Label htmlFor="email">Email *</Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="email"
             type="email"
@@ -138,7 +140,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       <div className="space-y-2">
         <Label htmlFor="phone">Τηλέφωνο</Label>
         <div className="relative">
-          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="phone"
             type="tel"
@@ -177,33 +179,75 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ data, updateData, 
       <div className="space-y-2">
         <Label htmlFor="password">Κωδικός Πρόσβασης *</Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={data.password}
             onChange={(e) => updateData({ password: e.target.value })}
             className="pl-10"
             required
           />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+            <span className="sr-only">
+              {showPassword ? "Απόκρυψη κωδικού" : "Εμφάνιση κωδικού"}
+            </span>
+          </Button>
         </div>
+        {data.password.length > 0 && data.password.length < 8 && (
+          <p className="text-sm text-destructive">
+            Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες ({data.password.length}/8)
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Επιβεβαίωση Κωδικού *</Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             id="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="••••••••"
             value={data.confirmPassword}
             onChange={(e) => updateData({ confirmPassword: e.target.value })}
             className="pl-10"
             required
           />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+            <span className="sr-only">
+              {showConfirmPassword ? "Απόκρυψη κωδικού" : "Εμφάνιση κωδικού"}
+            </span>
+          </Button>
         </div>
+        {data.confirmPassword.length > 0 && data.password !== data.confirmPassword && (
+          <p className="text-sm text-destructive">
+            Οι κωδικοί πρόσβασης δεν ταιριάζουν
+          </p>
+        )}
       </div>
 
 
